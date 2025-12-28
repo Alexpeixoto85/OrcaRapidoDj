@@ -1,0 +1,1889 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Manager - Sistema de Gestão de Orçamentos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #1abc9c;
+            --warning-color: #e74c3c;
+            --success-color: #2ecc71;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --gray-color: #95a5a6;
+            --light-gray: #f8f9fa;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--box-shadow);
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .logo {
+            text-align: center;
+            padding: 20px 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo span {
+            color: var(--accent-color);
+        }
+
+        .logo p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 5px;
+        }
+
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .nav-menu a i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        .nav-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-menu a.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h2 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .notification-badge {
+            background-color: var(--warning-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        /* Tabs */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Cards */
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-header h3 {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-accent {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background-color: #16a085;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-accepted {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-no-response {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+        }
+
+        .status-followup {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .edit-btn {
+            background-color: #e3f2fd;
+            color: var(--secondary-color);
+        }
+
+        .edit-btn:hover {
+            background-color: #bbdefb;
+        }
+
+        .delete-btn {
+            background-color: #ffebee;
+            color: var(--warning-color);
+        }
+
+        .delete-btn:hover {
+            background-color: #ffcdd2;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-col {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--warning-color);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: var(--gray-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--warning-color);
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .stat-icon.blue {
+            background-color: var(--secondary-color);
+        }
+
+        .stat-icon.green {
+            background-color: var(--success-color);
+        }
+
+        .stat-icon.orange {
+            background-color: #f39c12;
+        }
+
+        .stat-icon.red {
+            background-color: var(--warning-color);
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-info p {
+            color: var(--gray-color);
+            font-size: 0.95rem;
+        }
+
+        /* Alert Badge */
+        .alert-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--warning-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Backup Section */
+        .backup-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .backup-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px 0;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .nav-menu li {
+                flex: 0 0 auto;
+                margin-bottom: 0;
+            }
+            
+            .nav-menu a {
+                padding: 15px 20px;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+            }
+            
+            .nav-menu a.active {
+                border-left: none;
+                border-bottom: 4px solid var(--accent-color);
+            }
+            
+            .logo {
+                padding: 15px 10px;
+                margin-bottom: 10px;
+            }
+            
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header h2 {
+                margin-bottom: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .form-col {
+                min-width: 100%;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .action-btn {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--gray-color);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>DJ<span>Manager</span></h1>
+                <p>Sistema de Gestão de Orçamentos</p>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#" class="active" data-tab="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#" data-tab="clientes"><i class="fas fa-users"></i> Clientes</a></li>
+                <li><a href="#" data-tab="orcamentos"><i class="fas fa-file-invoice-dollar"></i> Orçamentos</a></li>
+                <li><a href="#" data-tab="financeiro"><i class="fas fa-chart-line"></i> Financeiro</a></li>
+                <li><a href="#" data-tab="backup"><i class="fas fa-database"></i> Backup</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h2>Dashboard</h2>
+                <div id="notification-area">
+                    <!-- Notificações serão adicionadas aqui via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-clientes">0</h3>
+                            <p>Total de Clientes</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-orcamentos">0</h3>
+                            <p>Orçamentos Enviados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="pendentes-resposta">0</h3>
+                            <p>Pendentes de Resposta</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="sem-resposta">0</h3>
+                            <p>Sem Resposta (Alerta)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Orçamentos que Precisam de Follow-up</h3>
+                    </div>
+                    <div class="table-container">
+                        <table id="followup-table">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Telefone</th>
+                                    <th>Data do Orçamento</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="followup-body">
+                                <!-- Dados serão preenchidos via JavaScript -->
+                                <tr id="empty-followup">
+                                    <td colspan="6" class="empty-state">
+                                        <i class="fas fa-check-circle"></i>
+                                        <h3>Nenhum follow-up necessário no momento</h3>
+                                        <p>Todos os clientes responderam ou estão dentro do prazo.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Estatísticas de Aceitação</h3>
+                    </div>
+                    <div id="acceptance-chart" style="height: 300px; padding: 20px;">
+                        <canvas id="chartCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clientes Tab -->
+            <div id="clientes" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Clientes Cadastrados</h3>
+                        <button class="btn btn-primary" id="add-cliente-btn">
+                            <i class="fas fa-plus"></i> Novo Cliente
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Telefone</th>
+                                    <th>Email</th>
+                                    <th>Data do Contato</th>
+                                    <th>Orçamentos</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientes-body">
+                                <!-- Dados serão preenchidos via JavaScript -->
+                                <tr id="empty-clientes">
+                                    <td colspan="6" class="empty-state">
+                                        <i class="fas fa-users"></i>
+                                        <h3>Nenhum cliente cadastrado</h3>
+                                        <p>Clique em "Novo Cliente" para adicionar seu primeiro cliente.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orçamentos Tab -->
+            <div id="orcamentos" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Orçamentos</h3>
+                        <button class="btn btn-primary" id="add-orcamento-btn">
+                            <i class="fas fa-plus"></i> Novo Orçamento
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Evento</th>
+                                    <th>Data</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Data do Follow-up</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orcamentos-body">
+                                <!-- Dados serão preenchidos via JavaScript -->
+                                <tr id="empty-orcamentos">
+                                    <td colspan="7" class="empty-state">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                        <h3>Nenhum orçamento cadastrado</h3>
+                                        <p>Clique em "Novo Orçamento" para criar seu primeiro orçamento.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financeiro Tab -->
+            <div id="financeiro" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Resumo Financeiro</h3>
+                    </div>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-estimado">R$ 0,00</h3>
+                                <p>Total Estimado (Todos os Orçamentos)</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-aceito">R$ 0,00</h3>
+                                <p>Total Aceito (Orçamentos Confirmados)</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-pendente">R$ 0,00</h3>
+                                <p>Total Pendente (Aguardando Resposta)</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-recusado">R$ 0,00</h3>
+                                <p>Total Recusado (Orçamentos Não Aceitos)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Gráfico de Faturamento por Mês</h3>
+                    </div>
+                    <div id="revenue-chart" style="height: 300px; padding: 20px;">
+                        <canvas id="revenueCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup Tab -->
+            <div id="backup" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Backup e Restauração de Dados</h3>
+                    </div>
+                    <p>Faça backup de todos os dados do sistema para um arquivo JSON ou restaure de um backup anterior.</p>
+                    
+                    <div class="backup-actions">
+                        <button class="btn btn-primary" id="export-btn">
+                            <i class="fas fa-download"></i> Exportar Dados (Backup)
+                        </button>
+                        <button class="btn btn-success" id="import-btn">
+                            <i class="fas fa-upload"></i> Importar Dados (Restaurar)
+                        </button>
+                        <button class="btn btn-warning" id="clear-data-btn">
+                            <i class="fas fa-trash-alt"></i> Limpar Todos os Dados
+                        </button>
+                    </div>
+                    
+                    <div class="backup-card">
+                        <h3>Instruções</h3>
+                        <ul style="padding-left: 20px; margin-top: 15px;">
+                            <li><strong>Exportar Dados:</strong> Cria um arquivo JSON com todos os clientes e orçamentos.</li>
+                            <li><strong>Importar Dados:</strong> Restaura os dados a partir de um arquivo JSON exportado anteriormente.</li>
+                            <li><strong>Limpar Dados:</strong> Remove todos os dados do sistema (ação irreversível).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>DJ Manager &copy; 2023 - Sistema de Gestão de Orçamentos para DJs</p>
+                <p>Desenvolvido para uso local - Todos os dados são armazenados no seu navegador</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Clientes -->
+    <div id="cliente-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="cliente-modal-title">Novo Cliente</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="cliente-form">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cliente-nome" class="required">Nome</label>
+                            <input type="text" id="cliente-nome" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cliente-telefone" class="required">Telefone</label>
+                            <input type="tel" id="cliente-telefone" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cliente-email">Email</label>
+                            <input type="email" id="cliente-email">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cliente-data">Data do Contato</label>
+                            <input type="date" id="cliente-data">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cliente-observacoes">Observações</label>
+                    <textarea id="cliente-observacoes" rows="3"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning close-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Salvar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Orçamentos -->
+    <div id="orcamento-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="orcamento-modal-title">Novo Orçamento</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="orcamento-form">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="orcamento-cliente" class="required">Cliente</label>
+                            <select id="orcamento-cliente" required>
+                                <option value="">Selecione um cliente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="orcamento-evento">Tipo de Evento</label>
+                            <select id="orcamento-evento">
+                                <option value="">Selecione o tipo de evento</option>
+                                <option value="Casamento">Casamento</option>
+                                <option value="Aniversário">Aniversário</option>
+                                <option value="Formatura">Formatura</option>
+                                <option value="Corporativo">Evento Corporativo</option>
+                                <option value="Festa de 15 anos">Festa de 15 anos</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="orcamento-data">Data do Evento</label>
+                            <input type="date" id="orcamento-data">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="orcamento-valor" class="required">Valor (R$)</label>
+                            <input type="number" id="orcamento-valor" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="orcamento-status">Status</label>
+                            <select id="orcamento-status">
+                                <option value="pendente">Aguardando Resposta</option>
+                                <option value="aceito">Aceito</option>
+                                <option value="recusado">Recusado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="orcamento-followup">Data para Follow-up</label>
+                            <input type="date" id="orcamento-followup">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="orcamento-descricao">Descrição do Serviço</label>
+                    <textarea id="orcamento-descricao" rows="3" placeholder="Descreva os serviços incluídos no orçamento..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="orcamento-observacoes">Observações</label>
+                    <textarea id="orcamento-observacoes" rows="2" placeholder="Observações adicionais..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning close-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Salvar Orçamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Sistema DJ Manager - Código Principal
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variáveis globais
+            let clientes = JSON.parse(localStorage.getItem('djmanager-clientes')) || [];
+            let orcamentos = JSON.parse(localStorage.getItem('djmanager-orcamentos')) || [];
+            let editingClienteId = null;
+            let editingOrcamentoId = null;
+            
+            // Elementos da interface
+            const tabLinks = document.querySelectorAll('.nav-menu a');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const clienteModal = document.getElementById('cliente-modal');
+            const orcamentoModal = document.getElementById('orcamento-modal');
+            const addClienteBtn = document.getElementById('add-cliente-btn');
+            const addOrcamentoBtn = document.getElementById('add-orcamento-btn');
+            const closeModalButtons = document.querySelectorAll('.close-modal');
+            const clienteForm = document.getElementById('cliente-form');
+            const orcamentoForm = document.getElementById('orcamento-form');
+            const exportBtn = document.getElementById('export-btn');
+            const importBtn = document.getElementById('import-btn');
+            const clearDataBtn = document.getElementById('clear-data-btn');
+            const notificationArea = document.getElementById('notification-area');
+            
+            // Inicialização
+            init();
+            
+            // Função de inicialização
+            function init() {
+                // Carregar dados
+                loadClientes();
+                loadOrcamentos();
+                updateDashboard();
+                updateFinanceiro();
+                updateNotifications();
+                
+                // Configurar navegação por abas
+                tabLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const tabId = this.getAttribute('data-tab');
+                        
+                        // Atualizar navegação
+                        tabLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // Atualizar conteúdo
+                        tabContents.forEach(content => content.classList.remove('active'));
+                        document.getElementById(tabId).classList.add('active');
+                        
+                        // Atualizar título do header
+                        const tabTitles = {
+                            'dashboard': 'Dashboard',
+                            'clientes': 'Clientes',
+                            'orcamentos': 'Orçamentos',
+                            'financeiro': 'Financeiro',
+                            'backup': 'Backup'
+                        };
+                        document.querySelector('.header h2').textContent = tabTitles[tabId];
+                    });
+                });
+                
+                // Configurar botão para adicionar cliente
+                addClienteBtn.addEventListener('click', function() {
+                    editingClienteId = null;
+                    document.getElementById('cliente-modal-title').textContent = 'Novo Cliente';
+                    clienteForm.reset();
+                    document.getElementById('cliente-data').value = new Date().toISOString().split('T')[0];
+                    clienteModal.classList.add('active');
+                });
+                
+                // Configurar botão para adicionar orçamento
+                addOrcamentoBtn.addEventListener('click', function() {
+                    editingOrcamentoId = null;
+                    document.getElementById('orcamento-modal-title').textContent = 'Novo Orçamento';
+                    orcamentoForm.reset();
+                    
+                    // Preencher clientes no select
+                    const clienteSelect = document.getElementById('orcamento-cliente');
+                    clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+                    clientes.forEach(cliente => {
+                        const option = document.createElement('option');
+                        option.value = cliente.id;
+                        option.textContent = cliente.nome;
+                        clienteSelect.appendChild(option);
+                    });
+                    
+                    // Definir data padrão para follow-up (7 dias a partir de hoje)
+                    const followupDate = new Date();
+                    followupDate.setDate(followupDate.getDate() + 7);
+                    document.getElementById('orcamento-followup').value = followupDate.toISOString().split('T')[0];
+                    
+                    orcamentoModal.classList.add('active');
+                });
+                
+                // Configurar fechamento de modais
+                closeModalButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        clienteModal.classList.remove('active');
+                        orcamentoModal.classList.remove('active');
+                    });
+                });
+                
+                // Configurar envio do formulário de cliente
+                clienteForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    saveCliente();
+                });
+                
+                // Configurar envio do formulário de orçamento
+                orcamentoForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    saveOrcamento();
+                });
+                
+                // Configurar botão de exportação
+                exportBtn.addEventListener('click', exportData);
+                
+                // Configurar botão de importação
+                importBtn.addEventListener('click', function() {
+                    document.getElementById('import-file').click();
+                });
+                
+                // Criar input file oculto para importação
+                const importFileInput = document.createElement('input');
+                importFileInput.type = 'file';
+                importFileInput.id = 'import-file';
+                importFileInput.accept = '.json';
+                importFileInput.style.display = 'none';
+                document.body.appendChild(importFileInput);
+                
+                importFileInput.addEventListener('change', importData);
+                
+                // Configurar botão para limpar dados
+                clearDataBtn.addEventListener('click', clearData);
+            }
+            
+            // Funções para gerenciar clientes
+            function loadClientes() {
+                const tbody = document.getElementById('clientes-body');
+                const emptyRow = document.getElementById('empty-clientes');
+                
+                if (clientes.length === 0) {
+                    emptyRow.style.display = '';
+                    return;
+                }
+                
+                emptyRow.style.display = 'none';
+                tbody.innerHTML = '';
+                
+                clientes.forEach(cliente => {
+                    const orcamentosCliente = orcamentos.filter(o => o.clienteId === cliente.id);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${cliente.nome}</td>
+                        <td>${cliente.telefone}</td>
+                        <td>${cliente.email || '-'}</td>
+                        <td>${formatDate(cliente.dataContato)}</td>
+                        <td>${orcamentosCliente.length}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <div class="action-btn edit-btn" title="Editar" onclick="editCliente('${cliente.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="action-btn delete-btn" title="Excluir" onclick="deleteCliente('${cliente.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+            
+            function saveCliente() {
+                const nome = document.getElementById('cliente-nome').value;
+                const telefone = document.getElementById('cliente-telefone').value;
+                const email = document.getElementById('cliente-email').value;
+                const dataContato = document.getElementById('cliente-data').value || new Date().toISOString().split('T')[0];
+                const observacoes = document.getElementById('cliente-observacoes').value;
+                
+                if (!nome || !telefone) {
+                    alert('Nome e telefone são obrigatórios!');
+                    return;
+                }
+                
+                if (editingClienteId) {
+                    // Atualizar cliente existente
+                    const index = clientes.findIndex(c => c.id === editingClienteId);
+                    if (index !== -1) {
+                        clientes[index] = {
+                            ...clientes[index],
+                            nome,
+                            telefone,
+                            email,
+                            dataContato,
+                            observacoes
+                        };
+                    }
+                } else {
+                    // Adicionar novo cliente
+                    const novoCliente = {
+                        id: generateId(),
+                        nome,
+                        telefone,
+                        email,
+                        dataContato,
+                        observacoes,
+                        dataCadastro: new Date().toISOString()
+                    };
+                    
+                    clientes.push(novoCliente);
+                }
+                
+                // Salvar no localStorage
+                localStorage.setItem('djmanager-clientes', JSON.stringify(clientes));
+                
+                // Recarregar a lista de clientes
+                loadClientes();
+                
+                // Atualizar o dashboard e notificações
+                updateDashboard();
+                updateNotifications();
+                
+                // Fechar o modal
+                clienteModal.classList.remove('active');
+                
+                // Mostrar mensagem de sucesso
+                alert(editingClienteId ? 'Cliente atualizado com sucesso!' : 'Cliente cadastrado com sucesso!');
+            }
+            
+            window.editCliente = function(id) {
+                const cliente = clientes.find(c => c.id === id);
+                if (!cliente) return;
+                
+                editingClienteId = id;
+                document.getElementById('cliente-modal-title').textContent = 'Editar Cliente';
+                
+                document.getElementById('cliente-nome').value = cliente.nome;
+                document.getElementById('cliente-telefone').value = cliente.telefone;
+                document.getElementById('cliente-email').value = cliente.email || '';
+                document.getElementById('cliente-data').value = cliente.dataContato;
+                document.getElementById('cliente-observacoes').value = cliente.observacoes || '';
+                
+                clienteModal.classList.add('active');
+            };
+            
+            window.deleteCliente = function(id) {
+                if (!confirm('Tem certeza que deseja excluir este cliente? Todos os orçamentos relacionados também serão excluídos.')) {
+                    return;
+                }
+                
+                // Remover cliente
+                clientes = clientes.filter(c => c.id !== id);
+                
+                // Remover orçamentos relacionados
+                orcamentos = orcamentos.filter(o => o.clienteId !== id);
+                
+                // Atualizar localStorage
+                localStorage.setItem('djmanager-clientes', JSON.stringify(clientes));
+                localStorage.setItem('djmanager-orcamentos', JSON.stringify(orcamentos));
+                
+                // Recarregar listas
+                loadClientes();
+                loadOrcamentos();
+                updateDashboard();
+                updateFinanceiro();
+                updateNotifications();
+                
+                alert('Cliente excluído com sucesso!');
+            };
+            
+            // Funções para gerenciar orçamentos
+            function loadOrcamentos() {
+                const tbody = document.getElementById('orcamentos-body');
+                const emptyRow = document.getElementById('empty-orcamentos');
+                
+                if (orcamentos.length === 0) {
+                    emptyRow.style.display = '';
+                    return;
+                }
+                
+                emptyRow.style.display = 'none';
+                tbody.innerHTML = '';
+                
+                orcamentos.forEach(orcamento => {
+                    const cliente = clientes.find(c => c.id === orcamento.clienteId);
+                    const clienteNome = cliente ? cliente.nome : 'Cliente não encontrado';
+                    
+                    // Determinar status
+                    let statusClass, statusText;
+                    switch (orcamento.status) {
+                        case 'aceito':
+                            statusClass = 'status-accepted';
+                            statusText = 'Aceito';
+                            break;
+                        case 'recusado':
+                            statusClass = 'status-rejected';
+                            statusText = 'Recusado';
+                            break;
+                        default:
+                            statusClass = 'status-pending';
+                            statusText = 'Aguardando';
+                    }
+                    
+                    // Verificar se precisa de follow-up
+                    const hoje = new Date();
+                    const followupDate = new Date(orcamento.followupDate);
+                    const diffTime = followupDate - hoje;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (orcamento.status === 'pendente' && diffDays <= 0) {
+                        statusClass = 'status-followup';
+                        statusText = 'Precisa de Follow-up';
+                    }
+                    
+                    row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${clienteNome}</td>
+                        <td>${orcamento.evento || '-'}</td>
+                        <td>${formatDate(orcamento.dataEvento)}</td>
+                        <td>R$ ${formatCurrency(orcamento.valor)}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${formatDate(orcamento.followupDate)}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <div class="action-btn edit-btn" title="Editar" onclick="editOrcamento('${orcamento.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="action-btn delete-btn" title="Excluir" onclick="deleteOrcamento('${orcamento.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+            
+            function saveOrcamento() {
+                const clienteId = document.getElementById('orcamento-cliente').value;
+                const evento = document.getElementById('orcamento-evento').value;
+                const dataEvento = document.getElementById('orcamento-data').value;
+                const valor = parseFloat(document.getElementById('orcamento-valor').value);
+                const status = document.getElementById('orcamento-status').value;
+                const followupDate = document.getElementById('orcamento-followup').value;
+                const descricao = document.getElementById('orcamento-descricao').value;
+                const observacoes = document.getElementById('orcamento-observacoes').value;
+                
+                if (!clienteId || !valor) {
+                    alert('Cliente e valor são obrigatórios!');
+                    return;
+                }
+                
+                if (editingOrcamentoId) {
+                    // Atualizar orçamento existente
+                    const index = orcamentos.findIndex(o => o.id === editingOrcamentoId);
+                    if (index !== -1) {
+                        orcamentos[index] = {
+                            ...orcamentos[index],
+                            clienteId,
+                            evento,
+                            dataEvento,
+                            valor,
+                            status,
+                            followupDate,
+                            descricao,
+                            observacoes
+                        };
+                    }
+                } else {
+                    // Adicionar novo orçamento
+                    const novoOrcamento = {
+                        id: generateId(),
+                        clienteId,
+                        evento,
+                        dataEvento,
+                        valor,
+                        status,
+                        followupDate,
+                        descricao,
+                        observacoes,
+                        dataCriacao: new Date().toISOString()
+                    };
+                    
+                    orcamentos.push(novoOrcamento);
+                }
+                
+                // Salvar no localStorage
+                localStorage.setItem('djmanager-orcamentos', JSON.stringify(orcamentos));
+                
+                // Recarregar a lista de orçamentos
+                loadOrcamentos();
+                
+                // Atualizar o dashboard, financeiro e notificações
+                updateDashboard();
+                updateFinanceiro();
+                updateNotifications();
+                
+                // Fechar o modal
+                orcamentoModal.classList.remove('active');
+                
+                // Mostrar mensagem de sucesso
+                alert(editingOrcamentoId ? 'Orçamento atualizado com sucesso!' : 'Orçamento cadastrado com sucesso!');
+            }
+            
+            window.editOrcamento = function(id) {
+                const orcamento = orcamentos.find(o => o.id === id);
+                if (!orcamento) return;
+                
+                editingOrcamentoId = id;
+                document.getElementById('orcamento-modal-title').textContent = 'Editar Orçamento';
+                
+                // Preencher clientes no select
+                const clienteSelect = document.getElementById('orcamento-cliente');
+                clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+                clientes.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.id;
+                    option.textContent = cliente.nome;
+                    option.selected = cliente.id === orcamento.clienteId;
+                    clienteSelect.appendChild(option);
+                });
+                
+                document.getElementById('orcamento-evento').value = orcamento.evento || '';
+                document.getElementById('orcamento-data').value = orcamento.dataEvento || '';
+                document.getElementById('orcamento-valor').value = orcamento.valor || '';
+                document.getElementById('orcamento-status').value = orcamento.status || 'pendente';
+                document.getElementById('orcamento-followup').value = orcamento.followupDate || '';
+                document.getElementById('orcamento-descricao').value = orcamento.descricao || '';
+                document.getElementById('orcamento-observacoes').value = orcamento.observacoes || '';
+                
+                orcamentoModal.classList.add('active');
+            };
+            
+            window.deleteOrcamento = function(id) {
+                if (!confirm('Tem certeza que deseja excluir este orçamento?')) {
+                    return;
+                }
+                
+                // Remover orçamento
+                orcamentos = orcamentos.filter(o => o.id !== id);
+                
+                // Atualizar localStorage
+                localStorage.setItem('djmanager-orcamentos', JSON.stringify(orcamentos));
+                
+                // Recarregar listas
+                loadOrcamentos();
+                updateDashboard();
+                updateFinanceiro();
+                updateNotifications();
+                
+                alert('Orçamento excluído com sucesso!');
+            };
+            
+            // Funções para o dashboard
+            function updateDashboard() {
+                // Atualizar estatísticas
+                document.getElementById('total-clientes').textContent = clientes.length;
+                document.getElementById('total-orcamentos').textContent = orcamentos.length;
+                
+                // Calcular orçamentos pendentes de resposta
+                const pendentes = orcamentos.filter(o => o.status === 'pendente').length;
+                document.getElementById('pendentes-resposta').textContent = pendentes;
+                
+                // Calcular orçamentos que precisam de follow-up (sem resposta e data de follow-up já passou)
+                const hoje = new Date();
+                const semResposta = orcamentos.filter(o => {
+                    if (o.status !== 'pendente') return false;
+                    
+                    const followupDate = new Date(o.followupDate);
+                    return followupDate <= hoje;
+                }).length;
+                
+                document.getElementById('sem-resposta').textContent = semResposta;
+                
+                // Atualizar tabela de follow-up
+                updateFollowupTable();
+                
+                // Atualizar gráfico de aceitação
+                updateAcceptanceChart();
+            }
+            
+            function updateFollowupTable() {
+                const tbody = document.getElementById('followup-body');
+                const emptyRow = document.getElementById('empty-followup');
+                
+                // Filtrar orçamentos que precisam de follow-up
+                const hoje = new Date();
+                const followupOrcamentos = orcamentos.filter(o => {
+                    if (o.status !== 'pendente') return false;
+                    
+                    const followupDate = new Date(o.followupDate);
+                    return followupDate <= hoje;
+                });
+                
+                if (followupOrcamentos.length === 0) {
+                    emptyRow.style.display = '';
+                    return;
+                }
+                
+                emptyRow.style.display = 'none';
+                tbody.innerHTML = '';
+                
+                followupOrcamentos.forEach(orcamento => {
+                    const cliente = clientes.find(c => c.id === orcamento.clienteId);
+                    if (!cliente) return;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${cliente.nome}</td>
+                        <td>${cliente.telefone}</td>
+                        <td>${formatDate(orcamento.dataCriacao)}</td>
+                        <td>R$ ${formatCurrency(orcamento.valor)}</td>
+                        <td><span class="status-badge status-followup">Precisa de Follow-up</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <div class="action-btn edit-btn" title="Editar Orçamento" onclick="editOrcamento('${orcamento.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="action-btn" title="Ligar para o Cliente" style="background-color: #d4edda; color: #155724;" onclick="callClient('${cliente.telefone}')">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+            
+            function updateAcceptanceChart() {
+                const ctx = document.getElementById('chartCanvas').getContext('2d');
+                
+                // Calcular dados para o gráfico
+                const total = orcamentos.length;
+                const aceitos = orcamentos.filter(o => o.status === 'aceito').length;
+                const recusados = orcamentos.filter(o => o.status === 'recusado').length;
+                const pendentes = orcamentos.filter(o => o.status === 'pendente').length;
+                
+                // Destruir gráfico anterior se existir
+                if (window.acceptanceChart) {
+                    window.acceptanceChart.destroy();
+                }
+                
+                // Criar novo gráfico
+                window.acceptanceChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Aceitos', 'Recusados', 'Pendentes'],
+                        datasets: [{
+                            data: [aceitos, recusados, pendentes],
+                            backgroundColor: [
+                                'rgba(46, 204, 113, 0.8)',
+                                'rgba(231, 76, 60, 0.8)',
+                                'rgba(52, 152, 219, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgb(46, 204, 113)',
+                                'rgb(231, 76, 60)',
+                                'rgb(52, 152, 219)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Funções para o financeiro
+            function updateFinanceiro() {
+                // Calcular totais
+                const totalEstimado = orcamentos.reduce((sum, o) => sum + o.valor, 0);
+                const totalAceito = orcamentos
+                    .filter(o => o.status === 'aceito')
+                    .reduce((sum, o) => sum + o.valor, 0);
+                const totalPendente = orcamentos
+                    .filter(o => o.status === 'pendente')
+                    .reduce((sum, o) => sum + o.valor, 0);
+                const totalRecusado = orcamentos
+                    .filter(o => o.status === 'recusado')
+                    .reduce((sum, o) => sum + o.valor, 0);
+                
+                // Atualizar estatísticas
+                document.getElementById('total-estimado').textContent = `R$ ${formatCurrency(totalEstimado)}`;
+                document.getElementById('total-aceito').textContent = `R$ ${formatCurrency(totalAceito)}`;
+                document.getElementById('total-pendente').textContent = `R$ ${formatCurrency(totalPendente)}`;
+                document.getElementById('total-recusado').textContent = `R$ ${formatCurrency(totalRecusado)}`;
+                
+                // Atualizar gráfico de faturamento
+                updateRevenueChart();
+            }
+            
+            function updateRevenueChart() {
+                const ctx = document.getElementById('revenueCanvas').getContext('2d');
+                
+                // Calcular faturamento por mês (dos últimos 6 meses)
+                const meses = [];
+                const faturamento = [];
+                
+                const hoje = new Date();
+                for (let i = 5; i >= 0; i--) {
+                    const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                    const mesAno = data.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+                    meses.push(mesAno);
+                    
+                    // Calcular faturamento do mês (orçamentos aceitos)
+                    const mes = data.getMonth();
+                    const ano = data.getFullYear();
+                    
+                    const faturamentoMes = orcamentos
+                        .filter(o => {
+                            if (o.status !== 'aceito') return false;
+                            
+                            const dataOrcamento = new Date(o.dataCriacao);
+                            return dataOrcamento.getMonth() === mes && dataOrcamento.getFullYear() === ano;
+                        })
+                        .reduce((sum, o) => sum + o.valor, 0);
+                    
+                    faturamento.push(faturamentoMes);
+                }
+                
+                // Destruir gráfico anterior se existir
+                if (window.revenueChart) {
+                    window.revenueChart.destroy();
+                }
+                
+                // Criar novo gráfico
+                window.revenueChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: meses,
+                        datasets: [{
+                            label: 'Faturamento (R$)',
+                            data: faturamento,
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            borderColor: 'rgb(52, 152, 219)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + formatCurrency(value);
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Faturamento: R$ ${formatCurrency(context.raw)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Funções para backup
+            function exportData() {
+                const data = {
+                    clientes: clientes,
+                    orcamentos: orcamentos,
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+                
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `djmanager-backup-${new Date().toISOString().split('T')[0]}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                alert('Backup exportado com sucesso!');
+            }
+            
+            function importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (!data.clientes || !data.orcamentos) {
+                            throw new Error('Formato de arquivo inválido');
+                        }
+                        
+                        if (!confirm(`O backup contém ${data.clientes.length} clientes e ${data.orcamentos.length} orçamentos. Deseja importar esses dados? Os dados atuais serão substituídos.`)) {
+                            return;
+                        }
+                        
+                        // Substituir dados atuais
+                        clientes = data.clientes;
+                        orcamentos = data.orcamentos;
+                        
+                        // Salvar no localStorage
+                        localStorage.setItem('djmanager-clientes', JSON.stringify(clientes));
+                        localStorage.setItem('djmanager-orcamentos', JSON.stringify(orcamentos));
+                        
+                        // Recarregar todas as visualizações
+                        loadClientes();
+                        loadOrcamentos();
+                        updateDashboard();
+                        updateFinanceiro();
+                        updateNotifications();
+                        
+                        alert('Backup importado com sucesso!');
+                    } catch (error) {
+                        alert('Erro ao importar backup: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+                
+                // Resetar o input file
+                event.target.value = '';
+            }
+            
+            function clearData() {
+                if (!confirm('ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema (clientes e orçamentos). Esta ação é irreversível. Deseja continuar?')) {
+                    return;
+                }
+                
+                // Limpar localStorage
+                localStorage.removeItem('djmanager-clientes');
+                localStorage.removeItem('djmanager-orcamentos');
+                
+                // Limpar arrays
+                clientes = [];
+                orcamentos = [];
+                
+                // Recarregar todas as visualizações
+                loadClientes();
+                loadOrcamentos();
+                updateDashboard();
+                updateFinanceiro();
+                updateNotifications();
+                
+                alert('Todos os dados foram apagados com sucesso!');
+            }
+            
+            // Funções para notificações
+            function updateNotifications() {
+                // Calcular orçamentos que precisam de follow-up
+                const hoje = new Date();
+                const followupCount = orcamentos.filter(o => {
+                    if (o.status !== 'pendente') return false;
+                    
+                    const followupDate = new Date(o.followupDate);
+                    return followupDate <= hoje;
+                }).length;
+                
+                // Limpar área de notificações
+                notificationArea.innerHTML = '';
+                
+                if (followupCount > 0) {
+                    const notification = document.createElement('div');
+                    notification.className = 'btn btn-warning';
+                    notification.style.position = 'relative';
+                    notification.innerHTML = `
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>${followupCount} Clientes precisam de follow-up</span>
+                        <div class="alert-badge">${followupCount}</div>
+                    `;
+                    
+                    notification.addEventListener('click', function() {
+                        // Navegar para a aba de orçamentos
+                        document.querySelector('[data-tab="orcamentos"]').click();
+                    });
+                    
+                    notificationArea.appendChild(notification);
+                }
+            }
+            
+            // Funções utilitárias
+            function generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+            
+            function formatDate(dateString) {
+                if (!dateString) return '-';
+                
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '-';
+                
+                return date.toLocaleDateString('pt-BR');
+            }
+            
+            function formatCurrency(value) {
+                if (!value) return '0,00';
+                
+                return parseFloat(value).toFixed(2).replace('.', ',');
+            }
+            
+            window.callClient = function(telefone) {
+                alert(`Ligando para: ${telefone}\n\nEm um sistema real, isso iniciaria uma chamada telefônica.`);
+            };
+        });
+    </script>
+</body>
+</html>
