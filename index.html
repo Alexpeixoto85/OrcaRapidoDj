@@ -7,7 +7,6 @@
     <title>DJ Manager Mobile - Sistema de Orçamentos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -20,8 +19,8 @@
             --dark-color: #2c3e50;
             --gray-color: #95a5a6;
             --light-gray: #f8f9fa;
-            --border-radius: 10px;
-            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
         }
 
@@ -29,7 +28,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -37,28 +36,40 @@
             color: #333;
             line-height: 1.6;
             padding-bottom: 80px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .header {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), #1a2530);
             color: white;
-            padding: 15px 20px;
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .header h1 {
-            font-size: 1.4rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .header span {
             color: var(--accent-color);
+            font-weight: 800;
+        }
+
+        .header small {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            font-weight: normal;
+            margin-left: 5px;
         }
 
         .notification-badge {
@@ -73,6 +84,7 @@
             font-size: 0.8rem;
             font-weight: bold;
             margin-left: 8px;
+            animation: pulse 2s infinite;
         }
 
         .main-content {
@@ -81,7 +93,7 @@
 
         .tab-content {
             display: none;
-            animation: fadeIn 0.5s;
+            animation: fadeIn 0.4s ease-out;
         }
 
         .tab-content.active {
@@ -89,7 +101,7 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -97,28 +109,37 @@
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 20px;
+            padding: 24px;
             margin-bottom: 20px;
             transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 2px solid #f0f0f0;
         }
 
         .card-header h3 {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--primary-color);
-            font-weight: 600;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn {
-            padding: 12px 20px;
+            padding: 14px 24px;
             border: none;
             border-radius: var(--border-radius);
             cursor: pointer;
@@ -127,69 +148,76 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 1rem;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .btn i {
-            margin-right: 8px;
+            margin-right: 10px;
+            font-size: 1.1rem;
         }
 
         .btn-primary {
-            background-color: var(--secondary-color);
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
             color: white;
         }
 
         .btn-primary:hover {
-            background-color: #2980b9;
+            background: linear-gradient(135deg, #2980b9, var(--secondary-color));
+            transform: translateY(-2px);
         }
 
         .btn-success {
-            background-color: var(--success-color);
+            background: linear-gradient(135deg, var(--success-color), #27ae60);
             color: white;
         }
 
         .btn-success:hover {
-            background-color: #27ae60;
+            background: linear-gradient(135deg, #27ae60, var(--success-color));
+            transform: translateY(-2px);
         }
 
         .btn-warning {
-            background-color: var(--warning-color);
+            background: linear-gradient(135deg, var(--warning-color), #c0392b);
             color: white;
         }
 
         .btn-warning:hover {
-            background-color: #c0392b;
+            background: linear-gradient(135deg, #c0392b, var(--warning-color));
+            transform: translateY(-2px);
         }
 
         .btn-accent {
-            background-color: var(--accent-color);
+            background: linear-gradient(135deg, var(--accent-color), #16a085);
             color: white;
         }
 
         .btn-accent:hover {
-            background-color: #16a085;
+            background: linear-gradient(135deg, #16a085, var(--accent-color));
+            transform: translateY(-2px);
         }
 
         .btn-whatsapp {
-            background-color: var(--whatsapp-color);
+            background: linear-gradient(135deg, var(--whatsapp-color), #128C7E);
             color: white;
         }
 
         .btn-whatsapp:hover {
-            background-color: #128C7E;
+            background: linear-gradient(135deg, #128C7E, var(--whatsapp-color));
+            transform: translateY(-2px);
         }
 
         .stats-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 18px;
+            margin-bottom: 25px;
         }
 
         .stat-card {
-            background-color: white;
+            background: linear-gradient(135deg, white, #f8f9fa);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             padding: 20px;
@@ -199,6 +227,7 @@
             text-align: center;
             transition: var(--transition);
             cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .stat-card:active {
@@ -206,42 +235,45 @@
         }
 
         .stat-icon {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 10px;
-            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
             color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
         .stat-icon.blue {
-            background-color: var(--secondary-color);
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
         }
 
         .stat-icon.green {
-            background-color: var(--success-color);
+            background: linear-gradient(135deg, var(--success-color), #27ae60);
         }
 
         .stat-icon.orange {
-            background-color: #f39c12;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
         }
 
         .stat-icon.red {
-            background-color: var(--warning-color);
+            background: linear-gradient(135deg, var(--warning-color), #c0392b);
         }
 
         .stat-info h3 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: var(--primary-color);
             margin-bottom: 5px;
+            font-weight: 700;
         }
 
         .stat-info p {
             color: var(--gray-color);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .table-container {
@@ -249,33 +281,42 @@
             -webkit-overflow-scrolling: touch;
             margin: 0 -15px;
             padding: 0 15px;
+            border-radius: var(--border-radius);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             min-width: 600px;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         table th {
-            background-color: #f1f5f9;
-            color: var(--primary-color);
-            padding: 12px 10px;
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            color: white;
+            padding: 16px 12px;
             text-align: left;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             white-space: nowrap;
+            position: sticky;
+            top: 0;
         }
 
         table td {
-            padding: 12px 10px;
+            padding: 16px 12px;
             border-bottom: 1px solid #eee;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
+            transition: var(--transition);
         }
 
         table tr:hover td {
             background-color: #f8f9fa;
+            transform: translateX(4px);
         }
 
         table tr:last-child td {
@@ -283,58 +324,67 @@
         }
 
         .status-badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
             text-align: center;
             display: inline-block;
             white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .status-pending {
-            background-color: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
             color: #856404;
+            border: 1px solid #ffeaa7;
         }
 
         .status-accepted {
-            background-color: #d4edda;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .status-rejected {
-            background-color: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .status-followup {
-            background-color: #cce5ff;
+            background: linear-gradient(135deg, #cce5ff, #b8daff);
             color: #004085;
+            border: 1px solid #b8daff;
             animation: pulse 2s infinite;
+            font-weight: 800;
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
         }
 
         .action-buttons {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             justify-content: flex-end;
+            flex-wrap: wrap;
         }
 
         .action-btn {
-            width: 36px;
-            height: 36px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: var(--transition);
-            font-size: 0.9rem;
+            font-size: 1rem;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            border: none;
         }
 
         .action-btn:active {
@@ -342,56 +392,64 @@
         }
 
         .edit-btn {
-            background-color: #e3f2fd;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
             color: var(--secondary-color);
         }
 
         .delete-btn {
-            background-color: #ffebee;
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
             color: var(--warning-color);
         }
 
         .whatsapp-btn {
-            background-color: rgba(37, 211, 102, 0.1);
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.15), rgba(37, 211, 102, 0.1));
             color: var(--whatsapp-color);
+            border: 1px solid rgba(37, 211, 102, 0.2);
         }
 
         .pdf-btn {
-            background-color: rgba(231, 76, 60, 0.1);
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.1));
             color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.2);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
+            margin-bottom: 10px;
+            font-weight: 700;
             color: var(--primary-color);
-            font-size: 0.95rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .required::after {
             content: " *";
             color: var(--warning-color);
+            font-weight: bold;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 14px 15px;
-            border: 1px solid #ddd;
+            padding: 16px 18px;
+            border: 2px solid #e0e0e0;
             border-radius: var(--border-radius);
             font-size: 1rem;
             transition: var(--transition);
             background-color: white;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--secondary-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
         }
 
         .modal {
@@ -401,12 +459,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
             z-index: 1000;
             align-items: center;
             justify-content: center;
             padding: 15px;
             animation: modalFadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
         @keyframes modalFadeIn {
@@ -421,17 +480,18 @@
         .modal-content {
             background-color: white;
             border-radius: var(--border-radius);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             width: 100%;
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 20px;
-            animation: modalSlideIn 0.3s ease;
+            padding: 24px;
+            animation: modalSlideIn 0.4s ease-out;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         @keyframes modalSlideIn {
-            from { transform: translateY(20px); opacity: 0; }
+            from { transform: translateY(30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
 
@@ -439,47 +499,56 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
         }
 
         .modal-header h3 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: var(--primary-color);
+            font-weight: 700;
         }
 
         .close-modal {
-            background: none;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border: none;
             font-size: 1.5rem;
             color: var(--gray-color);
             cursor: pointer;
             transition: var(--transition);
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .close-modal:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            color: var(--warning-color);
         }
 
         .toast {
             position: fixed;
-            bottom: 80px;
+            bottom: 100px;
             left: 15px;
             right: 15px;
-            background-color: var(--success-color);
+            background: linear-gradient(135deg, var(--success-color), #27ae60);
             color: white;
-            padding: 15px 20px;
+            padding: 18px 24px;
             border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
             z-index: 2000;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             transform: translateY(100px);
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 5px solid rgba(255,255,255,0.5);
         }
 
         .toast.show {
@@ -488,11 +557,11 @@
         }
 
         .toast.warning {
-            background-color: var(--warning-color);
+            background: linear-gradient(135deg, var(--warning-color), #c0392b);
         }
 
         .toast.info {
-            background-color: var(--secondary-color);
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
         }
 
         .bottom-nav {
@@ -500,12 +569,13 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: white;
+            background: linear-gradient(135deg, white, #f8f9fa);
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
             z-index: 100;
+            border-top: 1px solid rgba(0,0,0,0.05);
         }
 
         .nav-item {
@@ -514,26 +584,40 @@
             align-items: center;
             text-decoration: none;
             color: var(--gray-color);
-            padding: 8px 5px;
-            border-radius: 8px;
+            padding: 10px 8px;
+            border-radius: 12px;
             transition: var(--transition);
             flex: 1;
             max-width: 80px;
+            position: relative;
         }
 
         .nav-item i {
-            font-size: 1.3rem;
-            margin-bottom: 5px;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+            transition: var(--transition);
         }
 
         .nav-item span {
-            font-size: 0.75rem;
-            font-weight: 500;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
         }
 
         .nav-item.active {
             color: var(--secondary-color);
-            background-color: rgba(52, 152, 219, 0.1);
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(52, 152, 219, 0.05));
+            transform: translateY(-5px);
+        }
+
+        .nav-item.active i {
+            color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        .nav-item.active span {
+            color: var(--secondary-color);
+            font-weight: 700;
         }
 
         .nav-item:active {
@@ -542,71 +626,82 @@
 
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 60px 20px;
             color: var(--gray-color);
         }
 
         .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #ddd;
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+            opacity: 0.7;
         }
 
         .empty-state h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
             color: var(--primary-color);
+            font-weight: 700;
         }
 
         .empty-state p {
-            font-size: 0.95rem;
+            font-size: 1rem;
+            max-width: 300px;
+            margin: 0 auto;
+            line-height: 1.6;
         }
 
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 18px;
+            margin-bottom: 25px;
         }
 
         .search-bar {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             position: relative;
         }
 
         .search-bar input {
-            padding-left: 45px;
+            padding-left: 50px;
             background-color: white;
+            border: 2px solid #e0e0e0;
+            font-size: 1rem;
+            border-radius: 50px;
+            height: 56px;
         }
 
         .search-bar i {
             position: absolute;
-            left: 15px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--gray-color);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
 
         .alert-badge {
             position: absolute;
             top: -5px;
             right: -5px;
-            background-color: var(--warning-color);
+            background: linear-gradient(135deg, var(--warning-color), #c0392b);
             color: white;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .followup-highlight {
-            background-color: #fff8e1 !important;
+            background: linear-gradient(135deg, #fff8e1, #fff3cd) !important;
             position: relative;
+            animation: subtlePulse 3s infinite;
         }
 
         .followup-highlight::before {
@@ -615,54 +710,78 @@
             left: 0;
             top: 0;
             height: 100%;
-            width: 4px;
-            background-color: #ff9800;
+            width: 5px;
+            background: linear-gradient(to bottom, #ff9800, #ffb74d);
+            border-radius: 3px 0 0 3px;
         }
 
-        /* Estilos para o card de visualização do orçamento */
+        @keyframes subtlePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
         .orcamento-card {
-            background: white;
+            background: linear-gradient(135deg, white, #f8f9fa);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             padding: 20px;
             margin-bottom: 20px;
             border-left: 5px solid var(--secondary-color);
             transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .orcamento-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), transparent);
+            border-radius: 0 0 0 100px;
+            pointer-events: none;
         }
 
         .orcamento-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
         }
 
         .card-status {
             display: inline-block;
-            padding: 5px 12px;
+            padding: 8px 16px;
             border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 700;
             margin-bottom: 15px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--primary-color);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .card-title .numero {
-            font-weight: bold;
+            font-weight: 800;
             color: var(--secondary-color);
+            font-size: 1.4rem;
         }
 
         .card-info {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 18px;
+            margin-bottom: 20px;
         }
 
         .card-info-item {
@@ -671,66 +790,78 @@
         }
 
         .card-info-label {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--gray-color);
-            margin-bottom: 3px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .card-info-value {
-            font-size: 0.95rem;
-            font-weight: 500;
+            font-size: 1rem;
+            font-weight: 600;
             color: var(--dark-color);
+            word-break: break-word;
         }
 
         .card-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: flex-end;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
         }
 
         .card-actions .btn {
             width: auto;
-            padding: 8px 15px;
+            padding: 12px 20px;
             margin: 0;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 100px;
         }
 
         .orcamento-cards-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
         }
 
-        /* Toggle entre tabela e cards */
         .view-toggle {
             display: flex;
-            background: #f1f5f9;
+            background: linear-gradient(135deg, #f1f5f9, #e9ecef);
             border-radius: var(--border-radius);
-            padding: 5px;
-            margin-bottom: 15px;
+            padding: 6px;
+            margin-bottom: 20px;
             width: fit-content;
             margin-left: auto;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
         }
 
         .view-toggle-btn {
-            padding: 8px 15px;
+            padding: 10px 20px;
             border: none;
             background: transparent;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--gray-color);
             transition: var(--transition);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .view-toggle-btn.active {
-            background: white;
+            background: linear-gradient(135deg, white, #f8f9fa);
             color: var(--secondary-color);
-            font-weight: 600;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: 700;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
         }
 
         @media (max-width: 480px) {
@@ -743,19 +874,19 @@
             }
             
             .modal-content {
-                padding: 15px;
+                padding: 20px;
             }
             
             .header h1 {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
             }
             
             .nav-item span {
-                font-size: 0.7rem;
+                font-size: 0.75rem;
             }
             
             .nav-item i {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
             }
             
             .card-info {
@@ -769,7 +900,22 @@
             
             .card-actions .btn {
                 flex: 1;
-                min-width: 120px;
+                min-width: 140px;
+            }
+            
+            .orcamento-cards-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .orcamento-card {
+                padding: 18px;
+            }
+            
+            .card-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
             }
         }
 
@@ -777,27 +923,35 @@
             body {
                 max-width: 768px;
                 margin: 0 auto;
-                box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                box-shadow: 0 0 30px rgba(0,0,0,0.1);
                 min-height: 100vh;
+                position: relative;
             }
             
             .bottom-nav {
                 max-width: 768px;
                 left: 50%;
                 transform: translateX(-50%);
+                border-radius: 20px 20px 0 0;
+                bottom: 10px;
+                width: calc(100% - 20px);
+                box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.2);
             }
             
             .orcamento-cards-container {
-                display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 20px;
+            }
+            
+            .modal-content {
+                max-width: 550px;
             }
         }
 
         .spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border: 3px solid rgba(255,255,255,.3);
             border-radius: 50%;
             border-top-color: white;
@@ -809,19 +963,32 @@
         }
 
         .config-btn {
-            background: none;
-            border: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+            border: 1px solid rgba(255,255,255,0.3);
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             cursor: pointer;
-            padding: 5px;
+            padding: 10px;
             margin-left: 10px;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .config-btn:hover {
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.2));
+            transform: rotate(15deg);
         }
 
         .form-row {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 18px;
+            margin-bottom: 24px;
         }
 
         .form-row .form-group {
@@ -832,31 +999,142 @@
         .phone-prefix {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .phone-prefix .prefix {
-            flex: 0 0 60px;
-            background: #f5f5f5;
-            border: 1px solid #ddd;
+            flex: 0 0 70px;
+            background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+            border: 2px solid #ddd;
             border-radius: var(--border-radius);
-            padding: 14px;
+            padding: 16px;
             text-align: center;
             font-weight: bold;
+            color: var(--primary-color);
         }
 
         .phone-prefix input {
             flex: 1;
         }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .form-actions .btn {
+            flex: 1;
+            margin: 0;
+        }
+
+        .valor-destaque {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05));
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .valor-destaque .label {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin-bottom: 5px;
+        }
+
+        .valor-destaque .valor {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--secondary-color);
+        }
+
+        .followup-urgency {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--warning-color);
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        [title] {
+            position: relative;
+        }
+
+        [title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        [title]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--primary-color);
+            margin-bottom: -5px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2980b9, var(--secondary-color));
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>DJ<span>Manager</span></h1>
+        <h1>🎧 DJ<span>Manager</span> <small>| Dashboard</small></h1>
         <div style="display: flex; align-items: center;">
             <div id="notification-area"></div>
             <button class="config-btn" id="config-dj-btn" title="Configurar dados do DJ">
-                <i class="fas fa-user"></i>
+                <i class="fas fa-sliders-h"></i>
             </button>
         </div>
     </div>
@@ -865,7 +1143,7 @@
         <div id="dashboard" class="tab-content active">
             <div class="quick-actions">
                 <button class="btn btn-primary" id="quick-add-orcamento">
-                    <i class="fas fa-plus"></i> Novo Orçamento
+                    <i class="fas fa-plus-circle"></i> Novo Orçamento
                 </button>
                 <button class="btn btn-success" id="quick-add-cliente">
                     <i class="fas fa-user-plus"></i> Novo Cliente
@@ -913,22 +1191,25 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h3>Follow-ups Pendentes</h3>
+                    <h3><i class="fas fa-bell"></i> Follow-ups Pendentes</h3>
+                    <span class="notification-badge" id="followup-count">0</span>
                 </div>
                 <div class="table-container">
                     <table id="followup-table">
                         <thead>
                             <tr>
                                 <th>Cliente</th>
-                                <th>Data</th>
+                                <th>Próximo Contato</th>
+                                <th>Status</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="followup-body">
                             <tr id="empty-followup">
-                                <td colspan="3" class="empty-state">
+                                <td colspan="4" class="empty-state">
                                     <i class="fas fa-check-circle"></i>
                                     <h3>Nenhum follow-up pendente</h3>
+                                    <p>Todos os contatos estão em dia!</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -940,12 +1221,13 @@
         <div id="clientes" class="tab-content">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" id="cliente-search" placeholder="Buscar cliente...">
+                <input type="text" id="cliente-search" placeholder="Buscar cliente por nome, telefone ou email...">
             </div>
             
             <div class="card">
                 <div class="card-header">
-                    <h3>Clientes Cadastrados</h3>
+                    <h3><i class="fas fa-users"></i> Clientes Cadastrados</h3>
+                    <span class="badge" style="background: var(--secondary-color); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.9rem;" id="client-count">0</span>
                 </div>
                 <div class="table-container">
                     <table>
@@ -953,15 +1235,16 @@
                             <tr>
                                 <th>Nome</th>
                                 <th>Telefone</th>
+                                <th>Último Contato</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="clientes-body">
                             <tr id="empty-clientes">
-                                <td colspan="3" class="empty-state">
+                                <td colspan="4" class="empty-state">
                                     <i class="fas fa-users"></i>
                                     <h3>Nenhum cliente cadastrado</h3>
-                                    <p>Adicione seu primeiro cliente</p>
+                                    <p>Clique em "Novo Cliente" para começar</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -973,10 +1256,9 @@
         <div id="orcamentos" class="tab-content">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" id="orcamento-search" placeholder="Buscar orçamento...">
+                <input type="text" id="orcamento-search" placeholder="Buscar orçamento por cliente, evento ou número...">
             </div>
             
-            <!-- Toggle para visualização -->
             <div class="view-toggle">
                 <button class="view-toggle-btn active" id="view-table-btn" data-view="table">
                     <i class="fas fa-table"></i> Tabela
@@ -988,10 +1270,10 @@
             
             <div class="card">
                 <div class="card-header">
-                    <h3>Orçamentos</h3>
+                    <h3><i class="fas fa-file-invoice-dollar"></i> Orçamentos</h3>
+                    <span class="badge" style="background: var(--success-color); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.9rem;" id="orcamento-count">0</span>
                 </div>
                 
-                <!-- Visualização em tabela -->
                 <div id="orcamentos-table-view">
                     <div class="table-container">
                         <table id="orcamentos-table">
@@ -1001,15 +1283,16 @@
                                     <th>Cliente</th>
                                     <th>Valor</th>
                                     <th>Status</th>
+                                    <th>Próximo Contato</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="orcamentos-body">
                                 <tr id="empty-orcamentos">
-                                    <td colspan="5" class="empty-state">
+                                    <td colspan="6" class="empty-state">
                                         <i class="fas fa-file-invoice-dollar"></i>
                                         <h3>Nenhum orçamento</h3>
-                                        <p>Crie seu primeiro orçamento</p>
+                                        <p>Crie seu primeiro orçamento para começar</p>
                                     </td>
                                 </tr>
                             </tbody>
@@ -1017,10 +1300,8 @@
                     </div>
                 </div>
                 
-                <!-- Visualização em cards -->
                 <div id="orcamentos-cards-view" style="display: none;">
                     <div class="orcamento-cards-container" id="orcamentos-cards">
-                        <!-- Cards serão inseridos aqui via JavaScript -->
                     </div>
                 </div>
             </div>
@@ -1029,7 +1310,7 @@
         <div id="financeiro" class="tab-content">
             <div class="card">
                 <div class="card-header">
-                    <h3>Resumo Financeiro</h3>
+                    <h3><i class="fas fa-chart-line"></i> Resumo Financeiro</h3>
                 </div>
                 <div class="stats-container">
                     <div class="stat-card">
@@ -1075,9 +1356,9 @@
         <div id="backup" class="tab-content">
             <div class="card">
                 <div class="card-header">
-                    <h3>Backup e Restauração</h3>
+                    <h3><i class="fas fa-database"></i> Backup e Restauração</h3>
                 </div>
-                <p style="margin-bottom: 20px;">Faça backup de todos os dados ou restaure de um backup anterior.</p>
+                <p style="margin-bottom: 25px; color: var(--gray-color); font-size: 1rem;">Faça backup de todos os dados ou restaure de um backup anterior. Seus dados são armazenados localmente no navegador.</p>
                 
                 <button class="btn btn-primary" id="export-btn">
                     <i class="fas fa-download"></i> Exportar Dados
@@ -1087,8 +1368,13 @@
                     <i class="fas fa-upload"></i> Importar Dados
                 </button>
                 
+                <div class="alert" style="background: linear-gradient(135deg, #fff3cd, #ffeaa7); padding: 15px; border-radius: var(--border-radius); margin: 20px 0; border-left: 4px solid #ffc107;">
+                    <h4 style="color: #856404; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i> Importante</h4>
+                    <p style="color: #856404; font-size: 0.9rem;">Faça backup regularmente para não perder seus dados. Ao limpar os dados, todas as informações serão apagadas permanentemente.</p>
+                </div>
+                
                 <button class="btn btn-warning" id="clear-data-btn">
-                    <i class="fas fa-trash-alt"></i> Limpar Dados
+                    <i class="fas fa-trash-alt"></i> Limpar Todos os Dados
                 </button>
             </div>
         </div>
@@ -1117,7 +1403,6 @@
         </a>
     </div>
 
-    <!-- Modal para visualização do orçamento em card -->
     <div id="view-orcamento-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1125,7 +1410,6 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div id="orcamento-card-details">
-                <!-- Conteúdo será preenchido via JavaScript -->
             </div>
         </div>
     </div>
@@ -1133,17 +1417,17 @@
     <div id="cliente-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="cliente-modal-title">Novo Cliente</h3>
+                <h3 id="cliente-modal-title"><i class="fas fa-user-plus"></i> Novo Cliente</h3>
                 <button class="close-modal">&times;</button>
             </div>
             <form id="cliente-form">
                 <div class="form-group">
-                    <label for="cliente-nome" class="required">Nome Completo</label>
-                    <input type="text" id="cliente-nome" required>
+                    <label for="cliente-nome" class="required"><i class="fas fa-user"></i> Nome Completo</label>
+                    <input type="text" id="cliente-nome" required placeholder="Digite o nome completo">
                 </div>
                 
                 <div class="form-group">
-                    <label for="cliente-telefone" class="required">Telefone (com DDD)</label>
+                    <label for="cliente-telefone" class="required"><i class="fas fa-phone"></i> Telefone (com DDD)</label>
                     <div class="phone-prefix">
                         <div class="prefix">+55</div>
                         <input type="tel" id="cliente-telefone" placeholder="(00) 00000-0000" required>
@@ -1151,23 +1435,26 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="cliente-email">Email</label>
+                    <label for="cliente-email"><i class="fas fa-envelope"></i> Email</label>
                     <input type="email" id="cliente-email" placeholder="cliente@email.com">
                 </div>
                 
                 <div class="form-group">
-                    <label for="cliente-data">Data do Contato</label>
+                    <label for="cliente-data"><i class="fas fa-calendar"></i> Data do Contato</label>
                     <input type="date" id="cliente-data">
                 </div>
                 
                 <div class="form-group">
-                    <label for="cliente-observacoes">Observações</label>
+                    <label for="cliente-observacoes"><i class="fas fa-sticky-note"></i> Observações</label>
                     <textarea id="cliente-observacoes" rows="3" placeholder="Anotações sobre o cliente..."></textarea>
                 </div>
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-warning close-modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Salvar Cliente</button>
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner" style="display: none;"></span>
+                        <span>Salvar Cliente</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -1176,19 +1463,19 @@
     <div id="orcamento-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="orcamento-modal-title">Novo Orçamento</h3>
+                <h3 id="orcamento-modal-title"><i class="fas fa-file-invoice-dollar"></i> Novo Orçamento</h3>
                 <button class="close-modal">&times;</button>
             </div>
             <form id="orcamento-form">
                 <div class="form-group">
-                    <label for="orcamento-cliente" class="required">Cliente</label>
+                    <label for="orcamento-cliente" class="required"><i class="fas fa-user"></i> Cliente</label>
                     <select id="orcamento-cliente" required>
                         <option value="">Selecione um cliente</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label for="orcamento-evento">Tipo de Evento</label>
+                    <label for="orcamento-evento"><i class="fas fa-calendar-alt"></i> Tipo de Evento</label>
                     <select id="orcamento-evento">
                         <option value="">Selecione o tipo de evento</option>
                         <option value="Casamento">Casamento</option>
@@ -1196,27 +1483,35 @@
                         <option value="Formatura">Formatura</option>
                         <option value="Corporativo">Evento Corporativo</option>
                         <option value="Festa de 15 anos">Festa de 15 anos</option>
+                        <option value="Festa Infantil">Festa Infantil</option>
+                        <option value="Bar/Boate">Bar/Boate</option>
                         <option value="Outro">Outro</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label for="orcamento-data">Data do Evento</label>
+                    <label for="orcamento-data"><i class="fas fa-calendar-day"></i> Data do Evento</label>
                     <input type="date" id="orcamento-data">
                 </div>
                 
                 <div class="form-group">
-                    <label for="orcamento-valor" class="required">Valor (R$)</label>
-                    <input type="number" id="orcamento-valor" step="0.01" min="0" required>
+                    <label for="orcamento-valor" class="required"><i class="fas fa-money-bill-wave"></i> Valor (R$)</label>
+                    <input type="number" id="orcamento-valor" step="0.01" min="0" required placeholder="0,00">
                 </div>
                 
                 <div class="form-group">
-                    <label for="orcamento-validade" class="required">Data de Validade</label>
+                    <label for="orcamento-validade" class="required"><i class="fas fa-hourglass-end"></i> Data de Validade</label>
                     <input type="date" id="orcamento-validade" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="orcamento-status">Status</label>
+                    <label for="orcamento-prox-contato"><i class="fas fa-bell"></i> Próximo Contato (Follow-up)</label>
+                    <input type="date" id="orcamento-prox-contato">
+                    <small style="display: block; margin-top: 5px; color: var(--gray-color);">Data para fazer follow-up com o cliente</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="orcamento-status"><i class="fas fa-tag"></i> Status</label>
                     <select id="orcamento-status">
                         <option value="pendente">Aguardando Resposta</option>
                         <option value="aceito">Aceito</option>
@@ -1225,18 +1520,21 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="orcamento-descricao">Descrição do Serviço</label>
-                    <textarea id="orcamento-descricao" rows="3" placeholder="Descreva os serviços incluídos..."></textarea>
+                    <label for="orcamento-descricao"><i class="fas fa-list-alt"></i> Descrição do Serviço</label>
+                    <textarea id="orcamento-descricao" rows="4" placeholder="Descreva os serviços incluídos..."></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="orcamento-observacoes">Observações</label>
-                    <textarea id="orcamento-observacoes" rows="2" placeholder="Observações adicionais..."></textarea>
+                    <label for="orcamento-observacoes"><i class="fas fa-sticky-note"></i> Observações</label>
+                    <textarea id="orcamento-observacoes" rows="3" placeholder="Observações adicionais..."></textarea>
                 </div>
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-warning close-modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Salvar Orçamento</button>
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner" style="display: none;"></span>
+                        <span>Salvar Orçamento</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -1245,28 +1543,28 @@
     <div id="dj-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Configurar Dados do DJ</h3>
+                <h3><i class="fas fa-sliders-h"></i> Configurar Dados do DJ</h3>
                 <button class="close-modal">&times;</button>
             </div>
             <form id="dj-form">
                 <div class="form-group">
-                    <label for="dj-nome">Nome Artístico</label>
+                    <label for="dj-nome"><i class="fas fa-user-circle"></i> Nome Artístico</label>
                     <input type="text" id="dj-nome" placeholder="Seu nome artístico">
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="dj-cpf">CPF</label>
+                        <label for="dj-cpf"><i class="fas fa-id-card"></i> CPF</label>
                         <input type="text" id="dj-cpf" placeholder="000.000.000-00">
                     </div>
                     <div class="form-group">
-                        <label for="dj-cnpj">CNPJ</label>
+                        <label for="dj-cnpj"><i class="fas fa-building"></i> CNPJ</label>
                         <input type="text" id="dj-cnpj" placeholder="00.000.000/0000-00">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="dj-telefone">Telefone para Contato</label>
+                    <label for="dj-telefone"><i class="fas fa-phone"></i> Telefone para Contato</label>
                     <div class="phone-prefix">
                         <div class="prefix">+55</div>
                         <input type="tel" id="dj-telefone" placeholder="(00) 00000-0000">
@@ -1274,30 +1572,30 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="dj-email">Email</label>
+                    <label for="dj-email"><i class="fas fa-envelope"></i> Email</label>
                     <input type="email" id="dj-email" placeholder="dj@email.com">
                 </div>
                 
                 <div class="form-group">
-                    <label for="dj-endereco">Endereço</label>
+                    <label for="dj-endereco"><i class="fas fa-map-marker-alt"></i> Endereço</label>
                     <input type="text" id="dj-endereco" placeholder="Rua, número, bairro">
                 </div>
                 
                 <div class="form-group">
-                    <label for="dj-cidade">Cidade/Estado</label>
+                    <label for="dj-cidade"><i class="fas fa-city"></i> Cidade/Estado</label>
                     <input type="text" id="dj-cidade" placeholder="Cidade - Estado">
                 </div>
                 
                 <div class="form-group">
-                    <label for="dj-logo">Logomarca (URL ou texto)</label>
+                    <label for="dj-logo"><i class="fas fa-image"></i> Logomarca (URL ou texto)</label>
                     <textarea id="dj-logo" rows="2" placeholder="URL da logomarca ou texto para cabeçalho"></textarea>
-                    <small>Cole a URL da imagem ou insira um texto para aparecer no cabeçalho dos orçamentos</small>
+                    <small style="display: block; margin-top: 5px; color: var(--gray-color);">Cole a URL da imagem ou insira um texto para aparecer no cabeçalho dos orçamentos PDF</small>
                 </div>
                 
                 <div class="form-group">
-                    <label for="next-orcamento-number">Próximo Número de Orçamento</label>
-                    <input type="text" id="next-orcamento-number" readonly style="background-color: #f5f5f5;">
-                    <small>Números são sequenciais começando de 0085</small>
+                    <label for="next-orcamento-number"><i class="fas fa-hashtag"></i> Próximo Número de Orçamento</label>
+                    <input type="text" id="next-orcamento-number" readonly style="background-color: #f5f5f5; font-weight: bold; font-size: 1.1rem;">
+                    <small style="display: block; margin-top: 5px; color: var(--gray-color);">Números são sequenciais começando de 0085. Alterações manuais podem causar duplicidade.</small>
                 </div>
                 
                 <div class="form-actions">
@@ -1315,11 +1613,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Variáveis globais
             let clientes = JSON.parse(localStorage.getItem('djmanager-clientes')) || [];
             let orcamentos = JSON.parse(localStorage.getItem('djmanager-orcamentos')) || [];
             let djData = JSON.parse(localStorage.getItem('djmanager-dj')) || {
-                nome: '',
+                nome: 'DJ Manager',
                 cpf: '',
                 cnpj: '',
                 telefone: '',
@@ -1330,56 +1627,48 @@
                 nextOrcamentoNum: 85
             };
             
-            // Inicializar próximo número de orçamento se não existir
             if (!djData.nextOrcamentoNum) {
                 djData.nextOrcamentoNum = 85;
             }
             
-            // Função para gerar números aleatórios para orçamentos antigos (0001-0084)
             function assignRandomNumbersToOldOrcamentos() {
-                // Números disponíveis de 0001 a 0084
                 const availableNumbers = Array.from({length: 84}, (_, i) => String(i + 1).padStart(4, '0'));
                 
-                // Embaralhar os números
                 for (let i = availableNumbers.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
                 }
                 
-                // Atribuir números aleatórios a orçamentos sem número ou com número >= 0085
-                orcamentos.forEach((orcamento, index) => {
+                orcamentos.forEach((orcamento) => {
                     if (!orcamento.numero) {
-                        // Se não tem número, atribuir um aleatório
                         if (availableNumbers.length > 0) {
                             orcamento.numero = availableNumbers.pop();
                         } else {
-                            // Se acabaram os números, usar o próximo sequencial
                             orcamento.numero = String(djData.nextOrcamentoNum).padStart(4, '0');
                             djData.nextOrcamentoNum++;
                         }
                     } else if (parseInt(orcamento.numero) >= 85) {
-                        // Se já tem número >= 85, manter o número atual
-                        // Atualizar o nextOrcamentoNum se necessário
                         const num = parseInt(orcamento.numero);
                         if (num >= djData.nextOrcamentoNum) {
                             djData.nextOrcamentoNum = num + 1;
                         }
                     }
+                    
+                    if (!orcamento.proxContato) {
+                        orcamento.proxContato = '';
+                    }
                 });
                 
-                // Salvar as alterações
                 saveToLocalStorage();
                 localStorage.setItem('djmanager-dj', JSON.stringify(djData));
             }
             
-            // Executar ao carregar para garantir números em orçamentos antigos
             assignRandomNumbersToOldOrcamentos();
             
             let editingClienteId = null;
             let editingOrcamentoId = null;
-            let currentView = 'table'; // 'table' ou 'cards'
+            let currentView = 'table';
             
-            // Elementos da interface
             const navItems = document.querySelectorAll('.nav-item');
             const tabContents = document.querySelectorAll('.tab-content');
             const clienteModal = document.getElementById('cliente-modal');
@@ -1407,11 +1696,9 @@
             const orcamentosCardsView = document.getElementById('orcamentos-cards-view');
             const orcamentosCardsContainer = document.getElementById('orcamentos-cards');
             
-            // Inicialização
             init();
             
             function init() {
-                // Carregar dados
                 loadClientes();
                 loadOrcamentos();
                 updateDashboard();
@@ -1419,38 +1706,39 @@
                 updateNotifications();
                 updateDjData();
                 
-                // Configurar navegação
                 navItems.forEach(item => {
                     item.addEventListener('click', function(e) {
                         e.preventDefault();
                         const tabId = this.getAttribute('data-tab');
                         
-                        // Atualizar navegação
                         navItems.forEach(nav => nav.classList.remove('active'));
                         this.classList.add('active');
                         
-                        // Atualizar conteúdo
                         tabContents.forEach(content => content.classList.remove('active'));
                         document.getElementById(tabId).classList.add('active');
                         
-                        // Atualizar título do header
                         const tabTitles = {
-                            'dashboard': 'DJ Manager',
+                            'dashboard': 'Dashboard',
                             'clientes': 'Clientes',
                             'orcamentos': 'Orçamentos',
                             'financeiro': 'Financeiro',
                             'backup': 'Backup'
                         };
-                        document.querySelector('.header h1').innerHTML = `DJ<span>Manager</span> <small>| ${tabTitles[tabId]}</small>`;
+                        const tabIcons = {
+                            'dashboard': '🎧',
+                            'clientes': '👥',
+                            'orcamentos': '💰',
+                            'financeiro': '📊',
+                            'backup': '💾'
+                        };
+                        document.querySelector('.header h1').innerHTML = `${tabIcons[tabId]} DJ<span>Manager</span> <small>| ${tabTitles[tabId]}</small>`;
                         
-                        // Se for a aba de orçamentos, carregar a visualização atual
                         if (tabId === 'orcamentos') {
                             loadOrcamentosView();
                         }
                     });
                 });
                 
-                // Configurar cards clicáveis
                 document.querySelectorAll('.stat-card').forEach(card => {
                     card.addEventListener('click', function() {
                         const targetTab = this.getAttribute('data-target');
@@ -1460,12 +1748,10 @@
                     });
                 });
                 
-                // Configurar botões rápidos
                 quickAddClienteBtn.addEventListener('click', openClienteModal);
                 quickAddOrcamentoBtn.addEventListener('click', openOrcamentoModal);
                 configDjBtn.addEventListener('click', openDjModal);
                 
-                // Configurar fechamento de modais
                 closeModalButtons.forEach(button => {
                     button.addEventListener('click', function() {
                         clienteModal.classList.remove('active');
@@ -1475,7 +1761,6 @@
                     });
                 });
                 
-                // Fechar modal ao clicar fora
                 window.addEventListener('click', function(e) {
                     if (e.target === clienteModal) clienteModal.classList.remove('active');
                     if (e.target === orcamentoModal) orcamentoModal.classList.remove('active');
@@ -1483,28 +1768,22 @@
                     if (e.target === viewOrcamentoModal) viewOrcamentoModal.classList.remove('active');
                 });
                 
-                // Configurar formulários
                 clienteForm.addEventListener('submit', saveCliente);
                 orcamentoForm.addEventListener('submit', saveOrcamento);
                 djForm.addEventListener('submit', saveDjData);
                 
-                // Configurar formatação de telefone
                 document.getElementById('cliente-telefone').addEventListener('input', formatPhoneInput);
                 document.getElementById('dj-telefone').addEventListener('input', formatPhoneInput);
                 
-                // Configurar busca
                 clienteSearch?.addEventListener('input', searchClientes);
                 orcamentoSearch?.addEventListener('input', searchOrcamentos);
                 
-                // Configurar backup
                 exportBtn.addEventListener('click', exportData);
                 importBtn.addEventListener('click', triggerImport);
                 clearDataBtn.addEventListener('click', clearData);
                 
-                // Configurar data atual nos campos de data
                 setTodayDate();
                 
-                // Configurar toggle de visualização
                 viewTableBtn?.addEventListener('click', function() {
                     setOrcamentosView('table');
                 });
@@ -1513,14 +1792,11 @@
                     setOrcamentosView('cards');
                 });
                 
-                // Configurar clique nas linhas da tabela para visualizar orçamento
                 document.addEventListener('click', function(e) {
-                    // Verificar se o clique foi em uma linha da tabela de orçamentos (exceto nos botões de ação)
                     if (e.target.closest('#orcamentos-body tr:not(#empty-orcamentos)')) {
                         const row = e.target.closest('tr');
                         const orcamentoId = row.getAttribute('data-id');
                         
-                        // Não abrir modal se o clique foi em um botão de ação
                         if (!e.target.closest('.action-buttons') && orcamentoId) {
                             viewOrcamentoCard(orcamentoId);
                         }
@@ -1537,9 +1813,12 @@
                 document.getElementById('cliente-data').value = today;
                 document.getElementById('orcamento-data').value = '';
                 document.getElementById('orcamento-validade').value = validityStr;
+                
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                document.getElementById('orcamento-prox-contato').value = tomorrow.toISOString().split('T')[0];
             }
             
-            // Função para formatar entrada de telefone
             function formatPhoneInput(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 
@@ -1555,67 +1834,81 @@
                 e.target.value = value;
             }
             
-            // Funções para Clientes
             function openClienteModal() {
                 editingClienteId = null;
-                document.getElementById('cliente-modal-title').textContent = 'Novo Cliente';
+                document.getElementById('cliente-modal-title').innerHTML = '<i class="fas fa-user-plus"></i> Novo Cliente';
                 clienteForm.reset();
                 setTodayDate();
                 clienteModal.classList.add('active');
+                
+                setTimeout(() => {
+                    document.getElementById('cliente-nome').focus();
+                }, 300);
             }
             
             function saveCliente(e) {
                 e.preventDefault();
                 
-                const nome = document.getElementById('cliente-nome').value.trim();
-                let telefone = document.getElementById('cliente-telefone').value.trim();
-                const email = document.getElementById('cliente-email').value.trim();
-                const dataContato = document.getElementById('cliente-data').value;
-                const observacoes = document.getElementById('cliente-observacoes').value.trim();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner"></span> Salvando...';
+                btn.disabled = true;
                 
-                if (!nome || !telefone) {
-                    showToast('Nome e telefone são obrigatórios!', 'warning');
-                    return;
-                }
-                
-                // Garantir que o telefone tenha o prefixo +55
-                if (!telefone.startsWith('+55')) {
-                    telefone = '+55 ' + telefone;
-                }
-                
-                if (editingClienteId) {
-                    // Atualizar cliente
-                    const index = clientes.findIndex(c => c.id === editingClienteId);
-                    if (index !== -1) {
-                        clientes[index] = {
-                            ...clientes[index],
+                setTimeout(() => {
+                    const nome = document.getElementById('cliente-nome').value.trim();
+                    let telefone = document.getElementById('cliente-telefone').value.trim();
+                    const email = document.getElementById('cliente-email').value.trim();
+                    const dataContato = document.getElementById('cliente-data').value;
+                    const observacoes = document.getElementById('cliente-observacoes').value.trim();
+                    
+                    if (!nome || !telefone) {
+                        showToast('Nome e telefone são obrigatórios!', 'warning');
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                    
+                    if (!telefone.startsWith('+55')) {
+                        telefone = '+55 ' + telefone;
+                    }
+                    
+                    if (editingClienteId) {
+                        const index = clientes.findIndex(c => c.id === editingClienteId);
+                        if (index !== -1) {
+                            clientes[index] = {
+                                ...clientes[index],
+                                nome,
+                                telefone,
+                                email,
+                                dataContato,
+                                observacoes,
+                                dataAtualizacao: new Date().toISOString()
+                            };
+                            showToast('Cliente atualizado com sucesso!', 'success');
+                        }
+                    } else {
+                        clientes.push({
+                            id: generateId(),
                             nome,
                             telefone,
                             email,
                             dataContato,
-                            observacoes
-                        };
-                        showToast('Cliente atualizado!', 'success');
+                            observacoes,
+                            dataCadastro: new Date().toISOString(),
+                            dataAtualizacao: new Date().toISOString()
+                        });
+                        showToast('Cliente cadastrado com sucesso!', 'success');
                     }
-                } else {
-                    // Novo cliente
-                    clientes.push({
-                        id: generateId(),
-                        nome,
-                        telefone,
-                        email,
-                        dataContato,
-                        observacoes,
-                        dataCadastro: new Date().toISOString()
-                    });
-                    showToast('Cliente cadastrado!', 'success');
-                }
-                
-                saveToLocalStorage();
-                loadClientes();
-                updateDashboard();
-                updateNotifications();
-                clienteModal.classList.remove('active'); // MODAL FECHA AUTOMATICAMENTE
+                    
+                    saveToLocalStorage();
+                    loadClientes();
+                    updateDashboard();
+                    updateNotifications();
+                    
+                    clienteModal.classList.remove('active');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 500);
             }
             
             window.editCliente = function(id) {
@@ -1623,7 +1916,7 @@
                 if (!cliente) return;
                 
                 editingClienteId = id;
-                document.getElementById('cliente-modal-title').textContent = 'Editar Cliente';
+                document.getElementById('cliente-modal-title').innerHTML = '<i class="fas fa-user-edit"></i> Editar Cliente';
                 
                 document.getElementById('cliente-nome').value = cliente.nome;
                 document.getElementById('cliente-telefone').value = cliente.telefone;
@@ -1632,10 +1925,14 @@
                 document.getElementById('cliente-observacoes').value = cliente.observacoes || '';
                 
                 clienteModal.classList.add('active');
+                
+                setTimeout(() => {
+                    document.getElementById('cliente-nome').focus();
+                }, 300);
             };
             
             window.deleteCliente = function(id) {
-                if (!confirm('Excluir este cliente e todos os seus orçamentos?')) return;
+                if (!confirm('Excluir este cliente e todos os seus orçamentos?\n\nEsta ação não pode ser desfeita!')) return;
                 
                 clientes = clientes.filter(c => c.id !== id);
                 orcamentos = orcamentos.filter(o => o.clienteId !== id);
@@ -1647,17 +1944,15 @@
                 updateFinanceiro();
                 updateNotifications();
                 
-                showToast('Cliente excluído!', 'success');
+                showToast('Cliente e seus orçamentos excluídos!', 'success');
             };
             
-            // Funções para Orçamentos
             function openOrcamentoModal() {
                 editingOrcamentoId = null;
-                document.getElementById('orcamento-modal-title').textContent = 'Novo Orçamento';
+                document.getElementById('orcamento-modal-title').innerHTML = '<i class="fas fa-file-invoice-dollar"></i> Novo Orçamento';
                 orcamentoForm.reset();
                 setTodayDate();
                 
-                // Preencher select de clientes
                 const select = document.getElementById('orcamento-cliente');
                 select.innerHTML = '<option value="">Selecione um cliente</option>';
                 clientes.forEach(cliente => {
@@ -1668,73 +1963,91 @@
                 });
                 
                 orcamentoModal.classList.add('active');
+                
+                setTimeout(() => {
+                    document.getElementById('orcamento-cliente').focus();
+                }, 300);
             }
             
             function saveOrcamento(e) {
                 e.preventDefault();
                 
-                const clienteId = document.getElementById('orcamento-cliente').value;
-                const evento = document.getElementById('orcamento-evento').value;
-                const dataEvento = document.getElementById('orcamento-data').value;
-                const valor = parseFloat(document.getElementById('orcamento-valor').value);
-                const validade = document.getElementById('orcamento-validade').value;
-                const status = document.getElementById('orcamento-status').value;
-                const descricao = document.getElementById('orcamento-descricao').value.trim();
-                const observacoes = document.getElementById('orcamento-observacoes').value.trim();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner"></span> Salvando...';
+                btn.disabled = true;
                 
-                if (!clienteId || !valor || !validade) {
-                    showToast('Cliente, valor e validade são obrigatórios!', 'warning');
-                    return;
-                }
-                
-                if (editingOrcamentoId) {
-                    // Atualizar orçamento
-                    const index = orcamentos.findIndex(o => o.id === editingOrcamentoId);
-                    if (index !== -1) {
-                        orcamentos[index] = {
-                            ...orcamentos[index],
+                setTimeout(() => {
+                    const clienteId = document.getElementById('orcamento-cliente').value;
+                    const evento = document.getElementById('orcamento-evento').value;
+                    const dataEvento = document.getElementById('orcamento-data').value;
+                    const valor = parseFloat(document.getElementById('orcamento-valor').value);
+                    const validade = document.getElementById('orcamento-validade').value;
+                    const proxContato = document.getElementById('orcamento-prox-contato').value;
+                    const status = document.getElementById('orcamento-status').value;
+                    const descricao = document.getElementById('orcamento-descricao').value.trim();
+                    const observacoes = document.getElementById('orcamento-observacoes').value.trim();
+                    
+                    if (!clienteId || !valor || !validade) {
+                        showToast('Cliente, valor e validade são obrigatórios!', 'warning');
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                    
+                    if (editingOrcamentoId) {
+                        const index = orcamentos.findIndex(o => o.id === editingOrcamentoId);
+                        if (index !== -1) {
+                            orcamentos[index] = {
+                                ...orcamentos[index],
+                                clienteId,
+                                evento,
+                                dataEvento,
+                                valor,
+                                validade,
+                                proxContato,
+                                status,
+                                descricao,
+                                observacoes,
+                                dataAtualizacao: new Date().toISOString()
+                            };
+                            showToast('Orçamento atualizado com sucesso!', 'success');
+                        }
+                    } else {
+                        const numeroOrcamento = String(djData.nextOrcamentoNum).padStart(4, '0');
+                        djData.nextOrcamentoNum++;
+                        
+                        orcamentos.push({
+                            id: generateId(),
+                            numero: numeroOrcamento,
                             clienteId,
                             evento,
                             dataEvento,
                             valor,
                             validade,
+                            proxContato,
                             status,
                             descricao,
-                            observacoes
-                        };
-                        showToast('Orçamento atualizado!', 'success');
+                            observacoes,
+                            dataCriacao: new Date().toISOString(),
+                            dataAtualizacao: new Date().toISOString()
+                        });
+                        
+                        localStorage.setItem('djmanager-dj', JSON.stringify(djData));
+                        showToast(`Orçamento #${numeroOrcamento} criado com sucesso!`, 'success');
                     }
-                } else {
-                    // Novo orçamento com número sequencial
-                    const numeroOrcamento = String(djData.nextOrcamentoNum).padStart(4, '0');
-                    djData.nextOrcamentoNum++;
                     
-                    orcamentos.push({
-                        id: generateId(),
-                        numero: numeroOrcamento,
-                        clienteId,
-                        evento,
-                        dataEvento,
-                        valor,
-                        validade,
-                        status,
-                        descricao,
-                        observacoes,
-                        dataCriacao: new Date().toISOString()
-                    });
+                    saveToLocalStorage();
+                    loadOrcamentos();
+                    updateDashboard();
+                    updateFinanceiro();
+                    updateNotifications();
+                    updateDjData();
                     
-                    // Salvar próximo número
-                    localStorage.setItem('djmanager-dj', JSON.stringify(djData));
-                    showToast('Orçamento criado! Nº ' + numeroOrcamento, 'success');
-                }
-                
-                saveToLocalStorage();
-                loadOrcamentos();
-                updateDashboard();
-                updateFinanceiro();
-                updateNotifications();
-                updateDjData();
-                orcamentoModal.classList.remove('active'); // MODAL FECHA AUTOMATICAMENTE
+                    orcamentoModal.classList.remove('active');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 500);
             }
             
             window.editOrcamento = function(id) {
@@ -1742,9 +2055,8 @@
                 if (!orcamento) return;
                 
                 editingOrcamentoId = id;
-                document.getElementById('orcamento-modal-title').textContent = 'Editar Orçamento';
+                document.getElementById('orcamento-modal-title').innerHTML = '<i class="fas fa-edit"></i> Editar Orçamento';
                 
-                // Preencher cliente
                 const select = document.getElementById('orcamento-cliente');
                 select.innerHTML = '<option value="">Selecione um cliente</option>';
                 clientes.forEach(cliente => {
@@ -1759,15 +2071,20 @@
                 document.getElementById('orcamento-data').value = orcamento.dataEvento || '';
                 document.getElementById('orcamento-valor').value = orcamento.valor || '';
                 document.getElementById('orcamento-validade').value = orcamento.validade || '';
+                document.getElementById('orcamento-prox-contato').value = orcamento.proxContato || '';
                 document.getElementById('orcamento-status').value = orcamento.status || 'pendente';
                 document.getElementById('orcamento-descricao').value = orcamento.descricao || '';
                 document.getElementById('orcamento-observacoes').value = orcamento.observacoes || '';
                 
                 orcamentoModal.classList.add('active');
+                
+                setTimeout(() => {
+                    document.getElementById('orcamento-cliente').focus();
+                }, 300);
             };
             
             window.deleteOrcamento = function(id) {
-                if (!confirm('Excluir este orçamento?')) return;
+                if (!confirm('Excluir este orçamento?\n\nEsta ação não pode ser desfeita!')) return;
                 
                 orcamentos = orcamentos.filter(o => o.id !== id);
                 saveToLocalStorage();
@@ -1778,7 +2095,6 @@
                 showToast('Orçamento excluído!', 'success');
             };
             
-            // Visualizar orçamento em card
             function viewOrcamentoCard(id) {
                 const orcamento = orcamentos.find(o => o.id === id);
                 if (!orcamento) return;
@@ -1786,7 +2102,6 @@
                 const cliente = clientes.find(c => c.id === orcamento.clienteId);
                 if (!cliente) return;
                 
-                // Determinar cor do status
                 let statusClass = 'status-pending';
                 let statusText = 'Pendente';
                 
@@ -1801,7 +2116,6 @@
                         break;
                 }
                 
-                // Verificar validade
                 const hoje = new Date();
                 const validadeDate = new Date(orcamento.validade);
                 if (validadeDate < hoje && orcamento.status === 'pendente') {
@@ -1809,9 +2123,8 @@
                     statusText = 'Vencido';
                 }
                 
-                // Criar conteúdo do card
                 const cardContent = `
-                    <div class="orcamento-card">
+                    <div class="orcamento-card" style="margin-bottom: 0;">
                         <div class="card-status ${statusClass}">${statusText}</div>
                         <div class="card-title">
                             <span class="numero">Orçamento #${orcamento.numero}</span>
@@ -1820,43 +2133,43 @@
                         
                         <div class="card-info">
                             <div class="card-info-item">
-                                <span class="card-info-label">Cliente</span>
+                                <span class="card-info-label"><i class="fas fa-user"></i> Cliente</span>
                                 <span class="card-info-value">${cliente.nome}</span>
                             </div>
                             <div class="card-info-item">
-                                <span class="card-info-label">Evento</span>
+                                <span class="card-info-label"><i class="fas fa-calendar-alt"></i> Evento</span>
                                 <span class="card-info-value">${orcamento.evento || 'Não informado'}</span>
                             </div>
                             <div class="card-info-item">
-                                <span class="card-info-label">Data do Evento</span>
+                                <span class="card-info-label"><i class="fas fa-calendar-day"></i> Data Evento</span>
                                 <span class="card-info-value">${formatDate(orcamento.dataEvento) || 'Não definida'}</span>
                             </div>
                             <div class="card-info-item">
-                                <span class="card-info-label">Validade</span>
+                                <span class="card-info-label"><i class="fas fa-hourglass-end"></i> Validade</span>
                                 <span class="card-info-value">${formatDate(orcamento.validade)}</span>
+                            </div>
+                            <div class="card-info-item">
+                                <span class="card-info-label"><i class="fas fa-bell"></i> Próximo Contato</span>
+                                <span class="card-info-value">${orcamento.proxContato ? formatDate(orcamento.proxContato) : 'Não agendado'}</span>
                             </div>
                         </div>
                         
-                        <div class="card-info" style="margin-top: 10px;">
-                            <div class="card-info-item">
-                                <span class="card-info-label">Valor</span>
-                                <span class="card-info-value" style="font-size: 1.2rem; color: var(--secondary-color); font-weight: bold;">
-                                    R$ ${formatCurrency(orcamento.valor)}
-                                </span>
-                            </div>
+                        <div class="valor-destaque">
+                            <div class="label">Valor Total</div>
+                            <div class="valor">R$ ${formatCurrency(orcamento.valor)}</div>
                         </div>
                         
                         ${orcamento.descricao ? `
-                        <div style="margin-top: 15px;">
-                            <span class="card-info-label">Descrição do Serviço</span>
-                            <p style="margin-top: 5px; font-size: 0.9rem; color: #555;">${orcamento.descricao}</p>
+                        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: var(--border-radius);">
+                            <span class="card-info-label" style="margin-bottom: 10px;"><i class="fas fa-list-alt"></i> Descrição do Serviço</span>
+                            <p style="margin-top: 5px; font-size: 0.95rem; color: #555; line-height: 1.6;">${orcamento.descricao}</p>
                         </div>
                         ` : ''}
                         
                         ${orcamento.observacoes ? `
-                        <div style="margin-top: 10px;">
-                            <span class="card-info-label">Observações</span>
-                            <p style="margin-top: 5px; font-size: 0.85rem; color: #777; font-style: italic;">${orcamento.observacoes}</p>
+                        <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: var(--border-radius);">
+                            <span class="card-info-label" style="margin-bottom: 10px;"><i class="fas fa-sticky-note"></i> Observações</span>
+                            <p style="margin-top: 5px; font-size: 0.9rem; color: #777; line-height: 1.6; font-style: italic;">${orcamento.observacoes}</p>
                         </div>
                         ` : ''}
                         
@@ -1874,15 +2187,13 @@
                     </div>
                 `;
                 
-                // Atualizar modal
                 document.getElementById('view-orcamento-title').textContent = `Orçamento #${orcamento.numero}`;
                 document.getElementById('orcamento-card-details').innerHTML = cardContent;
                 
-                // Mostrar modal
                 viewOrcamentoModal.classList.add('active');
             }
             
-            // Gerar PDF do orçamento com layout melhorado
+            // FUNÇÃO GERAR PDF - CORRIGIDA
             window.generatePDF = function(id) {
                 try {
                     const orcamento = orcamentos.find(o => o.id === id);
@@ -1897,122 +2208,93 @@
                         return;
                     }
                     
+                    // Verificar se jsPDF está carregado
+                    if (typeof window.jspdf === 'undefined') {
+                        showToast('Erro: Biblioteca PDF não carregada.', 'warning');
+                        return;
+                    }
+                    
                     const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF('p', 'mm', 'a4');
+                    const doc = new jsPDF();
                     
                     // Configurações
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const margin = 20;
                     let yPos = margin;
                     
-                    // Cabeçalho com gradiente
-                    doc.setFillColor(44, 62, 80); // --primary-color
-                    doc.rect(0, 0, pageWidth, 50, 'F');
+                    // Cabeçalho
+                    doc.setFillColor(44, 62, 80);
+                    doc.rect(0, 0, pageWidth, 40, 'F');
                     
-                    // Logo ou nome do DJ
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(22);
                     doc.setFont("helvetica", "bold");
-                    const djName = djData.nome || 'DJ Manager';
-                    doc.text(djName, pageWidth / 2, 20, { align: 'center' });
+                    const djName = djData.nome || 'DJ MANAGER';
+                    doc.text(djName.toUpperCase(), pageWidth / 2, 20, { align: 'center' });
                     
-                    // Informações de contato
-                    doc.setFontSize(9);
+                    doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
-                    let contactInfo = '';
-                    if (djData.telefone) contactInfo += `Tel: ${djData.telefone} | `;
-                    if (djData.email) contactInfo += `Email: ${djData.email} | `;
-                    if (djData.cpf) contactInfo += `CPF: ${djData.cpf} | `;
-                    if (djData.cnpj) contactInfo += `CNPJ: ${djData.cnpj}`;
-                    contactInfo = contactInfo.replace(/\s*\|\s*$/, '');
+                    doc.text('ORÇAMENTO', pageWidth / 2, 30, { align: 'center' });
                     
-                    if (contactInfo) {
-                        doc.text(contactInfo, pageWidth / 2, 30, { align: 'center' });
-                    }
-                    
-                    // Endereço
-                    if (djData.endereco || djData.cidade) {
-                        let address = '';
-                        if (djData.endereco) address += djData.endereco;
-                        if (djData.cidade) address += ` - ${djData.cidade}`;
-                        doc.text(address, pageWidth / 2, 36, { align: 'center' });
-                    }
-                    
-                    yPos = 60;
-                    
-                    // Título do documento com destaque
-                    doc.setFillColor(26, 188, 156); // --accent-color
-                    doc.rect(margin, yPos, pageWidth - 2 * margin, 12, 'F');
-                    
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(16);
-                    doc.setFont("helvetica", "bold");
-                    doc.text('ORÇAMENTO', pageWidth / 2, yPos + 8, { align: 'center' });
-                    
-                    yPos += 20;
+                    yPos = 50;
                     
                     // Número e data
-                    doc.setTextColor(44, 62, 80);
-                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(12);
                     doc.setFont("helvetica", "bold");
                     doc.text(`Nº: ${orcamento.numero}`, margin, yPos);
-                    doc.text(`Data: ${formatDate(orcamento.dataCriacao)}`, pageWidth - margin, yPos, { align: 'right' });
+                    
+                    const dataCriacao = formatDate(orcamento.dataCriacao);
+                    doc.text(`Data: ${dataCriacao}`, pageWidth - margin - 40, yPos);
                     
                     yPos += 15;
                     
                     // Linha divisória
-                    doc.setDrawColor(26, 188, 156);
+                    doc.setDrawColor(0);
                     doc.setLineWidth(0.5);
                     doc.line(margin, yPos, pageWidth - margin, yPos);
                     
-                    yPos += 10;
+                    yPos += 15;
                     
-                    // Seção: Informações do Cliente
+                    // INFORMAÇÕES DO CLIENTE
                     doc.setFontSize(12);
                     doc.setFont("helvetica", "bold");
-                    doc.setTextColor(44, 62, 80);
-                    doc.text('CLIENTE', margin, yPos);
+                    doc.text('CLIENTE:', margin, yPos);
+                    yPos += 10;
                     
-                    yPos += 8;
                     doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
-                    doc.setTextColor(60, 60, 60);
-                    
                     doc.text(`Nome: ${cliente.nome}`, margin, yPos);
-                    yPos += 6;
+                    yPos += 7;
                     doc.text(`Telefone: ${cliente.telefone}`, margin, yPos);
                     if (cliente.email) {
-                        yPos += 6;
+                        yPos += 7;
                         doc.text(`Email: ${cliente.email}`, margin, yPos);
                     }
                     
-                    yPos += 12;
+                    yPos += 15;
                     
-                    // Seção: Detalhes do Orçamento
+                    // DETALHES DO ORÇAMENTO
                     doc.setFontSize(12);
                     doc.setFont("helvetica", "bold");
-                    doc.setTextColor(44, 62, 80);
-                    doc.text('DETALHES DO ORÇAMENTO', margin, yPos);
+                    doc.text('DETALHES DO ORÇAMENTO:', margin, yPos);
+                    yPos += 10;
                     
-                    yPos += 8;
                     doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
                     
-                    // Tabela de detalhes
                     const details = [
                         ['Evento:', orcamento.evento || 'Não informado'],
                         ['Data do Evento:', formatDate(orcamento.dataEvento) || 'Não definida'],
                         ['Validade:', formatDate(orcamento.validade)],
+                        ['Próximo Contato:', orcamento.proxContato ? formatDate(orcamento.proxContato) : 'Não agendado'],
                         ['Status:', getStatusText(orcamento.status)],
-                        ['Valor:', `R$ ${formatCurrency(orcamento.valor)}`]
+                        ['Valor Total:', `R$ ${formatCurrency(orcamento.valor)}`]
                     ];
                     
-                    // Desenhar tabela manualmente
-                    details.forEach(([label, value], index) => {
-                        doc.setTextColor(100, 100, 100);
+                    details.forEach(([label, value]) => {
                         doc.text(label, margin, yPos);
-                        doc.setTextColor(30, 30, 30);
-                        doc.text(value, margin + 45, yPos);
+                        doc.text(value, margin + 40, yPos);
                         yPos += 7;
                     });
                     
@@ -2022,71 +2304,47 @@
                     if (orcamento.descricao) {
                         doc.setFontSize(12);
                         doc.setFont("helvetica", "bold");
-                        doc.setTextColor(44, 62, 80);
-                        doc.text('DESCRIÇÃO DO SERVIÇO', margin, yPos);
+                        doc.text('DESCRIÇÃO DO SERVIÇO:', margin, yPos);
+                        yPos += 10;
                         
-                        yPos += 8;
                         doc.setFontSize(10);
                         doc.setFont("helvetica", "normal");
-                        doc.setTextColor(60, 60, 60);
-                        
                         const descLines = doc.splitTextToSize(orcamento.descricao, pageWidth - 2 * margin);
                         doc.text(descLines, margin, yPos);
-                        yPos += descLines.length * 5 + 10;
+                        yPos += descLines.length * 5 + 5;
                     }
                     
                     // Observações
                     if (orcamento.observacoes) {
                         doc.setFontSize(12);
                         doc.setFont("helvetica", "bold");
-                        doc.setTextColor(44, 62, 80);
-                        doc.text('OBSERVAÇÕES', margin, yPos);
+                        doc.text('OBSERVAÇÕES:', margin, yPos);
+                        yPos += 10;
                         
-                        yPos += 8;
                         doc.setFontSize(10);
                         doc.setFont("helvetica", "italic");
-                        doc.setTextColor(100, 100, 100);
-                        
                         const obsLines = doc.splitTextToSize(orcamento.observacoes, pageWidth - 2 * margin);
                         doc.text(obsLines, margin, yPos);
                         yPos += obsLines.length * 5 + 10;
                     }
                     
-                    // Valor total destacado
-                    yPos += 10;
-                    doc.setFillColor(241, 245, 249);
-                    doc.rect(margin, yPos, pageWidth - 2 * margin, 15, 'F');
-                    
+                    // VALOR TOTAL
                     doc.setFontSize(14);
                     doc.setFont("helvetica", "bold");
-                    doc.setTextColor(44, 62, 80);
-                    doc.text('VALOR TOTAL:', pageWidth - 100, yPos + 10);
-                    doc.setTextColor(26, 188, 156);
-                    doc.text(`R$ ${formatCurrency(orcamento.valor)}`, pageWidth - margin, yPos + 10, { align: 'right' });
+                    doc.text(`VALOR TOTAL: R$ ${formatCurrency(orcamento.valor)}`, margin, yPos);
                     
-                    yPos += 25;
+                    yPos += 15;
                     
-                    // Linha de assinatura
-                    doc.setDrawColor(200);
-                    doc.setLineWidth(0.3);
-                    doc.line(margin, yPos, margin + 80, yPos);
+                    // Assinatura
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    doc.text('______________________________', margin, yPos);
+                    doc.text('Assinatura do Cliente', margin, yPos + 5);
                     
-                    doc.setFontSize(9);
-                    doc.setTextColor(150);
-                    doc.text('Assinatura do Cliente', margin + 40, yPos + 5, { align: 'center' });
-                    
-                    // Rodapé profissional
-                    const footerY = doc.internal.pageSize.getHeight() - 15;
-                    doc.setDrawColor(220);
-                    doc.setLineWidth(0.3);
-                    doc.line(margin, footerY - 10, pageWidth - margin, footerY - 10);
-                    
+                    // Rodapé
+                    const footerY = doc.internal.pageSize.getHeight() - 10;
                     doc.setFontSize(8);
-                    doc.setTextColor(150);
-                    doc.text('Documento gerado automaticamente pelo DJ Manager - Sistema de Gestão de Orçamentos', 
-                            pageWidth / 2, footerY - 5, { align: 'center' });
-                    doc.text('Este orçamento tem validade até: ' + formatDate(orcamento.validade), 
-                            pageWidth / 2, footerY, { align: 'center' });
+                    doc.text(`Emitido por ${djName} - ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, footerY, { align: 'center' });
                     
                     // Salvar PDF
                     const fileName = `Orcamento_${orcamento.numero}_${cliente.nome.replace(/\s+/g, '_')}.pdf`;
@@ -2098,7 +2356,14 @@
                 }
             };
             
-            // Dados do DJ
+            function getStatusText(status) {
+                switch (status) {
+                    case 'aceito': return 'Aceito ✓';
+                    case 'recusado': return 'Recusado ✗';
+                    default: return 'Aguardando Resposta';
+                }
+            }
+            
             function openDjModal() {
                 document.getElementById('dj-nome').value = djData.nome || '';
                 document.getElementById('dj-cpf').value = djData.cpf || '';
@@ -2111,13 +2376,17 @@
                 document.getElementById('next-orcamento-number').value = String(djData.nextOrcamentoNum).padStart(4, '0');
                 
                 djModal.classList.add('active');
+                
+                setTimeout(() => {
+                    document.getElementById('dj-nome').focus();
+                }, 300);
             }
             
             function saveDjData(e) {
                 e.preventDefault();
                 
                 djData = {
-                    nome: document.getElementById('dj-nome').value.trim(),
+                    nome: document.getElementById('dj-nome').value.trim() || 'DJ Manager',
                     cpf: document.getElementById('dj-cpf').value.trim(),
                     cnpj: document.getElementById('dj-cnpj').value.trim(),
                     telefone: document.getElementById('dj-telefone').value.trim(),
@@ -2128,13 +2397,12 @@
                     nextOrcamentoNum: djData.nextOrcamentoNum
                 };
                 
-                // Garantir que o telefone tenha o prefixo +55
                 if (djData.telefone && !djData.telefone.startsWith('+55')) {
                     djData.telefone = '+55 ' + djData.telefone;
                 }
                 
                 localStorage.setItem('djmanager-dj', JSON.stringify(djData));
-                showToast('Dados do DJ salvos!', 'success');
+                showToast('Dados do DJ atualizados com sucesso!', 'success');
                 djModal.classList.remove('active');
             }
             
@@ -2142,10 +2410,10 @@
                 document.getElementById('next-orcamento-number').value = String(djData.nextOrcamentoNum).padStart(4, '0');
             }
             
-            // Carregar listas
             function loadClientes(searchTerm = '') {
                 const tbody = document.getElementById('clientes-body');
                 const emptyRow = document.getElementById('empty-clientes');
+                const clientCount = document.getElementById('client-count');
                 
                 let filteredClientes = clientes;
                 if (searchTerm) {
@@ -2155,6 +2423,8 @@
                         (cliente.email && cliente.email.toLowerCase().includes(searchTerm.toLowerCase()))
                     );
                 }
+                
+                clientCount.textContent = filteredClientes.length;
                 
                 if (filteredClientes.length === 0) {
                     emptyRow.style.display = '';
@@ -2166,22 +2436,29 @@
                 emptyRow.style.display = 'none';
                 tbody.innerHTML = '';
                 
+                filteredClientes.sort((a, b) => {
+                    const dateA = new Date(a.dataAtualizacao || a.dataCadastro || 0);
+                    const dateB = new Date(b.dataAtualizacao || b.dataCadastro || 0);
+                    return dateB - dateA;
+                });
+                
                 filteredClientes.forEach(cliente => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${cliente.nome}</td>
+                        <td style="font-weight: 600; color: var(--primary-color);">${cliente.nome}</td>
                         <td>${cliente.telefone}</td>
+                        <td style="color: var(--gray-color); font-size: 0.9rem;">${cliente.dataContato ? formatDate(cliente.dataContato) : '-'}</td>
                         <td>
                             <div class="action-buttons">
-                                <div class="action-btn edit-btn" title="Editar" onclick="window.editCliente('${cliente.id}')">
+                                <button class="action-btn edit-btn" title="Editar" onclick="window.editCliente('${cliente.id}')">
                                     <i class="fas fa-edit"></i>
-                                </div>
-                                <div class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${cliente.id}')">
+                                </button>
+                                <button class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${cliente.id}')">
                                     <i class="fab fa-whatsapp"></i>
-                                </div>
-                                <div class="action-btn delete-btn" title="Excluir" onclick="window.deleteCliente('${cliente.id}')">
+                                </button>
+                                <button class="action-btn delete-btn" title="Excluir" onclick="window.deleteCliente('${cliente.id}')">
                                     <i class="fas fa-trash"></i>
-                                </div>
+                                </button>
                             </div>
                         </td>
                     `;
@@ -2192,6 +2469,7 @@
             function loadOrcamentos(searchTerm = '') {
                 const tbody = document.getElementById('orcamentos-body');
                 const emptyRow = document.getElementById('empty-orcamentos');
+                const orcamentoCount = document.getElementById('orcamento-count');
                 
                 let filteredOrcamentos = orcamentos;
                 if (searchTerm) {
@@ -2207,6 +2485,8 @@
                     });
                 }
                 
+                orcamentoCount.textContent = filteredOrcamentos.length;
+                
                 if (filteredOrcamentos.length === 0) {
                     emptyRow.style.display = '';
                     tbody.innerHTML = '';
@@ -2217,6 +2497,12 @@
                 
                 emptyRow.style.display = 'none';
                 tbody.innerHTML = '';
+                
+                filteredOrcamentos.sort((a, b) => {
+                    const dateA = new Date(a.dataCriacao || 0);
+                    const dateB = new Date(b.dataCriacao || 0);
+                    return dateB - dateA;
+                });
                 
                 filteredOrcamentos.forEach(orcamento => {
                     const cliente = clientes.find(c => c.id === orcamento.clienteId);
@@ -2236,7 +2522,6 @@
                             break;
                     }
                     
-                    // Verificar validade
                     const hoje = new Date();
                     const validadeDate = new Date(orcamento.validade);
                     if (validadeDate < hoje && orcamento.status === 'pendente') {
@@ -2247,31 +2532,33 @@
                     const row = document.createElement('tr');
                     row.setAttribute('data-id', orcamento.id);
                     row.innerHTML = `
-                        <td>${orcamento.numero}</td>
-                        <td>${clienteNome}</td>
-                        <td>R$ ${formatCurrency(orcamento.valor)}</td>
+                        <td style="font-weight: 700; color: var(--secondary-color);">${orcamento.numero}</td>
+                        <td style="font-weight: 600;">${clienteNome}</td>
+                        <td style="font-weight: 700; color: var(--success-color);">R$ ${formatCurrency(orcamento.valor)}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td style="color: ${orcamento.proxContato ? 'var(--primary-color)' : 'var(--gray-color)'}; font-size: 0.9rem;">
+                            ${orcamento.proxContato ? formatDate(orcamento.proxContato) : '-'}
+                        </td>
                         <td>
                             <div class="action-buttons">
-                                <div class="action-btn edit-btn" title="Editar" onclick="window.editOrcamento('${orcamento.id}')">
+                                <button class="action-btn edit-btn" title="Editar" onclick="window.editOrcamento('${orcamento.id}')">
                                     <i class="fas fa-edit"></i>
-                                </div>
-                                <div class="action-btn delete-btn" title="Exclutar" onclick="window.deleteOrcamento('${orcamento.id}')">
+                                </button>
+                                <button class="action-btn delete-btn" title="Excluir" onclick="window.deleteOrcamento('${orcamento.id}')">
                                     <i class="fas fa-trash"></i>
-                                </div>
-                                <div class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${orcamento.clienteId}')">
+                                </button>
+                                <button class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${orcamento.clienteId}')">
                                     <i class="fab fa-whatsapp"></i>
-                                </div>
-                                <div class="action-btn pdf-btn" title="Gerar PDF" onclick="window.generatePDF('${orcamento.id}')">
+                                </button>
+                                <button class="action-btn pdf-btn" title="Gerar PDF" onclick="window.generatePDF('${orcamento.id}')">
                                     <i class="fas fa-file-pdf"></i>
-                                </div>
+                                </button>
                             </div>
                         </td>
                     `;
                     tbody.appendChild(row);
                 });
                 
-                // Carregar cards também
                 loadOrcamentosCards(filteredOrcamentos);
             }
             
@@ -2283,10 +2570,10 @@
                 
                 if (lista.length === 0) {
                     cardsContainer.innerHTML = `
-                        <div class="empty-state">
+                        <div class="empty-state" style="grid-column: 1 / -1;">
                             <i class="fas fa-file-invoice-dollar"></i>
                             <h3>Nenhum orçamento</h3>
-                            <p>Crie seu primeiro orçamento</p>
+                            <p>Crie seu primeiro orçamento para começar</p>
                         </div>
                     `;
                     return;
@@ -2294,11 +2581,16 @@
                 
                 cardsContainer.innerHTML = '';
                 
-                lista.forEach(orcamento => {
+                const listaOrdenada = [...lista].sort((a, b) => {
+                    const dateA = new Date(a.dataCriacao || 0);
+                    const dateB = new Date(b.dataCriacao || 0);
+                    return dateB - dateA;
+                });
+                
+                listaOrdenada.forEach(orcamento => {
                     const cliente = clientes.find(c => c.id === orcamento.clienteId);
                     if (!cliente) return;
                     
-                    // Determinar cor do status
                     let statusClass = 'status-pending';
                     let statusText = 'Pendente';
                     
@@ -2313,7 +2605,6 @@
                             break;
                     }
                     
-                    // Verificar validade
                     const hoje = new Date();
                     const validadeDate = new Date(orcamento.validade);
                     if (validadeDate < hoje && orcamento.status === 'pendente') {
@@ -2321,9 +2612,17 @@
                         statusText = 'Vencido';
                     }
                     
+                    const proxContatoDate = orcamento.proxContato ? new Date(orcamento.proxContato) : null;
+                    const precisaFollowup = proxContatoDate && proxContatoDate <= hoje && orcamento.status === 'pendente';
+                    
                     const card = document.createElement('div');
                     card.className = 'orcamento-card';
+                    if (precisaFollowup) {
+                        card.classList.add('followup-highlight');
+                    }
+                    
                     card.innerHTML = `
+                        ${precisaFollowup ? '<div class="followup-urgency"></div>' : ''}
                         <div class="card-status ${statusClass}">${statusText}</div>
                         <div class="card-title">
                             <span class="numero">Orçamento #${orcamento.numero}</span>
@@ -2332,30 +2631,28 @@
                         
                         <div class="card-info">
                             <div class="card-info-item">
-                                <span class="card-info-label">Cliente</span>
+                                <span class="card-info-label"><i class="fas fa-user"></i> Cliente</span>
                                 <span class="card-info-value">${cliente.nome}</span>
                             </div>
                             <div class="card-info-item">
-                                <span class="card-info-label">Evento</span>
+                                <span class="card-info-label"><i class="fas fa-calendar-alt"></i> Evento</span>
                                 <span class="card-info-value">${orcamento.evento || 'Não informado'}</span>
                             </div>
                             <div class="card-info-item">
-                                <span class="card-info-label">Data Evento</span>
-                                <span class="card-info-value">${formatDate(orcamento.dataEvento) || 'Não definida'}</span>
+                                <span class="card-info-label"><i class="fas fa-hourglass-end"></i> Validade</span>
+                                <span class="card-info-value">${formatDate(orcamento.validade)}</span>
                             </div>
                             <div class="card-info-item">
-                                <span class="card-info-label">Validade</span>
-                                <span class="card-info-value">${formatDate(orcamento.validade)}</span>
+                                <span class="card-info-label"><i class="fas fa-bell"></i> Próximo Contato</span>
+                                <span class="card-info-value" style="color: ${precisaFollowup ? 'var(--warning-color)' : 'inherit'}; font-weight: ${precisaFollowup ? 'bold' : 'normal'}">
+                                    ${orcamento.proxContato ? formatDate(orcamento.proxContato) : '-'}
+                                </span>
                             </div>
                         </div>
                         
-                        <div class="card-info" style="margin-top: 10px;">
-                            <div class="card-info-item">
-                                <span class="card-info-label">Valor</span>
-                                <span class="card-info-value" style="font-size: 1.2rem; color: var(--secondary-color); font-weight: bold;">
-                                    R$ ${formatCurrency(orcamento.valor)}
-                                </span>
-                            </div>
+                        <div class="valor-destaque">
+                            <div class="label">Valor Total</div>
+                            <div class="valor">R$ ${formatCurrency(orcamento.valor)}</div>
                         </div>
                         
                         <div class="card-actions">
@@ -2371,9 +2668,7 @@
                         </div>
                     `;
                     
-                    // Adicionar evento de clique para visualizar detalhes
                     card.addEventListener('click', function(e) {
-                        // Não abrir modal se o clique foi em um botão
                         if (!e.target.closest('.card-actions')) {
                             viewOrcamentoCard(orcamento.id);
                         }
@@ -2383,19 +2678,15 @@
                 });
             }
             
-            // Configurar visualização (tabela ou cards)
             function setOrcamentosView(view) {
                 currentView = view;
                 
-                // Atualizar botões toggle
                 viewTableBtn.classList.toggle('active', view === 'table');
                 viewCardsBtn.classList.toggle('active', view === 'cards');
                 
-                // Mostrar/ocultar visualizações
                 orcamentosTableView.style.display = view === 'table' ? 'block' : 'none';
                 orcamentosCardsView.style.display = view === 'cards' ? 'block' : 'none';
                 
-                // Salvar preferência
                 localStorage.setItem('djmanager-view-preference', view);
             }
             
@@ -2404,7 +2695,6 @@
                 setOrcamentosView(savedView);
             }
             
-            // Busca
             function searchClientes() {
                 loadClientes(this.value);
             }
@@ -2414,7 +2704,6 @@
                 loadOrcamentos(searchTerm);
             }
             
-            // Dashboard
             function updateDashboard() {
                 document.getElementById('total-clientes').textContent = clientes.length;
                 document.getElementById('total-orcamentos').textContent = orcamentos.length;
@@ -2422,15 +2711,23 @@
                 const pendentes = orcamentos.filter(o => o.status === 'pendente').length;
                 document.getElementById('pendentes-resposta').textContent = pendentes;
                 
-                // Calcular orçamentos vencidos
                 const hoje = new Date();
-                const vencidos = orcamentos.filter(o => {
+                const followups = orcamentos.filter(o => {
                     if (o.status !== 'pendente') return false;
+                    
                     const validade = new Date(o.validade);
-                    return validade < hoje;
+                    if (validade < hoje) return true;
+                    
+                    if (o.proxContato) {
+                        const proxContato = new Date(o.proxContato);
+                        if (proxContato <= hoje) return true;
+                    }
+                    
+                    return false;
                 }).length;
                 
-                document.getElementById('sem-resposta').textContent = vencidos;
+                document.getElementById('sem-resposta').textContent = followups;
+                document.getElementById('followup-count').textContent = followups;
                 updateFollowupTable();
             }
             
@@ -2441,9 +2738,17 @@
                 const hoje = new Date();
                 const followups = orcamentos.filter(o => {
                     if (o.status !== 'pendente') return false;
+                    
                     const validade = new Date(o.validade);
-                    return validade < hoje;
-                }).slice(0, 5);
+                    if (validade < hoje) return true;
+                    
+                    if (o.proxContato) {
+                        const proxContato = new Date(o.proxContato);
+                        if (proxContato <= hoje) return true;
+                    }
+                    
+                    return false;
+                }).slice(0, 10);
                 
                 if (followups.length === 0) {
                     emptyRow.style.display = '';
@@ -2459,30 +2764,45 @@
                     const cliente = clientes.find(c => c.id === orcamento.clienteId);
                     if (!cliente) return;
                     
+                    const hoje = new Date();
+                    const validadeDate = new Date(orcamento.validade);
+                    const proxContatoDate = orcamento.proxContato ? new Date(orcamento.proxContato) : null;
+                    
+                    let motivo = '';
+                    let dataReferencia = '';
+                    
+                    if (validadeDate < hoje) {
+                        motivo = 'Validade Vencida';
+                        dataReferencia = formatDate(orcamento.validade);
+                    } else if (proxContatoDate && proxContatoDate <= hoje) {
+                        motivo = 'Próximo Contato';
+                        dataReferencia = formatDate(orcamento.proxContato);
+                    }
+                    
                     const row = document.createElement('tr');
+                    row.classList.add('followup-highlight');
                     row.innerHTML = `
-                        <td>${cliente.nome}</td>
-                        <td>${formatDate(orcamento.validade)}</td>
+                        <td style="font-weight: 600;">${cliente.nome}</td>
+                        <td style="color: var(--warning-color); font-weight: 600;">${dataReferencia}</td>
+                        <td><span class="status-badge status-followup">${motivo}</span></td>
                         <td>
                             <div class="action-buttons">
-                                <div class="action-btn edit-btn" title="Editar" onclick="window.editOrcamento('${orcamento.id}')">
+                                <button class="action-btn edit-btn" title="Editar" onclick="window.editOrcamento('${orcamento.id}')">
                                     <i class="fas fa-edit"></i>
-                                </div>
-                                <div class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${orcamento.clienteId}')">
+                                </button>
+                                <button class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${orcamento.clienteId}')">
                                     <i class="fab fa-whatsapp"></i>
-                                </div>
-                                <div class="action-btn pdf-btn" title="PDF" onclick="window.generatePDF('${orcamento.id}')">
+                                </button>
+                                <button class="action-btn pdf-btn" title="PDF" onclick="window.generatePDF('${orcamento.id}')">
                                     <i class="fas fa-file-pdf"></i>
-                                </div>
+                                </button>
                             </div>
                         </td>
                     `;
-                    row.classList.add('followup-highlight');
                     tbody.appendChild(row);
                 });
             }
             
-            // Financeiro
             function updateFinanceiro() {
                 const totalEstimado = orcamentos.reduce((sum, o) => sum + o.valor, 0);
                 const totalAceito = orcamentos
@@ -2501,34 +2821,42 @@
                 document.getElementById('total-recusado').textContent = `R$ ${formatCurrency(totalRecusado)}`;
             }
             
-            // Notificações
             function updateNotifications() {
                 const hoje = new Date();
-                const vencidos = orcamentos.filter(o => {
+                const followups = orcamentos.filter(o => {
                     if (o.status !== 'pendente') return false;
+                    
                     const validade = new Date(o.validade);
-                    return validade < hoje;
+                    if (validade < hoje) return true;
+                    
+                    if (o.proxContato) {
+                        const proxContato = new Date(o.proxContato);
+                        if (proxContato <= hoje) return true;
+                    }
+                    
+                    return false;
                 }).length;
                 
                 notificationArea.innerHTML = '';
                 
-                if (vencidos > 0) {
+                if (followups > 0) {
                     const badge = document.createElement('div');
                     badge.className = 'notification-badge';
-                    badge.textContent = vencidos;
-                    badge.title = `${vencidos} orçamentos vencidos`;
+                    badge.textContent = followups;
+                    badge.title = `${followups} follow-ups pendentes`;
                     notificationArea.appendChild(badge);
                 }
             }
             
-            // Backup
             function exportData() {
                 const data = {
                     clientes,
                     orcamentos,
                     djData,
                     exportDate: new Date().toISOString(),
-                    version: '2.0'
+                    version: '2.0',
+                    totalOrcamentos: orcamentos.length,
+                    totalClientes: clientes.length
                 };
                 
                 const dataStr = JSON.stringify(data, null, 2);
@@ -2543,7 +2871,7 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 
-                showToast('Backup exportado!', 'success');
+                showToast('Backup exportado com sucesso!', 'success');
             }
             
             function triggerImport() {
@@ -2563,12 +2891,10 @@
                     try {
                         const data = JSON.parse(event.target.result);
                         
-                        // Verificação mais robusta da estrutura do arquivo
                         if (!data || typeof data !== 'object') {
                             throw new Error('Arquivo inválido ou corrompido');
                         }
                         
-                        // Verificar se tem os arrays necessários
                         const hasClientes = Array.isArray(data.clientes);
                         const hasOrcamentos = Array.isArray(data.orcamentos);
                         
@@ -2576,23 +2902,19 @@
                             throw new Error('Formato de backup inválido. O arquivo deve conter dados de clientes e orçamentos.');
                         }
                         
-                        if (confirm(`Importar ${data.clientes.length} clientes e ${data.orcamentos.length} orçamentos?`)) {
+                        if (confirm(`Importar ${data.clientes.length} clientes e ${data.orcamentos.length} orçamentos?\n\nEsta ação substituirá todos os dados atuais!`)) {
                             clientes = data.clientes;
                             orcamentos = data.orcamentos;
                             
-                            // Manter dados do DJ se existirem no backup
                             if (data.djData && typeof data.djData === 'object') {
-                                // Mesclar dados, preservando o nextOrcamentoNum atual se não existir no backup
                                 const currentNextNum = djData.nextOrcamentoNum;
                                 djData = { ...djData, ...data.djData };
                                 
-                                // Se o backup não tiver nextOrcamentoNum, manter o atual
                                 if (!data.djData.nextOrcamentoNum) {
                                     djData.nextOrcamentoNum = currentNextNum;
                                 }
                             }
                             
-                            // Atribuir números aleatórios a orçamentos sem número
                             assignRandomNumbersToOldOrcamentos();
                             
                             saveToLocalStorage();
@@ -2618,12 +2940,12 @@
             }
             
             function clearData() {
-                if (confirm('TEM CERTEZA? Todos os dados serão apagados permanentemente!')) {
+                if (confirm('⚠️  ATENÇÃO: TEM CERTEZA ABSOLUTA?\n\nTodos os dados serão apagados permanentemente!\n\nClientes, orçamentos, configurações... TUDO será perdido!\n\nEsta ação NÃO PODE ser desfeita!')) {
                     localStorage.clear();
                     clientes = [];
                     orcamentos = [];
                     djData = {
-                        nome: '',
+                        nome: 'DJ Manager',
                         cpf: '',
                         cnpj: '',
                         telefone: '',
@@ -2639,11 +2961,10 @@
                     updateFinanceiro();
                     updateNotifications();
                     updateDjData();
-                    showToast('Dados apagados!', 'success');
+                    showToast('Todos os dados foram apagados!', 'success');
                 }
             }
             
-            // Utilitários
             function saveToLocalStorage() {
                 localStorage.setItem('djmanager-clientes', JSON.stringify(clientes));
                 localStorage.setItem('djmanager-orcamentos', JSON.stringify(orcamentos));
@@ -2655,20 +2976,18 @@
             
             function formatDate(dateString) {
                 if (!dateString) return '-';
-                const date = new Date(dateString);
-                return date.toLocaleDateString('pt-BR');
+                try {
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return '-';
+                    return date.toLocaleDateString('pt-BR');
+                } catch (e) {
+                    return '-';
+                }
             }
             
             function formatCurrency(value) {
+                if (isNaN(value)) return '0,00';
                 return value.toFixed(2).replace('.', ',');
-            }
-            
-            function getStatusText(status) {
-                switch (status) {
-                    case 'aceito': return 'Aceito';
-                    case 'recusado': return 'Recusado';
-                    default: return 'Aguardando Resposta';
-                }
             }
             
             function showToast(message, type = 'success') {
@@ -2676,44 +2995,64 @@
                 toast.className = 'toast';
                 toast.classList.add(type);
                 
+                const icon = toast.querySelector('i');
+                if (type === 'warning') {
+                    icon.className = 'fas fa-exclamation-triangle';
+                } else if (type === 'info') {
+                    icon.className = 'fas fa-info-circle';
+                } else {
+                    icon.className = 'fas fa-check-circle';
+                }
+                
                 setTimeout(() => toast.classList.add('show'), 10);
-                setTimeout(() => toast.classList.remove('show'), 3000);
+                setTimeout(() => toast.classList.remove('show'), 4000);
             }
             
-            // WhatsApp - MELHORADO COM NOME DO DJ
             window.openWhatsApp = function(clienteId) {
                 const cliente = clientes.find(c => c.id === clienteId);
-                if (!cliente) return;
+                if (!cliente) {
+                    showToast('Cliente não encontrado!', 'warning');
+                    return;
+                }
                 
                 let phone = cliente.telefone.replace(/\D/g, '');
+                
                 if (phone.length === 11 && phone.startsWith('0')) {
                     phone = '55' + phone.substring(1);
                 } else if (phone.length === 10) {
                     phone = '55' + phone;
                 } else if (phone.length === 13 && phone.startsWith('55')) {
-                    // Já está formatado
                 } else if (phone.length === 12 && phone.startsWith('55')) {
-                    // Já está formatado
                 }
                 
-                // Verificar se é número do Brasil
                 if (!phone.startsWith('55')) {
                     phone = '55' + phone;
                 }
                 
-                // Remover qualquer caractere não numérico
                 phone = phone.replace(/\D/g, '');
                 
-                // Criar mensagem personalizada com nome do DJ
+                if (phone.length < 12) {
+                    showToast('Número de telefone inválido!', 'warning');
+                    return;
+                }
+                
                 const orcamentosCliente = orcamentos.filter(o => o.clienteId === clienteId);
                 let message = `Olá ${cliente.nome.split(' ')[0]}! Tudo bem? Aqui é o ${djData.nome || 'DJ Manager'}.`;
                 
                 if (orcamentosCliente.length > 0) {
                     const orcamentoMaisRecente = orcamentosCliente[orcamentosCliente.length - 1];
-                    message += ` Gostaria de falar sobre seu orçamento #${orcamentoMaisRecente.numero} (${orcamentoMaisRecente.evento || 'evento'}).`;
+                    message += `\n\nGostaria de falar sobre seu orçamento #${orcamentoMaisRecente.numero} (${orcamentoMaisRecente.evento || 'evento'}).`;
+                    message += `\n\nValor: R$ ${formatCurrency(orcamentoMaisRecente.valor)}`;
+                    message += `\nValidade: ${formatDate(orcamentoMaisRecente.validade)}`;
+                    
+                    if (orcamentoMaisRecente.descricao) {
+                        message += `\n\nServiços incluídos:\n${orcamentoMaisRecente.descricao.substring(0, 100)}${orcamentoMaisRecente.descricao.length > 100 ? '...' : ''}`;
+                    }
                 } else {
-                    message += ` Gostaria de conversar sobre seu evento.`;
+                    message += `\n\nGostaria de conversar sobre seu evento.`;
                 }
+                
+                message += `\n\nAtenciosamente,\n${djData.nome || 'DJ Manager'}`;
                 
                 const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
                 window.open(url, '_blank');
