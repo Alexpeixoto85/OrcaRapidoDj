@@ -303,6 +303,15 @@
             background: var(--primary); color: white;
             margin-top: 10px;
         }
+
+        /* Imagem Preview no Settings */
+        .logo-preview-container {
+            width: 100%; display: flex; justify-content: center; margin-bottom: 15px;
+        }
+        .logo-preview {
+            width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+            border: 2px dashed var(--border); background: var(--light);
+        }
         
         /* Utility */
         .empty-state { text-align: center; padding: 40px 20px; color: var(--secondary); }
@@ -523,8 +532,13 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Descrição / Serviços</label>
+                <label class="form-label">Descrição / Serviços (Público)</label>
                 <textarea id="o-descricao" class="form-control" placeholder="Dj, som, iluminação..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" style="color: var(--warning);"><i class="fas fa-eye-slash"></i> Observações Internas (Não sai no PDF)</label>
+                <textarea id="o-obs-internas" class="form-control" placeholder="Anotações privadas sobre o cliente ou negociação..." style="background: #fffbeb; border-color: #fcd34d;"></textarea>
             </div>
 
             <button type="submit" class="btn-block">Salvar Orçamento</button>
@@ -535,8 +549,21 @@
     <div class="modal-overlay" id="overlay-settings"></div>
     <div class="modal-sheet" id="sheet-settings">
         <div class="sheet-handle"></div>
-        <h3 class="section-title">Configurações do DJ</h3>
+        <h3 class="section-title">Configurações & Logo</h3>
         <form id="form-settings" onsubmit="App.settings.save(event)">
+            
+            <div class="logo-preview-container">
+                <img id="s-logo-preview" class="logo-preview" src="" style="display:none">
+                <div id="s-logo-placeholder" class="logo-preview" style="display:flex; align-items:center; justify-content:center; color:var(--secondary);"><i class="fas fa-image"></i></div>
+            </div>
+            <div class="form-group" style="text-align: center;">
+                <label for="s-logo-input" style="color: var(--primary); font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-upload"></i> Carregar Logomarca
+                </label>
+                <input type="file" id="s-logo-input" accept="image/*" style="display: none;" onchange="App.settings.previewLogo(this)">
+                <input type="hidden" id="s-logo-data">
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Nome Artístico / Empresa</label>
                 <input type="text" id="s-nome" class="form-control" placeholder="Dj Alek Musica & Arte">
@@ -612,6 +639,14 @@
                 t.style.background = type === 'success' ? 'var(--dark)' : 'var(--danger)';
                 t.classList.add('show');
                 setTimeout(() => t.classList.remove('show'), 3000);
+            },
+            readImage: (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
             }
         };
 
@@ -628,7 +663,8 @@
                 cnpj: '31.632.000/0001-38',
                 endereco: 'Rua Ernandes de Barros, 352\nSanta Lúcia, Maceió-AL\nCEP 57082-132',
                 pix: '31632000000138',
-                nextOrcamento: 27
+                nextOrcamento: 27,
+                logo: null
             },
             saveSettings: (data) => localStorage.setItem('djapp_settings', JSON.stringify(data))
         };
@@ -945,6 +981,18 @@
                 document.getElementById('s-instagram').value = s.instagram || '';
                 document.getElementById('s-endereco').value = s.endereco || '';
                 document.getElementById('s-pix').value = s.pix || '';
+                
+                // Logo Handling
+                document.getElementById('s-logo-data').value = s.logo || '';
+                if(s.logo) {
+                    document.getElementById('s-logo-preview').src = s.logo;
+                    document.getElementById('s-logo-preview').style.display = 'block';
+                    document.getElementById('s-logo-placeholder').style.display = 'none';
+                } else {
+                    document.getElementById('s-logo-preview').style.display = 'none';
+                    document.getElementById('s-logo-placeholder').style.display = 'flex';
+                }
+                
                 UI.openModal('settings');
             }
         };
@@ -1022,6 +1070,7 @@
                         status: document.getElementById('o-status').value,
                         validade: document.getElementById('o-validade').value,
                         descricao: document.getElementById('o-descricao').value,
+                        obsInternas: document.getElementById('o-obs-internas').value,
                         dataCriacao: new Date().toISOString()
                     };
 
@@ -1059,6 +1108,7 @@
                     document.getElementById('o-status').value = o.status;
                     document.getElementById('o-validade').value = o.validade;
                     document.getElementById('o-descricao').value = o.descricao;
+                    document.getElementById('o-obs-internas').value = o.obsInternas || '';
                     
                     document.getElementById('title-orcamento').innerText = `Editar Orçamento #${o.numero}`;
                     UI.openModal('orcamento');
@@ -1075,6 +1125,19 @@
             },
 
             settings: {
+                previewLogo: async (input) => {
+                    if (input.files && input.files[0]) {
+                        try {
+                            const base64 = await Utils.readImage(input.files[0]);
+                            document.getElementById('s-logo-data').value = base64;
+                            document.getElementById('s-logo-preview').src = base64;
+                            document.getElementById('s-logo-preview').style.display = 'block';
+                            document.getElementById('s-logo-placeholder').style.display = 'none';
+                        } catch (e) {
+                            Utils.toast('Erro ao ler imagem', 'error');
+                        }
+                    }
+                },
                 save: (e) => {
                     e.preventDefault();
                     const s = Storage.getSettings();
@@ -1086,6 +1149,7 @@
                     s.instagram = document.getElementById('s-instagram').value;
                     s.endereco = document.getElementById('s-endereco').value;
                     s.pix = document.getElementById('s-pix').value;
+                    s.logo = document.getElementById('s-logo-data').value;
                     
                     Storage.saveSettings(s);
                     Utils.toast('Configurações salvas');
@@ -1125,145 +1189,179 @@
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     
-                    // -- STYLE CONSTANTS --
-                    const blueColor = [29, 78, 216]; // Approx color from logo
-                    const grayColor = [100, 116, 139];
+                    // --- THEME & IDENTITY ---
+                    const primaryColor = [59, 130, 246]; // #3b82f6 (Blue)
+                    const lightGray = [241, 245, 249]; // #f1f5f9
+                    const borderColor = [200, 200, 200];
                     
-                    // -- HEADER --
-                    // Left: Logo/Name + Address
-                    doc.setFontSize(16);
+                    // --- HEADER BLOCK ---
+                    doc.setFillColor(...primaryColor);
+                    doc.rect(0, 0, 210, 45, 'F');
+                    
+                    // Logo Rendering
+                    if (s.logo) {
+                        try {
+                            doc.addImage(s.logo, 'PNG', 14, 8, 28, 28);
+                        } catch (e) { console.error("Logo error", e); }
+                    } else {
+                        // Fallback circle if no logo
+                        doc.setFillColor(255, 255, 255);
+                        doc.circle(28, 22, 14, 'F');
+                        doc.setTextColor(...primaryColor);
+                        doc.setFontSize(14);
+                        doc.text("DJ", 24, 25);
+                    }
+
+                    // Company Info (White Text on Blue)
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(18);
                     doc.setFont("helvetica", "bold");
-                    doc.text(s.nome.toUpperCase() || "DJ ALEK MUSICA & ARTE", 14, 20);
+                    doc.text(s.nome.toUpperCase() || "SUA EMPRESA", 50, 18);
                     
                     doc.setFontSize(9);
                     doc.setFont("helvetica", "normal");
-                    doc.text(s.razao || "", 14, 26);
-                    doc.text(`CNPJ: ${s.cnpj || ""}`, 14, 31);
+                    doc.text(s.razao || "", 50, 24);
+                    doc.text(`${s.cnpj ? 'CNPJ: ' + s.cnpj : ''}`, 50, 29);
                     
-                    const enderecoLines = doc.splitTextToSize(s.endereco || "", 90);
-                    doc.text(enderecoLines, 14, 36);
-                    
-                    let yPos = 36 + (enderecoLines.length * 4);
-                    doc.text(`${s.instagram || ""} ${s.instagram ? ' | ' : ''} ${s.email || ""}`, 14, yPos);
-                    doc.text(s.telefone || "", 14, yPos + 5);
+                    // Contact Info (Right Side Header)
+                    doc.setFontSize(9);
+                    doc.text(s.telefone || "", 200, 18, { align: "right" });
+                    doc.text(s.email || "", 200, 23, { align: "right" });
+                    doc.text(s.instagram || "", 200, 28, { align: "right" });
 
-                    // Right: Quote Number
-                    doc.setFontSize(14);
+                    // --- TITLE SECTION ---
+                    let yPos = 60;
+                    
+                    // Page Border / Identity Frame
+                    doc.setDrawColor(...primaryColor);
+                    doc.setLineWidth(0.5);
+                    doc.rect(10, 50, 190, 235); // Main Frame
+
+                    doc.setFontSize(16);
+                    doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
-                    doc.setTextColor(150);
-                    doc.text(`Orçamento ${o.numero}`, 196, 20, { align: "right" });
-                    doc.setTextColor(0);
-
-                    // -- CLIENT SECTION --
+                    doc.text(`ORÇAMENTO #${o.numero}`, 105, yPos, { align: "center" });
+                    
                     yPos += 15;
-                    doc.setFillColor(248, 250, 252);
-                    doc.roundedRect(14, yPos, 182, 20, 2, 2, 'F');
+
+                    // --- CLIENT INFO BOX ---
+                    doc.setDrawColor(...borderColor);
+                    doc.setFillColor(...lightGray);
+                    doc.roundedRect(15, yPos, 180, 22, 2, 2, 'FD');
                     
                     doc.setFontSize(10);
+                    doc.setTextColor(100); // Gray Label
+                    doc.text("CLIENTE", 20, yPos + 6);
+                    
+                    doc.setFontSize(11);
+                    doc.setTextColor(0); // Black Text
                     doc.setFont("helvetica", "bold");
-                    doc.text("Cliente:", 18, yPos + 8);
+                    doc.text(c.nome, 20, yPos + 14);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`${c.nome} - ${c.telefone}`, 18, yPos + 14);
-
-                    // -- EVENT INFO --
-                    yPos += 28;
-                    doc.setFontSize(11);
-                    doc.setFont("helvetica", "bold");
-                    doc.text("Informações básicas", 14, yPos);
+                    doc.text(c.telefone, 100, yPos + 14);
                     
-                    // Grid for event details
+                    yPos += 30;
+
+                    // --- EVENT DETAILS GRID ---
+                    doc.setFontSize(12);
+                    doc.setTextColor(...primaryColor);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("DETALHES DO EVENTO", 15, yPos);
+                    
                     yPos += 5;
-                    const startY = yPos;
+                    // Draw a line
+                    doc.setDrawColor(...borderColor);
+                    doc.line(15, yPos, 195, yPos);
                     
-                    // Box 1: Tipo
-                    doc.setFontSize(8);
-                    doc.setTextColor(...grayColor);
-                    doc.text("TIPO DE EVENTO", 14, yPos + 4);
-                    doc.setFontSize(10);
-                    doc.setTextColor(0);
-                    doc.text(o.evento || "-", 14, yPos + 10);
+                    yPos += 8;
                     
-                    // Box 2: Local
-                    doc.text("LOCAL DO EVENTO", 60, yPos + 4); // Label hack position
-                    doc.setTextColor(...grayColor); doc.text("LOCAL DO EVENTO", 60, yPos + 4);
-                    doc.setTextColor(0); doc.text(o.local || "A definir", 60, yPos + 10);
-                    
-                    // Box 3: Data
-                    doc.setTextColor(...grayColor); doc.text("DATA", 120, yPos + 4);
-                    doc.setTextColor(0); doc.text(Utils.formatDate(o.dataEvento), 120, yPos + 10);
+                    const drawDetail = (label, value, x, y) => {
+                        doc.setFontSize(8);
+                        doc.setTextColor(100);
+                        doc.text(label, x, y);
+                        doc.setFontSize(10);
+                        doc.setTextColor(0);
+                        doc.text(value || "-", x, y + 5);
+                    };
 
-                    // Box 4: Horário
-                    doc.setTextColor(...grayColor); doc.text("HORÁRIO", 160, yPos + 4);
-                    doc.setTextColor(0); doc.text(o.horario || "-", 160, yPos + 10);
+                    drawDetail("TIPO", o.evento, 20, yPos);
+                    drawDetail("DATA", Utils.formatDate(o.dataEvento), 70, yPos);
+                    drawDetail("HORÁRIO", o.horario, 120, yPos);
+                    
+                    yPos += 12;
+                    drawDetail("LOCAL", o.local || "A definir", 20, yPos);
 
-                    // -- TABLE --
+                    // --- TABLE SERVICES ---
                     yPos += 20;
-                    doc.setFontSize(11);
+                    doc.setFontSize(12);
+                    doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
-                    doc.text("Serviços", 14, yPos);
+                    doc.text("SERVIÇOS", 15, yPos);
 
                     const tableData = [
-                        [o.descricao || "Serviços de DJ (Som, Iluminação)", Utils.formatCurrency(o.valor)],
+                        [o.descricao || "Serviços de DJ", Utils.formatCurrency(o.valor)],
                     ];
 
                     doc.autoTable({
                         startY: yPos + 5,
-                        head: [['Descrição', 'Preço']],
+                        margin: { left: 15, right: 15 },
+                        head: [['DESCRIÇÃO', 'VALOR']],
                         body: tableData,
                         theme: 'grid',
-                        headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineColor: [200, 200, 200], lineWidth: 0.1 },
-                        styles: { fontSize: 10, cellPadding: 4 },
-                        foot: [['Total', Utils.formatCurrency(o.valor)]],
-                        footStyles: { fillColor: [241, 245, 249], textColor: [0,0,0], fontStyle: 'bold' }
+                        headStyles: { 
+                            fillColor: primaryColor, 
+                            textColor: [255, 255, 255], 
+                            fontStyle: 'bold',
+                            halign: 'center'
+                        },
+                        bodyStyles: { 
+                            fontSize: 10, 
+                            cellPadding: 6 
+                        },
+                        columnStyles: {
+                            0: { halign: 'left' },
+                            1: { halign: 'right', fontStyle: 'bold' }
+                        },
+                        foot: [['TOTAL', Utils.formatCurrency(o.valor)]],
+                        footStyles: { 
+                            fillColor: lightGray, 
+                            textColor: primaryColor, 
+                            fontStyle: 'bold', 
+                            halign: 'right' 
+                        }
                     });
 
                     yPos = doc.lastAutoTable.finalY + 15;
 
-                    // -- PAYMENT --
-                    doc.setFontSize(11);
-                    doc.setFont("helvetica", "bold");
-                    doc.text("Pagamento", 14, yPos);
+                    // --- PAYMENT & FOOTER ---
+                    // Payment Box
+                    doc.setDrawColor(...borderColor);
+                    doc.roundedRect(15, yPos, 180, 35, 2, 2);
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(...primaryColor);
+                    doc.text("Pagamento e Condições", 20, yPos + 8);
                     
                     doc.setFontSize(9);
-                    doc.setFont("helvetica", "normal");
-                    yPos += 6;
-                    doc.text("Meios de pagamento: Dinheiro ou PIX.", 14, yPos);
-                    yPos += 5;
-                    doc.text("Condições: Sinal de 50% e o valor restante após a conclusão do evento.", 14, yPos);
+                    doc.setTextColor(0);
+                    doc.text("• Sinal de 50% para reserva da data.", 20, yPos + 16);
+                    doc.text("• Restante no dia do evento.", 20, yPos + 22);
                     
-                    yPos += 8;
-                    doc.setFont("helvetica", "bold");
-                    doc.text(`PIX: ${s.pix || "Solicite a chave"}`, 14, yPos);
+                    if(s.pix) {
+                        doc.setFont("helvetica", "bold");
+                        doc.text(`PIX: ${s.pix}`, 20, yPos + 30);
+                    }
 
-                    // -- FOOTER & SIGNATURES --
-                    // Position at bottom of page
-                    let bottomY = 240;
+                    // Bottom Signatures
+                    let bottomY = 260;
+                    doc.setDrawColor(0);
+                    doc.line(25, bottomY, 85, bottomY); // Line 1
+                    doc.line(125, bottomY, 185, bottomY); // Line 2
                     
                     doc.setFontSize(8);
                     doc.setFont("helvetica", "normal");
-                    doc.text("As partes concordam com as informações acima descritas.", 105, bottomY, { align: 'center' });
-                    
-                    bottomY += 20;
-                    
-                    // Lines
-                    doc.setDrawColor(0);
-                    doc.line(20, bottomY, 90, bottomY);
-                    doc.line(120, bottomY, 190, bottomY);
-                    
-                    bottomY += 5;
-                    doc.text(s.nome, 55, bottomY, { align: 'center' });
-                    doc.text(c.nome, 155, bottomY, { align: 'center' });
-                    
-                    bottomY += 20;
-                    const today = new Date();
-                    const day = String(today.getDate()).padStart(2, '0');
-                    const month = String(today.getMonth() + 1).padStart(2, '0');
-                    const year = today.getFullYear();
-                    
-                    doc.text(`Maceió, ${day}/${month}/${year}`, 105, bottomY, { align: 'center' });
-                    
-                    doc.setTextColor(150);
-                    doc.text("Gerado via DJ Manager Pro", 105, 290, { align: 'center' });
+                    doc.text(s.nome, 55, bottomY + 5, { align: 'center' });
+                    doc.text("Contratante", 155, bottomY + 5, { align: 'center' });
 
                     doc.save(`Orcamento_${o.numero}.pdf`);
                     Utils.toast('PDF Baixado!');
