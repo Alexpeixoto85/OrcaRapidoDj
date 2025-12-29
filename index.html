@@ -1327,7 +1327,7 @@
                 endereco: '',
                 cidade: '',
                 logo: '',
-                nextOrcamentoNum: 85 // Inicia em 85
+                nextOrcamentoNum: 85
             };
             
             // Inicializar próximo número de orçamento se não existir
@@ -1615,7 +1615,7 @@
                 loadClientes();
                 updateDashboard();
                 updateNotifications();
-                clienteModal.classList.remove('active');
+                clienteModal.classList.remove('active'); // MODAL FECHA AUTOMATICAMENTE
             }
             
             window.editCliente = function(id) {
@@ -1734,7 +1734,7 @@
                 updateFinanceiro();
                 updateNotifications();
                 updateDjData();
-                orcamentoModal.classList.remove('active');
+                orcamentoModal.classList.remove('active'); // MODAL FECHA AUTOMATICAMENTE
             }
             
             window.editOrcamento = function(id) {
@@ -1882,193 +1882,220 @@
                 viewOrcamentoModal.classList.add('active');
             }
             
-            // Gerar PDF do orçamento
+            // Gerar PDF do orçamento com layout melhorado
             window.generatePDF = function(id) {
-                const orcamento = orcamentos.find(o => o.id === id);
-                if (!orcamento) return;
-                
-                const cliente = clientes.find(c => c.id === orcamento.clienteId);
-                if (!cliente) return;
-                
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Configurações do PDF
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const margin = 20;
-                let yPos = margin;
-                
-                // Cabeçalho com fundo colorido
-                doc.setFillColor(44, 62, 80); // --primary-color
-                doc.rect(0, 0, pageWidth, 60, 'F');
-                
-                // Logomarca ou nome do DJ
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(24);
-                doc.setFont("helvetica", "bold");
-                
-                if (djData.logo) {
-                    if (djData.logo.startsWith('http')) {
-                        // Para URL, seria necessário carregar a imagem assincronamente
-                        doc.text(djData.nome || 'DJ Manager', pageWidth / 2, 25, { align: 'center' });
-                    } else {
-                        doc.text(djData.logo || djData.nome || 'DJ Manager', pageWidth / 2, 25, { align: 'center' });
+                try {
+                    const orcamento = orcamentos.find(o => o.id === id);
+                    if (!orcamento) {
+                        showToast('Orçamento não encontrado!', 'warning');
+                        return;
                     }
-                } else {
-                    doc.text(djData.nome || 'DJ Manager', pageWidth / 2, 25, { align: 'center' });
-                }
-                
-                doc.setFontSize(10);
-                doc.setFont("helvetica", "normal");
-                if (djData.cpf || djData.cnpj || djData.telefone || djData.email) {
-                    let infoText = '';
-                    if (djData.cpf) infoText += `CPF: ${djData.cpf} | `;
-                    if (djData.cnpj) infoText += `CNPJ: ${djData.cnpj} | `;
-                    if (djData.telefone) infoText += `Tel: ${djData.telefone} | `;
-                    if (djData.email) infoText += `Email: ${djData.email}`;
                     
-                    // Remover o último "| " se existir
-                    infoText = infoText.replace(/\s*\|\s*$/, '');
-                    doc.text(infoText, pageWidth / 2, 35, { align: 'center' });
-                }
-                
-                yPos = 70;
-                
-                // Título do documento com destaque
-                doc.setFillColor(26, 188, 156); // --accent-color
-                doc.rect(margin, yPos - 10, pageWidth - 2 * margin, 25, 'F');
-                
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(28);
-                doc.setFont("helvetica", "bold");
-                doc.text('ORÇAMENTO', pageWidth / 2, yPos + 5, { align: 'center' });
-                
-                doc.setFontSize(12);
-                doc.text(`Nº: ${orcamento.numero}`, margin + 10, yPos);
-                doc.text(`Data: ${formatDate(orcamento.dataCriacao)}`, pageWidth - margin - 10, yPos, { align: 'right' });
-                
-                yPos += 30;
-                
-                // Informações do Cliente
-                doc.setTextColor(44, 62, 80);
-                doc.setFontSize(14);
-                doc.setFont("helvetica", "bold");
-                doc.text('INFORMAÇÕES DO CLIENTE', margin, yPos);
-                
-                doc.setDrawColor(26, 188, 156);
-                doc.setLineWidth(0.5);
-                doc.line(margin, yPos + 2, margin + 70, yPos + 2);
-                
-                yPos += 10;
-                doc.setFontSize(11);
-                doc.setFont("helvetica", "normal");
-                doc.setTextColor(60, 60, 60);
-                
-                doc.text(`Nome: ${cliente.nome}`, margin, yPos);
-                doc.text(`Telefone: ${cliente.telefone}`, margin, yPos + 7);
-                if (cliente.email) {
-                    doc.text(`Email: ${cliente.email}`, margin, yPos + 14);
-                    yPos += 7;
-                }
-                yPos += 20;
-                
-                // Detalhes do Orçamento
-                doc.setTextColor(44, 62, 80);
-                doc.setFontSize(14);
-                doc.setFont("helvetica", "bold");
-                doc.text('DETALHES DO ORÇAMENTO', margin, yPos);
-                doc.setDrawColor(26, 188, 156);
-                doc.line(margin, yPos + 2, margin + 85, yPos + 2);
-                
-                yPos += 10;
-                doc.setFontSize(11);
-                doc.setFont("helvetica", "normal");
-                doc.setTextColor(60, 60, 60);
-                
-                if (orcamento.evento) {
-                    doc.text(`Tipo de Evento: ${orcamento.evento}`, margin, yPos);
-                    yPos += 7;
-                }
-                if (orcamento.dataEvento) {
-                    doc.text(`Data do Evento: ${formatDate(orcamento.dataEvento)}`, margin, yPos);
-                    yPos += 7;
-                }
-                doc.text(`Valor: R$ ${formatCurrency(orcamento.valor)}`, margin, yPos);
-                yPos += 7;
-                doc.text(`Validade: ${formatDate(orcamento.validade)}`, margin, yPos);
-                yPos += 7;
-                
-                // Status com destaque visual
-                const statusText = getStatusText(orcamento.status);
-                let statusColor;
-                switch (orcamento.status) {
-                    case 'aceito': statusColor = [46, 204, 113]; break; // --success-color
-                    case 'recusado': statusColor = [231, 76, 60]; break; // --warning-color
-                    default: statusColor = [243, 156, 18]; // laranja
-                }
-                
-                doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
-                doc.rect(margin, yPos - 2, 30, 8, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(9);
-                doc.text(statusText, margin + 15, yPos + 3, { align: 'center' });
-                
-                doc.setTextColor(60, 60, 60);
-                doc.setFontSize(11);
-                yPos += 15;
-                
-                // Descrição do Serviço
-                if (orcamento.descricao) {
-                    doc.setFontSize(14);
+                    const cliente = clientes.find(c => c.id === orcamento.clienteId);
+                    if (!cliente) {
+                        showToast('Cliente não encontrado!', 'warning');
+                        return;
+                    }
+                    
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('p', 'mm', 'a4');
+                    
+                    // Configurações
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const margin = 20;
+                    let yPos = margin;
+                    
+                    // Cabeçalho com gradiente
+                    doc.setFillColor(44, 62, 80); // --primary-color
+                    doc.rect(0, 0, pageWidth, 50, 'F');
+                    
+                    // Logo ou nome do DJ
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(22);
                     doc.setFont("helvetica", "bold");
+                    const djName = djData.nome || 'DJ Manager';
+                    doc.text(djName, pageWidth / 2, 20, { align: 'center' });
+                    
+                    // Informações de contato
+                    doc.setFontSize(9);
+                    doc.setFont("helvetica", "normal");
+                    let contactInfo = '';
+                    if (djData.telefone) contactInfo += `Tel: ${djData.telefone} | `;
+                    if (djData.email) contactInfo += `Email: ${djData.email} | `;
+                    if (djData.cpf) contactInfo += `CPF: ${djData.cpf} | `;
+                    if (djData.cnpj) contactInfo += `CNPJ: ${djData.cnpj}`;
+                    contactInfo = contactInfo.replace(/\s*\|\s*$/, '');
+                    
+                    if (contactInfo) {
+                        doc.text(contactInfo, pageWidth / 2, 30, { align: 'center' });
+                    }
+                    
+                    // Endereço
+                    if (djData.endereco || djData.cidade) {
+                        let address = '';
+                        if (djData.endereco) address += djData.endereco;
+                        if (djData.cidade) address += ` - ${djData.cidade}`;
+                        doc.text(address, pageWidth / 2, 36, { align: 'center' });
+                    }
+                    
+                    yPos = 60;
+                    
+                    // Título do documento com destaque
+                    doc.setFillColor(26, 188, 156); // --accent-color
+                    doc.rect(margin, yPos, pageWidth - 2 * margin, 12, 'F');
+                    
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(16);
+                    doc.setFont("helvetica", "bold");
+                    doc.text('ORÇAMENTO', pageWidth / 2, yPos + 8, { align: 'center' });
+                    
+                    yPos += 20;
+                    
+                    // Número e data
                     doc.setTextColor(44, 62, 80);
-                    doc.text('DESCRIÇÃO DO SERVIÇO', margin, yPos);
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`Nº: ${orcamento.numero}`, margin, yPos);
+                    doc.text(`Data: ${formatDate(orcamento.dataCriacao)}`, pageWidth - margin, yPos, { align: 'right' });
+                    
+                    yPos += 15;
+                    
+                    // Linha divisória
                     doc.setDrawColor(26, 188, 156);
-                    doc.line(margin, yPos + 2, margin + 95, yPos + 2);
+                    doc.setLineWidth(0.5);
+                    doc.line(margin, yPos, pageWidth - margin, yPos);
                     
                     yPos += 10;
-                    doc.setFontSize(11);
+                    
+                    // Seção: Informações do Cliente
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "bold");
+                    doc.setTextColor(44, 62, 80);
+                    doc.text('CLIENTE', margin, yPos);
+                    
+                    yPos += 8;
+                    doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
                     doc.setTextColor(60, 60, 60);
                     
-                    const descLines = doc.splitTextToSize(orcamento.descricao, pageWidth - 2 * margin);
-                    doc.text(descLines, margin, yPos);
-                    yPos += descLines.length * 5 + 10;
-                }
-                
-                // Observações
-                if (orcamento.observacoes) {
+                    doc.text(`Nome: ${cliente.nome}`, margin, yPos);
+                    yPos += 6;
+                    doc.text(`Telefone: ${cliente.telefone}`, margin, yPos);
+                    if (cliente.email) {
+                        yPos += 6;
+                        doc.text(`Email: ${cliente.email}`, margin, yPos);
+                    }
+                    
+                    yPos += 12;
+                    
+                    // Seção: Detalhes do Orçamento
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "bold");
+                    doc.setTextColor(44, 62, 80);
+                    doc.text('DETALHES DO ORÇAMENTO', margin, yPos);
+                    
+                    yPos += 8;
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    
+                    // Tabela de detalhes
+                    const details = [
+                        ['Evento:', orcamento.evento || 'Não informado'],
+                        ['Data do Evento:', formatDate(orcamento.dataEvento) || 'Não definida'],
+                        ['Validade:', formatDate(orcamento.validade)],
+                        ['Status:', getStatusText(orcamento.status)],
+                        ['Valor:', `R$ ${formatCurrency(orcamento.valor)}`]
+                    ];
+                    
+                    // Desenhar tabela manualmente
+                    details.forEach(([label, value], index) => {
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(label, margin, yPos);
+                        doc.setTextColor(30, 30, 30);
+                        doc.text(value, margin + 45, yPos);
+                        yPos += 7;
+                    });
+                    
+                    yPos += 10;
+                    
+                    // Descrição do Serviço
+                    if (orcamento.descricao) {
+                        doc.setFontSize(12);
+                        doc.setFont("helvetica", "bold");
+                        doc.setTextColor(44, 62, 80);
+                        doc.text('DESCRIÇÃO DO SERVIÇO', margin, yPos);
+                        
+                        yPos += 8;
+                        doc.setFontSize(10);
+                        doc.setFont("helvetica", "normal");
+                        doc.setTextColor(60, 60, 60);
+                        
+                        const descLines = doc.splitTextToSize(orcamento.descricao, pageWidth - 2 * margin);
+                        doc.text(descLines, margin, yPos);
+                        yPos += descLines.length * 5 + 10;
+                    }
+                    
+                    // Observações
+                    if (orcamento.observacoes) {
+                        doc.setFontSize(12);
+                        doc.setFont("helvetica", "bold");
+                        doc.setTextColor(44, 62, 80);
+                        doc.text('OBSERVAÇÕES', margin, yPos);
+                        
+                        yPos += 8;
+                        doc.setFontSize(10);
+                        doc.setFont("helvetica", "italic");
+                        doc.setTextColor(100, 100, 100);
+                        
+                        const obsLines = doc.splitTextToSize(orcamento.observacoes, pageWidth - 2 * margin);
+                        doc.text(obsLines, margin, yPos);
+                        yPos += obsLines.length * 5 + 10;
+                    }
+                    
+                    // Valor total destacado
+                    yPos += 10;
+                    doc.setFillColor(241, 245, 249);
+                    doc.rect(margin, yPos, pageWidth - 2 * margin, 15, 'F');
+                    
                     doc.setFontSize(14);
                     doc.setFont("helvetica", "bold");
                     doc.setTextColor(44, 62, 80);
-                    doc.text('OBSERVAÇÕES', margin, yPos);
-                    doc.setDrawColor(26, 188, 156);
-                    doc.line(margin, yPos + 2, margin + 60, yPos + 2);
+                    doc.text('VALOR TOTAL:', pageWidth - 100, yPos + 10);
+                    doc.setTextColor(26, 188, 156);
+                    doc.text(`R$ ${formatCurrency(orcamento.valor)}`, pageWidth - margin, yPos + 10, { align: 'right' });
                     
-                    yPos += 10;
-                    doc.setFontSize(10);
-                    doc.setFont("helvetica", "italic");
-                    doc.setTextColor(100, 100, 100);
+                    yPos += 25;
                     
-                    const obsLines = doc.splitTextToSize(orcamento.observacoes, pageWidth - 2 * margin);
-                    doc.text(obsLines, margin, yPos);
+                    // Linha de assinatura
+                    doc.setDrawColor(200);
+                    doc.setLineWidth(0.3);
+                    doc.line(margin, yPos, margin + 80, yPos);
+                    
+                    doc.setFontSize(9);
+                    doc.setTextColor(150);
+                    doc.text('Assinatura do Cliente', margin + 40, yPos + 5, { align: 'center' });
+                    
+                    // Rodapé profissional
+                    const footerY = doc.internal.pageSize.getHeight() - 15;
+                    doc.setDrawColor(220);
+                    doc.setLineWidth(0.3);
+                    doc.line(margin, footerY - 10, pageWidth - margin, footerY - 10);
+                    
+                    doc.setFontSize(8);
+                    doc.setTextColor(150);
+                    doc.text('Documento gerado automaticamente pelo DJ Manager - Sistema de Gestão de Orçamentos', 
+                            pageWidth / 2, footerY - 5, { align: 'center' });
+                    doc.text('Este orçamento tem validade até: ' + formatDate(orcamento.validade), 
+                            pageWidth / 2, footerY, { align: 'center' });
+                    
+                    // Salvar PDF
+                    const fileName = `Orcamento_${orcamento.numero}_${cliente.nome.replace(/\s+/g, '_')}.pdf`;
+                    doc.save(fileName);
+                    showToast('PDF gerado com sucesso!', 'success');
+                } catch (error) {
+                    console.error('Erro ao gerar PDF:', error);
+                    showToast('Erro ao gerar PDF. Tente novamente.', 'warning');
                 }
-                
-                // Rodapé
-                const footerY = doc.internal.pageSize.getHeight() - 15;
-                doc.setDrawColor(200);
-                doc.setLineWidth(0.3);
-                doc.line(margin, footerY - 10, pageWidth - margin, footerY - 10);
-                
-                doc.setFontSize(9);
-                doc.setTextColor(150);
-                doc.text('Documento gerado automaticamente pelo DJ Manager - Sistema de Gestão de Orçamentos', 
-                        pageWidth / 2, footerY, { align: 'center' });
-                
-                // Salvar PDF
-                const fileName = `Orcamento_${orcamento.numero}_${cliente.nome.replace(/\s+/g, '_')}.pdf`;
-                doc.save(fileName);
-                showToast('PDF gerado com sucesso!', 'success');
             };
             
             // Dados do DJ
