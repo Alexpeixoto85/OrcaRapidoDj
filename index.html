@@ -99,6 +99,7 @@
             box-shadow: var(--box-shadow);
             padding: 20px;
             margin-bottom: 20px;
+            transition: var(--transition);
         }
 
         .card-header {
@@ -270,6 +271,11 @@
             padding: 12px 10px;
             border-bottom: 1px solid #eee;
             font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        table tr:hover td {
+            background-color: #f8f9fa;
         }
 
         table tr:last-child td {
@@ -613,6 +619,120 @@
             background-color: #ff9800;
         }
 
+        /* Estilos para o card de visualização do orçamento */
+        .orcamento-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .orcamento-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title .numero {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .card-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .card-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-info-label {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            margin-bottom: 3px;
+        }
+
+        .card-info-value {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .card-actions .btn {
+            width: auto;
+            padding: 8px 15px;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+        .orcamento-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Toggle entre tabela e cards */
+        .view-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: var(--border-radius);
+            padding: 5px;
+            margin-bottom: 15px;
+            width: fit-content;
+            margin-left: auto;
+        }
+
+        .view-toggle-btn {
+            padding: 8px 15px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            transition: var(--transition);
+        }
+
+        .view-toggle-btn.active {
+            background: white;
+            color: var(--secondary-color);
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
         @media (max-width: 480px) {
             .stats-container {
                 grid-template-columns: 1fr;
@@ -637,6 +757,20 @@
             .nav-item i {
                 font-size: 1.2rem;
             }
+            
+            .card-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .card-actions .btn {
+                flex: 1;
+                min-width: 120px;
+            }
         }
 
         @media (min-width: 768px) {
@@ -651,6 +785,12 @@
                 max-width: 768px;
                 left: 50%;
                 transform: translateX(-50%);
+            }
+            
+            .orcamento-cards-container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
             }
         }
 
@@ -836,31 +976,52 @@
                 <input type="text" id="orcamento-search" placeholder="Buscar orçamento...">
             </div>
             
+            <!-- Toggle para visualização -->
+            <div class="view-toggle">
+                <button class="view-toggle-btn active" id="view-table-btn" data-view="table">
+                    <i class="fas fa-table"></i> Tabela
+                </button>
+                <button class="view-toggle-btn" id="view-cards-btn" data-view="cards">
+                    <i class="fas fa-th-large"></i> Cards
+                </button>
+            </div>
+            
             <div class="card">
                 <div class="card-header">
                     <h3>Orçamentos</h3>
                 </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nº</th>
-                                <th>Cliente</th>
-                                <th>Valor</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orcamentos-body">
-                            <tr id="empty-orcamentos">
-                                <td colspan="5" class="empty-state">
-                                    <i class="fas fa-file-invoice-dollar"></i>
-                                    <h3>Nenhum orçamento</h3>
-                                    <p>Crie seu primeiro orçamento</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                
+                <!-- Visualização em tabela -->
+                <div id="orcamentos-table-view">
+                    <div class="table-container">
+                        <table id="orcamentos-table">
+                            <thead>
+                                <tr>
+                                    <th>Nº</th>
+                                    <th>Cliente</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orcamentos-body">
+                                <tr id="empty-orcamentos">
+                                    <td colspan="5" class="empty-state">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                        <h3>Nenhum orçamento</h3>
+                                        <p>Crie seu primeiro orçamento</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Visualização em cards -->
+                <div id="orcamentos-cards-view" style="display: none;">
+                    <div class="orcamento-cards-container" id="orcamentos-cards">
+                        <!-- Cards serão inseridos aqui via JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -954,6 +1115,19 @@
             <i class="fas fa-database"></i>
             <span>Backup</span>
         </a>
+    </div>
+
+    <!-- Modal para visualização do orçamento em card -->
+    <div id="view-orcamento-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="view-orcamento-title">Detalhes do Orçamento</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="orcamento-card-details">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+        </div>
     </div>
 
     <div id="cliente-modal" class="modal">
@@ -1203,12 +1377,14 @@
             
             let editingClienteId = null;
             let editingOrcamentoId = null;
+            let currentView = 'table'; // 'table' ou 'cards'
             
             // Elementos da interface
             const navItems = document.querySelectorAll('.nav-item');
             const tabContents = document.querySelectorAll('.tab-content');
             const clienteModal = document.getElementById('cliente-modal');
             const orcamentoModal = document.getElementById('orcamento-modal');
+            const viewOrcamentoModal = document.getElementById('view-orcamento-modal');
             const djModal = document.getElementById('dj-modal');
             const closeModalButtons = document.querySelectorAll('.close-modal');
             const clienteForm = document.getElementById('cliente-form');
@@ -1225,6 +1401,11 @@
             const clienteSearch = document.getElementById('cliente-search');
             const orcamentoSearch = document.getElementById('orcamento-search');
             const configDjBtn = document.getElementById('config-dj-btn');
+            const viewTableBtn = document.getElementById('view-table-btn');
+            const viewCardsBtn = document.getElementById('view-cards-btn');
+            const orcamentosTableView = document.getElementById('orcamentos-table-view');
+            const orcamentosCardsView = document.getElementById('orcamentos-cards-view');
+            const orcamentosCardsContainer = document.getElementById('orcamentos-cards');
             
             // Inicialização
             init();
@@ -1261,6 +1442,11 @@
                             'backup': 'Backup'
                         };
                         document.querySelector('.header h1').innerHTML = `DJ<span>Manager</span> <small>| ${tabTitles[tabId]}</small>`;
+                        
+                        // Se for a aba de orçamentos, carregar a visualização atual
+                        if (tabId === 'orcamentos') {
+                            loadOrcamentosView();
+                        }
                     });
                 });
                 
@@ -1285,6 +1471,7 @@
                         clienteModal.classList.remove('active');
                         orcamentoModal.classList.remove('active');
                         djModal.classList.remove('active');
+                        viewOrcamentoModal.classList.remove('active');
                     });
                 });
                 
@@ -1293,6 +1480,7 @@
                     if (e.target === clienteModal) clienteModal.classList.remove('active');
                     if (e.target === orcamentoModal) orcamentoModal.classList.remove('active');
                     if (e.target === djModal) djModal.classList.remove('active');
+                    if (e.target === viewOrcamentoModal) viewOrcamentoModal.classList.remove('active');
                 });
                 
                 // Configurar formulários
@@ -1315,6 +1503,29 @@
                 
                 // Configurar data atual nos campos de data
                 setTodayDate();
+                
+                // Configurar toggle de visualização
+                viewTableBtn?.addEventListener('click', function() {
+                    setOrcamentosView('table');
+                });
+                
+                viewCardsBtn?.addEventListener('click', function() {
+                    setOrcamentosView('cards');
+                });
+                
+                // Configurar clique nas linhas da tabela para visualizar orçamento
+                document.addEventListener('click', function(e) {
+                    // Verificar se o clique foi em uma linha da tabela de orçamentos (exceto nos botões de ação)
+                    if (e.target.closest('#orcamentos-body tr:not(#empty-orcamentos)')) {
+                        const row = e.target.closest('tr');
+                        const orcamentoId = row.getAttribute('data-id');
+                        
+                        // Não abrir modal se o clique foi em um botão de ação
+                        if (!e.target.closest('.action-buttons') && orcamentoId) {
+                            viewOrcamentoCard(orcamentoId);
+                        }
+                    }
+                });
             }
             
             function setTodayDate() {
@@ -1567,7 +1778,111 @@
                 showToast('Orçamento excluído!', 'success');
             };
             
-            // Gerar PDF do orçamento - LAYOUT MELHORADO
+            // Visualizar orçamento em card
+            function viewOrcamentoCard(id) {
+                const orcamento = orcamentos.find(o => o.id === id);
+                if (!orcamento) return;
+                
+                const cliente = clientes.find(c => c.id === orcamento.clienteId);
+                if (!cliente) return;
+                
+                // Determinar cor do status
+                let statusClass = 'status-pending';
+                let statusText = 'Pendente';
+                
+                switch (orcamento.status) {
+                    case 'aceito':
+                        statusClass = 'status-accepted';
+                        statusText = 'Aceito';
+                        break;
+                    case 'recusado':
+                        statusClass = 'status-rejected';
+                        statusText = 'Recusado';
+                        break;
+                }
+                
+                // Verificar validade
+                const hoje = new Date();
+                const validadeDate = new Date(orcamento.validade);
+                if (validadeDate < hoje && orcamento.status === 'pendente') {
+                    statusClass = 'status-followup';
+                    statusText = 'Vencido';
+                }
+                
+                // Criar conteúdo do card
+                const cardContent = `
+                    <div class="orcamento-card">
+                        <div class="card-status ${statusClass}">${statusText}</div>
+                        <div class="card-title">
+                            <span class="numero">Orçamento #${orcamento.numero}</span>
+                            <span>${formatDate(orcamento.dataCriacao)}</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <div class="card-info-item">
+                                <span class="card-info-label">Cliente</span>
+                                <span class="card-info-value">${cliente.nome}</span>
+                            </div>
+                            <div class="card-info-item">
+                                <span class="card-info-label">Evento</span>
+                                <span class="card-info-value">${orcamento.evento || 'Não informado'}</span>
+                            </div>
+                            <div class="card-info-item">
+                                <span class="card-info-label">Data do Evento</span>
+                                <span class="card-info-value">${formatDate(orcamento.dataEvento) || 'Não definida'}</span>
+                            </div>
+                            <div class="card-info-item">
+                                <span class="card-info-label">Validade</span>
+                                <span class="card-info-value">${formatDate(orcamento.validade)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-info" style="margin-top: 10px;">
+                            <div class="card-info-item">
+                                <span class="card-info-label">Valor</span>
+                                <span class="card-info-value" style="font-size: 1.2rem; color: var(--secondary-color); font-weight: bold;">
+                                    R$ ${formatCurrency(orcamento.valor)}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        ${orcamento.descricao ? `
+                        <div style="margin-top: 15px;">
+                            <span class="card-info-label">Descrição do Serviço</span>
+                            <p style="margin-top: 5px; font-size: 0.9rem; color: #555;">${orcamento.descricao}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${orcamento.observacoes ? `
+                        <div style="margin-top: 10px;">
+                            <span class="card-info-label">Observações</span>
+                            <p style="margin-top: 5px; font-size: 0.85rem; color: #777; font-style: italic;">${orcamento.observacoes}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editOrcamento('${orcamento.id}')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn btn-whatsapp" onclick="window.openWhatsApp('${cliente.id}')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="btn btn-primary" onclick="window.generatePDF('${orcamento.id}')">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Atualizar modal
+                document.getElementById('view-orcamento-title').textContent = `Orçamento #${orcamento.numero}`;
+                document.getElementById('orcamento-card-details').innerHTML = cardContent;
+                
+                // Mostrar modal
+                viewOrcamentoModal.classList.add('active');
+            }
+            
+            // Gerar PDF do orçamento
             window.generatePDF = function(id) {
                 const orcamento = orcamentos.find(o => o.id === id);
                 if (!orcamento) return;
@@ -1800,7 +2115,7 @@
                 document.getElementById('next-orcamento-number').value = String(djData.nextOrcamentoNum).padStart(4, '0');
             }
             
-            // Carregar listas - ADICIONADO BOTÃO WHATSAPP
+            // Carregar listas
             function loadClientes(searchTerm = '') {
                 const tbody = document.getElementById('clientes-body');
                 const emptyRow = document.getElementById('empty-clientes');
@@ -1869,6 +2184,7 @@
                     emptyRow.style.display = '';
                     tbody.innerHTML = '';
                     tbody.appendChild(emptyRow);
+                    loadOrcamentosCards(filteredOrcamentos);
                     return;
                 }
                 
@@ -1902,6 +2218,7 @@
                     }
                     
                     const row = document.createElement('tr');
+                    row.setAttribute('data-id', orcamento.id);
                     row.innerHTML = `
                         <td>${orcamento.numero}</td>
                         <td>${clienteNome}</td>
@@ -1926,6 +2243,138 @@
                     `;
                     tbody.appendChild(row);
                 });
+                
+                // Carregar cards também
+                loadOrcamentosCards(filteredOrcamentos);
+            }
+            
+            function loadOrcamentosCards(orcamentosList = null) {
+                const cardsContainer = document.getElementById('orcamentos-cards');
+                if (!cardsContainer) return;
+                
+                const lista = orcamentosList || orcamentos;
+                
+                if (lista.length === 0) {
+                    cardsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <h3>Nenhum orçamento</h3>
+                            <p>Crie seu primeiro orçamento</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                cardsContainer.innerHTML = '';
+                
+                lista.forEach(orcamento => {
+                    const cliente = clientes.find(c => c.id === orcamento.clienteId);
+                    if (!cliente) return;
+                    
+                    // Determinar cor do status
+                    let statusClass = 'status-pending';
+                    let statusText = 'Pendente';
+                    
+                    switch (orcamento.status) {
+                        case 'aceito':
+                            statusClass = 'status-accepted';
+                            statusText = 'Aceito';
+                            break;
+                        case 'recusado':
+                            statusClass = 'status-rejected';
+                            statusText = 'Recusado';
+                            break;
+                    }
+                    
+                    // Verificar validade
+                    const hoje = new Date();
+                    const validadeDate = new Date(orcamento.validade);
+                    if (validadeDate < hoje && orcamento.status === 'pendente') {
+                        statusClass = 'status-followup';
+                        statusText = 'Vencido';
+                    }
+                    
+                    const card = document.createElement('div');
+                    card.className = 'orcamento-card';
+                    card.innerHTML = `
+                        <div class="card-status ${statusClass}">${statusText}</div>
+                        <div class="card-title">
+                            <span class="numero">Orçamento #${orcamento.numero}</span>
+                            <span>${formatDate(orcamento.dataCriacao)}</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <div class="card-info-item">
+                                <span class="card-info-label">Cliente</span>
+                                <span class="card-info-value">${cliente.nome}</span>
+                            </div>
+                            <div class="card-info-item">
+                                <span class="card-info-label">Evento</span>
+                                <span class="card-info-value">${orcamento.evento || 'Não informado'}</span>
+                            </div>
+                            <div class="card-info-item">
+                                <span class="card-info-label">Data Evento</span>
+                                <span class="card-info-value">${formatDate(orcamento.dataEvento) || 'Não definida'}</span>
+                            </div>
+                            <div class="card-info-item">
+                                <span class="card-info-label">Validade</span>
+                                <span class="card-info-value">${formatDate(orcamento.validade)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-info" style="margin-top: 10px;">
+                            <div class="card-info-item">
+                                <span class="card-info-label">Valor</span>
+                                <span class="card-info-value" style="font-size: 1.2rem; color: var(--secondary-color); font-weight: bold;">
+                                    R$ ${formatCurrency(orcamento.valor)}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-actions">
+                            <button class="btn btn-warning" onclick="editOrcamento('${orcamento.id}')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn btn-whatsapp" onclick="window.openWhatsApp('${cliente.id}')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="btn btn-primary" onclick="window.generatePDF('${orcamento.id}')">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Adicionar evento de clique para visualizar detalhes
+                    card.addEventListener('click', function(e) {
+                        // Não abrir modal se o clique foi em um botão
+                        if (!e.target.closest('.card-actions')) {
+                            viewOrcamentoCard(orcamento.id);
+                        }
+                    });
+                    
+                    cardsContainer.appendChild(card);
+                });
+            }
+            
+            // Configurar visualização (tabela ou cards)
+            function setOrcamentosView(view) {
+                currentView = view;
+                
+                // Atualizar botões toggle
+                viewTableBtn.classList.toggle('active', view === 'table');
+                viewCardsBtn.classList.toggle('active', view === 'cards');
+                
+                // Mostrar/ocultar visualizações
+                orcamentosTableView.style.display = view === 'table' ? 'block' : 'none';
+                orcamentosCardsView.style.display = view === 'cards' ? 'block' : 'none';
+                
+                // Salvar preferência
+                localStorage.setItem('djmanager-view-preference', view);
+            }
+            
+            function loadOrcamentosView() {
+                const savedView = localStorage.getItem('djmanager-view-preference') || 'table';
+                setOrcamentosView(savedView);
             }
             
             // Busca
@@ -1934,7 +2383,8 @@
             }
             
             function searchOrcamentos() {
-                loadOrcamentos(this.value);
+                const searchTerm = this.value;
+                loadOrcamentos(searchTerm);
             }
             
             // Dashboard
@@ -2044,7 +2494,7 @@
                 }
             }
             
-            // Backup - CORRIGIDA A FUNÇÃO DE IMPORTAR
+            // Backup
             function exportData() {
                 const data = {
                     clientes,
@@ -2203,7 +2653,7 @@
                 setTimeout(() => toast.classList.remove('show'), 3000);
             }
             
-            // WhatsApp - MELHORADO
+            // WhatsApp - MELHORADO COM NOME DO DJ
             window.openWhatsApp = function(clienteId) {
                 const cliente = clientes.find(c => c.id === clienteId);
                 if (!cliente) return;
@@ -2227,7 +2677,7 @@
                 // Remover qualquer caractere não numérico
                 phone = phone.replace(/\D/g, '');
                 
-                // Criar mensagem personalizada
+                // Criar mensagem personalizada com nome do DJ
                 const orcamentosCliente = orcamentos.filter(o => o.clienteId === clienteId);
                 let message = `Olá ${cliente.nome.split(' ')[0]}! Tudo bem? Aqui é o ${djData.nome || 'DJ Manager'}.`;
                 
