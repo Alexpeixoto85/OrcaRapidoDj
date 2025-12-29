@@ -1161,6 +1161,46 @@
                 djData.nextOrcamentoNum = 85;
             }
             
+            // Função para gerar números aleatórios para orçamentos antigos (0001-0084)
+            function assignRandomNumbersToOldOrcamentos() {
+                // Números disponíveis de 0001 a 0084
+                const availableNumbers = Array.from({length: 84}, (_, i) => String(i + 1).padStart(4, '0'));
+                
+                // Embaralhar os números
+                for (let i = availableNumbers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
+                }
+                
+                // Atribuir números aleatórios a orçamentos sem número ou com número >= 0085
+                orcamentos.forEach((orcamento, index) => {
+                    if (!orcamento.numero) {
+                        // Se não tem número, atribuir um aleatório
+                        if (availableNumbers.length > 0) {
+                            orcamento.numero = availableNumbers.pop();
+                        } else {
+                            // Se acabaram os números, usar o próximo sequencial
+                            orcamento.numero = String(djData.nextOrcamentoNum).padStart(4, '0');
+                            djData.nextOrcamentoNum++;
+                        }
+                    } else if (parseInt(orcamento.numero) >= 85) {
+                        // Se já tem número >= 85, manter o número atual
+                        // Atualizar o nextOrcamentoNum se necessário
+                        const num = parseInt(orcamento.numero);
+                        if (num >= djData.nextOrcamentoNum) {
+                            djData.nextOrcamentoNum = num + 1;
+                        }
+                    }
+                });
+                
+                // Salvar as alterações
+                saveToLocalStorage();
+                localStorage.setItem('djmanager-dj', JSON.stringify(djData));
+            }
+            
+            // Executar ao carregar para garantir números em orçamentos antigos
+            assignRandomNumbersToOldOrcamentos();
+            
             let editingClienteId = null;
             let editingOrcamentoId = null;
             
@@ -2004,7 +2044,7 @@
                 }
             }
             
-            // Backup
+            // Backup - CORRIGIDA A FUNÇÃO DE IMPORTAR
             function exportData() {
                 const data = {
                     clientes,
@@ -2046,16 +2086,38 @@
                     try {
                         const data = JSON.parse(event.target.result);
                         
-                        if (!data.clientes || !data.orcamentos) {
-                            throw new Error('Formato inválido');
+                        // Verificação mais robusta da estrutura do arquivo
+                        if (!data || typeof data !== 'object') {
+                            throw new Error('Arquivo inválido ou corrompido');
+                        }
+                        
+                        // Verificar se tem os arrays necessários
+                        const hasClientes = Array.isArray(data.clientes);
+                        const hasOrcamentos = Array.isArray(data.orcamentos);
+                        
+                        if (!hasClientes || !hasOrcamentos) {
+                            throw new Error('Formato de backup inválido. O arquivo deve conter dados de clientes e orçamentos.');
                         }
                         
                         if (confirm(`Importar ${data.clientes.length} clientes e ${data.orcamentos.length} orçamentos?`)) {
                             clientes = data.clientes;
                             orcamentos = data.orcamentos;
-                            if (data.djData) {
-                                djData = data.djData;
+                            
+                            // Manter dados do DJ se existirem no backup
+                            if (data.djData && typeof data.djData === 'object') {
+                                // Mesclar dados, preservando o nextOrcamentoNum atual se não existir no backup
+                                const currentNextNum = djData.nextOrcamentoNum;
+                                djData = { ...djData, ...data.djData };
+                                
+                                // Se o backup não tiver nextOrcamentoNum, manter o atual
+                                if (!data.djData.nextOrcamentoNum) {
+                                    djData.nextOrcamentoNum = currentNextNum;
+                                }
                             }
+                            
+                            // Atribuir números aleatórios a orçamentos sem número
+                            assignRandomNumbersToOldOrcamentos();
+                            
                             saveToLocalStorage();
                             loadClientes();
                             loadOrcamentos();
@@ -2063,12 +2125,18 @@
                             updateFinanceiro();
                             updateNotifications();
                             updateDjData();
-                            showToast('Backup importado!', 'success');
+                            showToast('Backup importado com sucesso!', 'success');
                         }
                     } catch (error) {
-                        showToast('Erro ao importar backup', 'warning');
+                        console.error('Erro ao importar backup:', error);
+                        showToast(`Erro ao importar: ${error.message}`, 'warning');
                     }
                 };
+                
+                reader.onerror = function() {
+                    showToast('Erro ao ler o arquivo.', 'warning');
+                };
+                
                 reader.readAsText(file);
             }
             
