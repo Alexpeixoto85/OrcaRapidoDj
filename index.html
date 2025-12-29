@@ -36,10 +36,9 @@
             background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
-            padding-bottom: 80px; /* Espaço para o menu inferior */
+            padding-bottom: 80px;
         }
 
-        /* Header */
         .header {
             background-color: var(--primary-color);
             color: white;
@@ -76,12 +75,10 @@
             margin-left: 8px;
         }
 
-        /* Main Content */
         .main-content {
             padding: 20px 15px;
         }
 
-        /* Tabs */
         .tab-content {
             display: none;
             animation: fadeIn 0.5s;
@@ -96,7 +93,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Cards */
         .card {
             background-color: white;
             border-radius: var(--border-radius);
@@ -120,7 +116,6 @@
             font-weight: 600;
         }
 
-        /* Botões */
         .btn {
             padding: 12px 20px;
             border: none;
@@ -185,7 +180,6 @@
             background-color: #128C7E;
         }
 
-        /* Stats Cards */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -249,7 +243,6 @@
             font-size: 0.85rem;
         }
 
-        /* Tables - Mobile Friendly */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -283,7 +276,6 @@
             border-bottom: none;
         }
 
-        /* Status Badges */
         .status-badge {
             padding: 5px 10px;
             border-radius: 15px;
@@ -321,7 +313,6 @@
             100% { opacity: 1; }
         }
 
-        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -364,7 +355,6 @@
             color: #e74c3c;
         }
 
-        /* Forms */
         .form-group {
             margin-bottom: 20px;
         }
@@ -398,7 +388,6 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -468,7 +457,6 @@
             justify-content: center;
         }
 
-        /* Toast Notification */
         .toast {
             position: fixed;
             bottom: 80px;
@@ -501,7 +489,6 @@
             background-color: var(--secondary-color);
         }
 
-        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -547,7 +534,6 @@
             transform: scale(0.95);
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -570,7 +556,6 @@
             font-size: 0.95rem;
         }
 
-        /* Quick Actions */
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -578,7 +563,6 @@
             margin-bottom: 20px;
         }
 
-        /* Search Bar */
         .search-bar {
             margin-bottom: 20px;
             position: relative;
@@ -598,7 +582,6 @@
             font-size: 1.1rem;
         }
 
-        /* Alert Badge */
         .alert-badge {
             position: absolute;
             top: -5px;
@@ -615,7 +598,6 @@
             font-weight: bold;
         }
 
-        /* Follow-up Highlight */
         .followup-highlight {
             background-color: #fff8e1 !important;
             position: relative;
@@ -631,7 +613,6 @@
             background-color: #ff9800;
         }
 
-        /* Responsive Adjustments */
         @media (max-width: 480px) {
             .stats-container {
                 grid-template-columns: 1fr;
@@ -673,7 +654,6 @@
             }
         }
 
-        /* Loading Spinner */
         .spinner {
             display: inline-block;
             width: 20px;
@@ -687,22 +667,62 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .config-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .phone-prefix {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phone-prefix .prefix {
+            flex: 0 0 60px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 14px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .phone-prefix input {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <h1>DJ<span>Manager</span></h1>
-        <div id="notification-area">
-            <!-- Notificações serão adicionadas via JavaScript -->
+        <div style="display: flex; align-items: center;">
+            <div id="notification-area"></div>
+            <button class="config-btn" id="config-dj-btn" title="Configurar dados do DJ">
+                <i class="fas fa-user"></i>
+            </button>
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
-        <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
-            <!-- Quick Actions -->
             <div class="quick-actions">
                 <button class="btn btn-primary" id="quick-add-orcamento">
                     <i class="fas fa-plus"></i> Novo Orçamento
@@ -712,7 +732,6 @@
                 </button>
             </div>
 
-            <!-- Stats Cards -->
             <div class="stats-container">
                 <div class="stat-card" data-target="clientes">
                     <div class="stat-icon blue">
@@ -752,7 +771,6 @@
                 </div>
             </div>
 
-            <!-- Follow-up Card -->
             <div class="card">
                 <div class="card-header">
                     <h3>Follow-ups Pendentes</h3>
@@ -779,7 +797,6 @@
             </div>
         </div>
 
-        <!-- Clientes Tab -->
         <div id="clientes" class="tab-content">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
@@ -813,7 +830,6 @@
             </div>
         </div>
 
-        <!-- Orçamentos Tab -->
         <div id="orcamentos" class="tab-content">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
@@ -828,6 +844,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>Nº</th>
                                 <th>Cliente</th>
                                 <th>Valor</th>
                                 <th>Status</th>
@@ -836,7 +853,7 @@
                         </thead>
                         <tbody id="orcamentos-body">
                             <tr id="empty-orcamentos">
-                                <td colspan="4" class="empty-state">
+                                <td colspan="5" class="empty-state">
                                     <i class="fas fa-file-invoice-dollar"></i>
                                     <h3>Nenhum orçamento</h3>
                                     <p>Crie seu primeiro orçamento</p>
@@ -848,7 +865,6 @@
             </div>
         </div>
 
-        <!-- Financeiro Tab -->
         <div id="financeiro" class="tab-content">
             <div class="card">
                 <div class="card-header">
@@ -895,7 +911,6 @@
             </div>
         </div>
 
-        <!-- Backup Tab -->
         <div id="backup" class="tab-content">
             <div class="card">
                 <div class="card-header">
@@ -918,7 +933,6 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <a href="#" class="nav-item active" data-tab="dashboard">
             <i class="fas fa-tachometer-alt"></i>
@@ -942,7 +956,6 @@
         </a>
     </div>
 
-    <!-- Modal para Clientes -->
     <div id="cliente-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -957,7 +970,10 @@
                 
                 <div class="form-group">
                     <label for="cliente-telefone" class="required">Telefone (com DDD)</label>
-                    <input type="tel" id="cliente-telefone" placeholder="(11) 99999-9999" required>
+                    <div class="phone-prefix">
+                        <div class="prefix">+55</div>
+                        <input type="tel" id="cliente-telefone" placeholder="(00) 00000-0000" required>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -983,7 +999,6 @@
         </div>
     </div>
 
-    <!-- Modal para Orçamentos -->
     <div id="orcamento-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1053,18 +1068,99 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <div id="dj-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Configurar Dados do DJ</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="dj-form">
+                <div class="form-group">
+                    <label for="dj-nome">Nome Artístico</label>
+                    <input type="text" id="dj-nome" placeholder="Seu nome artístico">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dj-cpf">CPF</label>
+                        <input type="text" id="dj-cpf" placeholder="000.000.000-00">
+                    </div>
+                    <div class="form-group">
+                        <label for="dj-cnpj">CNPJ</label>
+                        <input type="text" id="dj-cnpj" placeholder="00.000.000/0000-00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dj-telefone">Telefone para Contato</label>
+                    <div class="phone-prefix">
+                        <div class="prefix">+55</div>
+                        <input type="tel" id="dj-telefone" placeholder="(00) 00000-0000">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dj-email">Email</label>
+                    <input type="email" id="dj-email" placeholder="dj@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dj-endereco">Endereço</label>
+                    <input type="text" id="dj-endereco" placeholder="Rua, número, bairro">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dj-cidade">Cidade/Estado</label>
+                    <input type="text" id="dj-cidade" placeholder="Cidade - Estado">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dj-logo">Logomarca (URL ou texto)</label>
+                    <textarea id="dj-logo" rows="2" placeholder="URL da logomarca ou texto para cabeçalho"></textarea>
+                    <small>Cole a URL da imagem ou insira um texto para aparecer no cabeçalho dos orçamentos</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="next-orcamento-number">Próximo Número de Orçamento</label>
+                    <input type="text" id="next-orcamento-number" readonly style="background-color: #f5f5f5;">
+                    <small>Números são sequenciais começando de 0085</small>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning close-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Salvar Dados</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="toast" class="toast">
         <i class="fas fa-check-circle"></i>
         <span id="toast-message">Operação realizada com sucesso!</span>
     </div>
 
     <script>
-        // Sistema DJ Manager Mobile - Código Principal
         document.addEventListener('DOMContentLoaded', function() {
             // Variáveis globais
             let clientes = JSON.parse(localStorage.getItem('djmanager-clientes')) || [];
             let orcamentos = JSON.parse(localStorage.getItem('djmanager-orcamentos')) || [];
+            let djData = JSON.parse(localStorage.getItem('djmanager-dj')) || {
+                nome: '',
+                cpf: '',
+                cnpj: '',
+                telefone: '',
+                email: '',
+                endereco: '',
+                cidade: '',
+                logo: '',
+                nextOrcamentoNum: 85 // Inicia em 85
+            };
+            
+            // Inicializar próximo número de orçamento se não existir
+            if (!djData.nextOrcamentoNum) {
+                djData.nextOrcamentoNum = 85;
+            }
+            
             let editingClienteId = null;
             let editingOrcamentoId = null;
             
@@ -1073,9 +1169,11 @@
             const tabContents = document.querySelectorAll('.tab-content');
             const clienteModal = document.getElementById('cliente-modal');
             const orcamentoModal = document.getElementById('orcamento-modal');
+            const djModal = document.getElementById('dj-modal');
             const closeModalButtons = document.querySelectorAll('.close-modal');
             const clienteForm = document.getElementById('cliente-form');
             const orcamentoForm = document.getElementById('orcamento-form');
+            const djForm = document.getElementById('dj-form');
             const exportBtn = document.getElementById('export-btn');
             const importBtn = document.getElementById('import-btn');
             const clearDataBtn = document.getElementById('clear-data-btn');
@@ -1086,6 +1184,7 @@
             const quickAddClienteBtn = document.getElementById('quick-add-cliente');
             const clienteSearch = document.getElementById('cliente-search');
             const orcamentoSearch = document.getElementById('orcamento-search');
+            const configDjBtn = document.getElementById('config-dj-btn');
             
             // Inicialização
             init();
@@ -1097,6 +1196,7 @@
                 updateDashboard();
                 updateFinanceiro();
                 updateNotifications();
+                updateDjData();
                 
                 // Configurar navegação
                 navItems.forEach(item => {
@@ -1137,12 +1237,14 @@
                 // Configurar botões rápidos
                 quickAddClienteBtn.addEventListener('click', openClienteModal);
                 quickAddOrcamentoBtn.addEventListener('click', openOrcamentoModal);
+                configDjBtn.addEventListener('click', openDjModal);
                 
                 // Configurar fechamento de modais
                 closeModalButtons.forEach(button => {
                     button.addEventListener('click', function() {
                         clienteModal.classList.remove('active');
                         orcamentoModal.classList.remove('active');
+                        djModal.classList.remove('active');
                     });
                 });
                 
@@ -1150,11 +1252,17 @@
                 window.addEventListener('click', function(e) {
                     if (e.target === clienteModal) clienteModal.classList.remove('active');
                     if (e.target === orcamentoModal) orcamentoModal.classList.remove('active');
+                    if (e.target === djModal) djModal.classList.remove('active');
                 });
                 
                 // Configurar formulários
                 clienteForm.addEventListener('submit', saveCliente);
                 orcamentoForm.addEventListener('submit', saveOrcamento);
+                djForm.addEventListener('submit', saveDjData);
+                
+                // Configurar formatação de telefone
+                document.getElementById('cliente-telefone').addEventListener('input', formatPhoneInput);
+                document.getElementById('dj-telefone').addEventListener('input', formatPhoneInput);
                 
                 // Configurar busca
                 clienteSearch?.addEventListener('input', searchClientes);
@@ -1172,12 +1280,28 @@
             function setTodayDate() {
                 const today = new Date().toISOString().split('T')[0];
                 const validityDate = new Date();
-                validityDate.setDate(validityDate.getDate() + 30); // 30 dias de validade padrão
+                validityDate.setDate(validityDate.getDate() + 30);
                 const validityStr = validityDate.toISOString().split('T')[0];
                 
                 document.getElementById('cliente-data').value = today;
                 document.getElementById('orcamento-data').value = '';
                 document.getElementById('orcamento-validade').value = validityStr;
+            }
+            
+            // Função para formatar entrada de telefone
+            function formatPhoneInput(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                if (value.length > 0) {
+                    value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                    if (value.length > 10) {
+                        value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                    } else {
+                        value = value.replace(/(\d{4})(\d)/, '$1-$2');
+                    }
+                }
+                
+                e.target.value = value;
             }
             
             // Funções para Clientes
@@ -1193,7 +1317,7 @@
                 e.preventDefault();
                 
                 const nome = document.getElementById('cliente-nome').value.trim();
-                const telefone = document.getElementById('cliente-telefone').value.trim();
+                let telefone = document.getElementById('cliente-telefone').value.trim();
                 const email = document.getElementById('cliente-email').value.trim();
                 const dataContato = document.getElementById('cliente-data').value;
                 const observacoes = document.getElementById('cliente-observacoes').value.trim();
@@ -1203,7 +1327,10 @@
                     return;
                 }
                 
-                const telefoneFormatado = formatPhoneNumber(telefone);
+                // Garantir que o telefone tenha o prefixo +55
+                if (!telefone.startsWith('+55')) {
+                    telefone = '+55 ' + telefone;
+                }
                 
                 if (editingClienteId) {
                     // Atualizar cliente
@@ -1212,7 +1339,7 @@
                         clientes[index] = {
                             ...clientes[index],
                             nome,
-                            telefone: telefoneFormatado,
+                            telefone,
                             email,
                             dataContato,
                             observacoes
@@ -1224,7 +1351,7 @@
                     clientes.push({
                         id: generateId(),
                         nome,
-                        telefone: telefoneFormatado,
+                        telefone,
                         email,
                         dataContato,
                         observacoes,
@@ -1327,9 +1454,13 @@
                         showToast('Orçamento atualizado!', 'success');
                     }
                 } else {
-                    // Novo orçamento
+                    // Novo orçamento com número sequencial
+                    const numeroOrcamento = String(djData.nextOrcamentoNum).padStart(4, '0');
+                    djData.nextOrcamentoNum++;
+                    
                     orcamentos.push({
                         id: generateId(),
+                        numero: numeroOrcamento,
                         clienteId,
                         evento,
                         dataEvento,
@@ -1340,7 +1471,10 @@
                         observacoes,
                         dataCriacao: new Date().toISOString()
                     });
-                    showToast('Orçamento criado!', 'success');
+                    
+                    // Salvar próximo número
+                    localStorage.setItem('djmanager-dj', JSON.stringify(djData));
+                    showToast('Orçamento criado! Nº ' + numeroOrcamento, 'success');
                 }
                 
                 saveToLocalStorage();
@@ -1348,6 +1482,7 @@
                 updateDashboard();
                 updateFinanceiro();
                 updateNotifications();
+                updateDjData();
                 orcamentoModal.classList.remove('active');
             }
             
@@ -1392,7 +1527,7 @@
                 showToast('Orçamento excluído!', 'success');
             };
             
-            // Gerar PDF do orçamento
+            // Gerar PDF do orçamento - LAYOUT MELHORADO
             window.generatePDF = function(id) {
                 const orcamento = orcamentos.find(o => o.id === id);
                 if (!orcamento) return;
@@ -1406,101 +1541,226 @@
                 // Configurações do PDF
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const margin = 20;
+                let yPos = margin;
                 
-                // Cabeçalho
-                doc.setFontSize(20);
-                doc.setTextColor(44, 62, 80);
-                doc.text('ORÇAMENTO DJ', pageWidth / 2, margin, { align: 'center' });
+                // Cabeçalho com fundo colorido
+                doc.setFillColor(44, 62, 80); // --primary-color
+                doc.rect(0, 0, pageWidth, 60, 'F');
                 
-                doc.setDrawColor(26, 188, 156);
-                doc.setLineWidth(1);
-                doc.line(margin, margin + 5, pageWidth - margin, margin + 5);
+                // Logomarca ou nome do DJ
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(24);
+                doc.setFont("helvetica", "bold");
                 
-                // Informações do Orçamento
-                doc.setFontSize(12);
-                doc.setTextColor(100);
-                doc.text(`Nº: ${orcamento.id.substring(0, 8)}`, margin, margin + 20);
-                doc.text(`Data: ${formatDate(orcamento.dataCriacao)}`, pageWidth - margin, margin + 20, { align: 'right' });
-                
-                // Cliente
-                doc.setFontSize(14);
-                doc.setTextColor(44, 62, 80);
-                doc.text('CLIENTE:', margin, margin + 40);
-                doc.setFontSize(12);
-                doc.setTextColor(100);
-                doc.text(`Nome: ${cliente.nome}`, margin, margin + 50);
-                doc.text(`Telefone: ${cliente.telefone}`, margin, margin + 58);
-                if (cliente.email) {
-                    doc.text(`Email: ${cliente.email}`, margin, margin + 66);
+                if (djData.logo) {
+                    if (djData.logo.startsWith('http')) {
+                        // Para URL, seria necessário carregar a imagem assincronamente
+                        doc.text(djData.nome || 'DJ Manager', pageWidth / 2, 25, { align: 'center' });
+                    } else {
+                        doc.text(djData.logo || djData.nome || 'DJ Manager', pageWidth / 2, 25, { align: 'center' });
+                    }
+                } else {
+                    doc.text(djData.nome || 'DJ Manager', pageWidth / 2, 25, { align: 'center' });
                 }
                 
-                // Detalhes do Orçamento
-                doc.setFontSize(14);
-                doc.setTextColor(44, 62, 80);
-                doc.text('DETALHES DO ORÇAMENTO:', margin, margin + 90);
-                doc.setFontSize(12);
-                doc.setTextColor(100);
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                if (djData.cpf || djData.cnpj || djData.telefone || djData.email) {
+                    let infoText = '';
+                    if (djData.cpf) infoText += `CPF: ${djData.cpf} | `;
+                    if (djData.cnpj) infoText += `CNPJ: ${djData.cnpj} | `;
+                    if (djData.telefone) infoText += `Tel: ${djData.telefone} | `;
+                    if (djData.email) infoText += `Email: ${djData.email}`;
+                    
+                    // Remover o último "| " se existir
+                    infoText = infoText.replace(/\s*\|\s*$/, '');
+                    doc.text(infoText, pageWidth / 2, 35, { align: 'center' });
+                }
                 
-                let yPos = margin + 100;
+                yPos = 70;
+                
+                // Título do documento com destaque
+                doc.setFillColor(26, 188, 156); // --accent-color
+                doc.rect(margin, yPos - 10, pageWidth - 2 * margin, 25, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(28);
+                doc.setFont("helvetica", "bold");
+                doc.text('ORÇAMENTO', pageWidth / 2, yPos + 5, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.text(`Nº: ${orcamento.numero}`, margin + 10, yPos);
+                doc.text(`Data: ${formatDate(orcamento.dataCriacao)}`, pageWidth - margin - 10, yPos, { align: 'right' });
+                
+                yPos += 30;
+                
+                // Informações do Cliente
+                doc.setTextColor(44, 62, 80);
+                doc.setFontSize(14);
+                doc.setFont("helvetica", "bold");
+                doc.text('INFORMAÇÕES DO CLIENTE', margin, yPos);
+                
+                doc.setDrawColor(26, 188, 156);
+                doc.setLineWidth(0.5);
+                doc.line(margin, yPos + 2, margin + 70, yPos + 2);
+                
+                yPos += 10;
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(60, 60, 60);
+                
+                doc.text(`Nome: ${cliente.nome}`, margin, yPos);
+                doc.text(`Telefone: ${cliente.telefone}`, margin, yPos + 7);
+                if (cliente.email) {
+                    doc.text(`Email: ${cliente.email}`, margin, yPos + 14);
+                    yPos += 7;
+                }
+                yPos += 20;
+                
+                // Detalhes do Orçamento
+                doc.setTextColor(44, 62, 80);
+                doc.setFontSize(14);
+                doc.setFont("helvetica", "bold");
+                doc.text('DETALHES DO ORÇAMENTO', margin, yPos);
+                doc.setDrawColor(26, 188, 156);
+                doc.line(margin, yPos + 2, margin + 85, yPos + 2);
+                
+                yPos += 10;
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(60, 60, 60);
+                
                 if (orcamento.evento) {
-                    doc.text(`Evento: ${orcamento.evento}`, margin, yPos);
-                    yPos += 8;
+                    doc.text(`Tipo de Evento: ${orcamento.evento}`, margin, yPos);
+                    yPos += 7;
                 }
                 if (orcamento.dataEvento) {
                     doc.text(`Data do Evento: ${formatDate(orcamento.dataEvento)}`, margin, yPos);
-                    yPos += 8;
+                    yPos += 7;
                 }
                 doc.text(`Valor: R$ ${formatCurrency(orcamento.valor)}`, margin, yPos);
-                yPos += 8;
+                yPos += 7;
                 doc.text(`Validade: ${formatDate(orcamento.validade)}`, margin, yPos);
-                yPos += 8;
-                doc.text(`Status: ${getStatusText(orcamento.status)}`, margin, yPos);
+                yPos += 7;
+                
+                // Status com destaque visual
+                const statusText = getStatusText(orcamento.status);
+                let statusColor;
+                switch (orcamento.status) {
+                    case 'aceito': statusColor = [46, 204, 113]; break; // --success-color
+                    case 'recusado': statusColor = [231, 76, 60]; break; // --warning-color
+                    default: statusColor = [243, 156, 18]; // laranja
+                }
+                
+                doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+                doc.rect(margin, yPos - 2, 30, 8, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(9);
+                doc.text(statusText, margin + 15, yPos + 3, { align: 'center' });
+                
+                doc.setTextColor(60, 60, 60);
+                doc.setFontSize(11);
                 yPos += 15;
                 
-                // Descrição
+                // Descrição do Serviço
                 if (orcamento.descricao) {
                     doc.setFontSize(14);
+                    doc.setFont("helvetica", "bold");
                     doc.setTextColor(44, 62, 80);
-                    doc.text('DESCRIÇÃO DOS SERVIÇOS:', margin, yPos);
-                    yPos += 10;
+                    doc.text('DESCRIÇÃO DO SERVIÇO', margin, yPos);
+                    doc.setDrawColor(26, 188, 156);
+                    doc.line(margin, yPos + 2, margin + 95, yPos + 2);
                     
+                    yPos += 10;
                     doc.setFontSize(11);
-                    doc.setTextColor(100);
+                    doc.setFont("helvetica", "normal");
+                    doc.setTextColor(60, 60, 60);
+                    
                     const descLines = doc.splitTextToSize(orcamento.descricao, pageWidth - 2 * margin);
                     doc.text(descLines, margin, yPos);
-                    yPos += descLines.length * 6 + 10;
+                    yPos += descLines.length * 5 + 10;
                 }
                 
                 // Observações
                 if (orcamento.observacoes) {
                     doc.setFontSize(14);
+                    doc.setFont("helvetica", "bold");
                     doc.setTextColor(44, 62, 80);
-                    doc.text('OBSERVAÇÕES:', margin, yPos);
-                    yPos += 10;
+                    doc.text('OBSERVAÇÕES', margin, yPos);
+                    doc.setDrawColor(26, 188, 156);
+                    doc.line(margin, yPos + 2, margin + 60, yPos + 2);
                     
-                    doc.setFontSize(11);
-                    doc.setTextColor(100);
+                    yPos += 10;
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "italic");
+                    doc.setTextColor(100, 100, 100);
+                    
                     const obsLines = doc.splitTextToSize(orcamento.observacoes, pageWidth - 2 * margin);
                     doc.text(obsLines, margin, yPos);
                 }
                 
                 // Rodapé
-                const footerY = doc.internal.pageSize.getHeight() - 20;
+                const footerY = doc.internal.pageSize.getHeight() - 15;
                 doc.setDrawColor(200);
-                doc.setLineWidth(0.5);
+                doc.setLineWidth(0.3);
                 doc.line(margin, footerY - 10, pageWidth - margin, footerY - 10);
                 
-                doc.setFontSize(10);
+                doc.setFontSize(9);
                 doc.setTextColor(150);
-                doc.text('DJ Manager - Sistema de Gestão de Orçamentos', pageWidth / 2, footerY, { align: 'center' });
+                doc.text('Documento gerado automaticamente pelo DJ Manager - Sistema de Gestão de Orçamentos', 
+                        pageWidth / 2, footerY, { align: 'center' });
                 
                 // Salvar PDF
-                const fileName = `Orcamento_${cliente.nome.replace(/\s+/g, '_')}_${orcamento.id.substring(0, 8)}.pdf`;
+                const fileName = `Orcamento_${orcamento.numero}_${cliente.nome.replace(/\s+/g, '_')}.pdf`;
                 doc.save(fileName);
                 showToast('PDF gerado com sucesso!', 'success');
             };
             
-            // Carregar listas
+            // Dados do DJ
+            function openDjModal() {
+                document.getElementById('dj-nome').value = djData.nome || '';
+                document.getElementById('dj-cpf').value = djData.cpf || '';
+                document.getElementById('dj-cnpj').value = djData.cnpj || '';
+                document.getElementById('dj-telefone').value = djData.telefone || '';
+                document.getElementById('dj-email').value = djData.email || '';
+                document.getElementById('dj-endereco').value = djData.endereco || '';
+                document.getElementById('dj-cidade').value = djData.cidade || '';
+                document.getElementById('dj-logo').value = djData.logo || '';
+                document.getElementById('next-orcamento-number').value = String(djData.nextOrcamentoNum).padStart(4, '0');
+                
+                djModal.classList.add('active');
+            }
+            
+            function saveDjData(e) {
+                e.preventDefault();
+                
+                djData = {
+                    nome: document.getElementById('dj-nome').value.trim(),
+                    cpf: document.getElementById('dj-cpf').value.trim(),
+                    cnpj: document.getElementById('dj-cnpj').value.trim(),
+                    telefone: document.getElementById('dj-telefone').value.trim(),
+                    email: document.getElementById('dj-email').value.trim(),
+                    endereco: document.getElementById('dj-endereco').value.trim(),
+                    cidade: document.getElementById('dj-cidade').value.trim(),
+                    logo: document.getElementById('dj-logo').value.trim(),
+                    nextOrcamentoNum: djData.nextOrcamentoNum
+                };
+                
+                // Garantir que o telefone tenha o prefixo +55
+                if (djData.telefone && !djData.telefone.startsWith('+55')) {
+                    djData.telefone = '+55 ' + djData.telefone;
+                }
+                
+                localStorage.setItem('djmanager-dj', JSON.stringify(djData));
+                showToast('Dados do DJ salvos!', 'success');
+                djModal.classList.remove('active');
+            }
+            
+            function updateDjData() {
+                document.getElementById('next-orcamento-number').value = String(djData.nextOrcamentoNum).padStart(4, '0');
+            }
+            
+            // Carregar listas - ADICIONADO BOTÃO WHATSAPP
             function loadClientes(searchTerm = '') {
                 const tbody = document.getElementById('clientes-body');
                 const emptyRow = document.getElementById('empty-clientes');
@@ -1525,8 +1785,6 @@
                 tbody.innerHTML = '';
                 
                 filteredClientes.forEach(cliente => {
-                    const orcamentosCliente = orcamentos.filter(o => o.clienteId === cliente.id);
-                    
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${cliente.nome}</td>
@@ -1535,6 +1793,9 @@
                             <div class="action-buttons">
                                 <div class="action-btn edit-btn" title="Editar" onclick="window.editCliente('${cliente.id}')">
                                     <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${cliente.id}')">
+                                    <i class="fab fa-whatsapp"></i>
                                 </div>
                                 <div class="action-btn delete-btn" title="Excluir" onclick="window.deleteCliente('${cliente.id}')">
                                     <i class="fas fa-trash"></i>
@@ -1558,7 +1819,8 @@
                             cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             cliente.telefone.includes(searchTerm) ||
                             orcamento.evento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            orcamento.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
+                            orcamento.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            orcamento.numero?.includes(searchTerm)
                         );
                     });
                 }
@@ -1601,6 +1863,7 @@
                     
                     const row = document.createElement('tr');
                     row.innerHTML = `
+                        <td>${orcamento.numero}</td>
                         <td>${clienteNome}</td>
                         <td>R$ ${formatCurrency(orcamento.valor)}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -1609,8 +1872,11 @@
                                 <div class="action-btn edit-btn" title="Editar" onclick="window.editOrcamento('${orcamento.id}')">
                                     <i class="fas fa-edit"></i>
                                 </div>
-                                <div class="action-btn delete-btn" title="Excluir" onclick="window.deleteOrcamento('${orcamento.id}')">
+                                <div class="action-btn delete-btn" title="Exclutar" onclick="window.deleteOrcamento('${orcamento.id}')">
                                     <i class="fas fa-trash"></i>
+                                </div>
+                                <div class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${orcamento.clienteId}')">
+                                    <i class="fab fa-whatsapp"></i>
                                 </div>
                                 <div class="action-btn pdf-btn" title="Gerar PDF" onclick="window.generatePDF('${orcamento.id}')">
                                     <i class="fas fa-file-pdf"></i>
@@ -1660,7 +1926,7 @@
                     if (o.status !== 'pendente') return false;
                     const validade = new Date(o.validade);
                     return validade < hoje;
-                }).slice(0, 5); // Limitar a 5 itens
+                }).slice(0, 5);
                 
                 if (followups.length === 0) {
                     emptyRow.style.display = '';
@@ -1684,6 +1950,9 @@
                             <div class="action-buttons">
                                 <div class="action-btn edit-btn" title="Editar" onclick="window.editOrcamento('${orcamento.id}')">
                                     <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="action-btn whatsapp-btn" title="WhatsApp" onclick="window.openWhatsApp('${orcamento.clienteId}')">
+                                    <i class="fab fa-whatsapp"></i>
                                 </div>
                                 <div class="action-btn pdf-btn" title="PDF" onclick="window.generatePDF('${orcamento.id}')">
                                     <i class="fas fa-file-pdf"></i>
@@ -1740,8 +2009,9 @@
                 const data = {
                     clientes,
                     orcamentos,
+                    djData,
                     exportDate: new Date().toISOString(),
-                    version: '1.0'
+                    version: '2.0'
                 };
                 
                 const dataStr = JSON.stringify(data, null, 2);
@@ -1783,12 +2053,16 @@
                         if (confirm(`Importar ${data.clientes.length} clientes e ${data.orcamentos.length} orçamentos?`)) {
                             clientes = data.clientes;
                             orcamentos = data.orcamentos;
+                            if (data.djData) {
+                                djData = data.djData;
+                            }
                             saveToLocalStorage();
                             loadClientes();
                             loadOrcamentos();
                             updateDashboard();
                             updateFinanceiro();
                             updateNotifications();
+                            updateDjData();
                             showToast('Backup importado!', 'success');
                         }
                     } catch (error) {
@@ -1803,11 +2077,23 @@
                     localStorage.clear();
                     clientes = [];
                     orcamentos = [];
+                    djData = {
+                        nome: '',
+                        cpf: '',
+                        cnpj: '',
+                        telefone: '',
+                        email: '',
+                        endereco: '',
+                        cidade: '',
+                        logo: '',
+                        nextOrcamentoNum: 85
+                    };
                     loadClientes();
                     loadOrcamentos();
                     updateDashboard();
                     updateFinanceiro();
                     updateNotifications();
+                    updateDjData();
                     showToast('Dados apagados!', 'success');
                 }
             }
@@ -1832,16 +2118,6 @@
                 return value.toFixed(2).replace('.', ',');
             }
             
-            function formatPhoneNumber(phone) {
-                let cleaned = phone.replace(/\D/g, '');
-                if (cleaned.length === 11) {
-                    return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-                } else if (cleaned.length === 10) {
-                    return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-                }
-                return phone;
-            }
-            
             function getStatusText(status) {
                 switch (status) {
                     case 'aceito': return 'Aceito';
@@ -1859,7 +2135,7 @@
                 setTimeout(() => toast.classList.remove('show'), 3000);
             }
             
-            // WhatsApp
+            // WhatsApp - MELHORADO
             window.openWhatsApp = function(clienteId) {
                 const cliente = clientes.find(c => c.id === clienteId);
                 if (!cliente) return;
@@ -1869,9 +2145,31 @@
                     phone = '55' + phone.substring(1);
                 } else if (phone.length === 10) {
                     phone = '55' + phone;
+                } else if (phone.length === 13 && phone.startsWith('55')) {
+                    // Já está formatado
+                } else if (phone.length === 12 && phone.startsWith('55')) {
+                    // Já está formatado
                 }
                 
-                const message = `Olá ${cliente.nome.split(' ')[0]}! Tudo bem? Aqui é o DJ Manager, gostaria de falar sobre seu orçamento.`;
+                // Verificar se é número do Brasil
+                if (!phone.startsWith('55')) {
+                    phone = '55' + phone;
+                }
+                
+                // Remover qualquer caractere não numérico
+                phone = phone.replace(/\D/g, '');
+                
+                // Criar mensagem personalizada
+                const orcamentosCliente = orcamentos.filter(o => o.clienteId === clienteId);
+                let message = `Olá ${cliente.nome.split(' ')[0]}! Tudo bem? Aqui é o ${djData.nome || 'DJ Manager'}.`;
+                
+                if (orcamentosCliente.length > 0) {
+                    const orcamentoMaisRecente = orcamentosCliente[orcamentosCliente.length - 1];
+                    message += ` Gostaria de falar sobre seu orçamento #${orcamentoMaisRecente.numero} (${orcamentoMaisRecente.evento || 'evento'}).`;
+                } else {
+                    message += ` Gostaria de conversar sobre seu evento.`;
+                }
+                
                 const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
                 window.open(url, '_blank');
             };
