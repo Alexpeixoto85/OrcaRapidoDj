@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -128,6 +130,17 @@
         }
         .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--dark); line-height: 1; }
         .stat-label { font-size: 0.8rem; color: var(--secondary); font-weight: 500; }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+            height: 300px;
+            position: relative;
+        }
 
         /* Colors for Stats */
         .bg-blue { background: #dbeafe; color: var(--primary); }
@@ -379,21 +392,26 @@
         </div>
 
         <div id="financeiro-view" class="view">
-            <div class="section-title">Resumo Financeiro</div>
+            <div class="section-title">Previsão Mensal (Confirmado + Pendente)</div>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+
+            <div class="section-title">Resumo Geral</div>
             <div class="list-card">
-                <div class="card-subtitle">Estimado (Total)</div>
+                <div class="card-subtitle">Potencial Total (Estimado)</div>
                 <div class="card-price" id="fin-total">R$ 0,00</div>
             </div>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon bg-green"><i class="fas fa-check"></i></div>
                     <div class="stat-value" id="fin-aceito" style="font-size: 1.1rem">R$ 0</div>
-                    <div class="stat-label">Fechado</div>
+                    <div class="stat-label">Já Fechado</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon bg-orange"><i class="fas fa-hourglass-half"></i></div>
                     <div class="stat-value" id="fin-pendente" style="font-size: 1.1rem">R$ 0</div>
-                    <div class="stat-label">Em Aberto</div>
+                    <div class="stat-label">A Fechar</div>
                 </div>
             </div>
         </div>
@@ -577,6 +595,7 @@
         // --- UI MANAGER ---
         const UI = {
             data: { clientes: [], orcamentos: [] },
+            chartInstance: null,
             
             init: () => {
                 UI.data.clientes = Storage.get('clientes');
@@ -720,12 +739,120 @@
                 document.getElementById('fin-total').innerText = Utils.formatCurrency(total);
                 document.getElementById('fin-aceito').innerText = Utils.formatCurrency(aceito);
                 document.getElementById('fin-pendente').innerText = Utils.formatCurrency(pendente);
+                
+                UI.renderChart();
+            },
+
+            renderChart: () => {
+                const ctx = document.getElementById('revenueChart').getContext('2d');
+                
+                // Agrupar dados: Fechados e Pendentes
+                const confirmedData = {};
+                const pendingData = {};
+                
+                UI.data.orcamentos.forEach(o => {
+                    if (!o.dataEvento || o.status === 'recusado') return;
+                    
+                    const dateKey = o.dataEvento.substring(0, 7); // YYYY-MM
+                    
+                    if(o.status === 'aceito') {
+                        confirmedData[dateKey] = (confirmedData[dateKey] || 0) + o.valor;
+                    } else if (o.status === 'pendente') {
+                        pendingData[dateKey] = (pendingData[dateKey] || 0) + o.valor;
+                    }
+                });
+
+                // Obter todas as chaves únicas (meses)
+                const allKeys = new Set([...Object.keys(confirmedData), ...Object.keys(pendingData)]);
+                const sortedKeys = Array.from(allKeys).sort();
+
+                const labels = sortedKeys.map(k => {
+                    const [y, m] = k.split('-');
+                    return `${m}/${y}`;
+                });
+                
+                const dataConfirmed = sortedKeys.map(k => confirmedData[k] || 0);
+                const dataPending = sortedKeys.map(k => pendingData[k] || 0);
+
+                if (UI.chartInstance) {
+                    UI.chartInstance.destroy();
+                }
+
+                if (sortedKeys.length === 0) return;
+
+                UI.chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Fechado',
+                                data: dataConfirmed,
+                                backgroundColor: '#3b82f6', // Primary Blue
+                                borderRadius: 4,
+                                stack: 'Stack 0',
+                            },
+                            {
+                                label: 'Pendente (Previsto)',
+                                data: dataPending,
+                                backgroundColor: '#f59e0b', // Warning Orange
+                                borderRadius: 4,
+                                stack: 'Stack 0',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: { 
+                                display: true,
+                                position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 10 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.y !== null) {
+                                            label += Utils.formatCurrency(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                grid: { borderDash: [2, 4], color: '#e2e8f0' },
+                                ticks: {
+                                    callback: function(value) {
+                                        if(value >= 1000) return 'R$ ' + value / 1000 + 'k';
+                                        return value;
+                                    },
+                                    font: { size: 10 }
+                                }
+                            },
+                            x: {
+                                stacked: true,
+                                grid: { display: false },
+                                ticks: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
             },
 
             // --- MODALS ---
             openModal: (type) => {
                 document.getElementById(`overlay-${type}`).classList.add('active');
-                // Pequeno delay para animação suave
                 requestAnimationFrame(() => {
                     document.getElementById(`overlay-${type}`).classList.add('active');
                 });
@@ -743,7 +870,6 @@
             },
 
             openNewOrcamento: () => {
-                // Populate Cliente Select
                 const select = document.getElementById('o-cliente');
                 select.innerHTML = '<option value="">Selecione...</option>';
                 UI.data.clientes.forEach(c => {
@@ -760,10 +886,9 @@
                 document.getElementById('o-id').value = '';
                 document.getElementById('title-orcamento').innerText = 'Novo Orçamento';
                 
-                // Defaults
                 const sett = Storage.getSettings();
                 const today = new Date();
-                today.setDate(today.getDate() + 15); // Validade padrão 15 dias
+                today.setDate(today.getDate() + 15);
                 document.getElementById('o-validade').value = today.toISOString().split('T')[0];
                 
                 UI.openModal('orcamento');
@@ -804,7 +929,6 @@
                     
                     if(document.getElementById('form-cliente').dataset.returnTo === 'orcamento') {
                         UI.openNewOrcamento();
-                        // Selecionar o novo cliente
                         setTimeout(() => document.getElementById('o-cliente').value = id, 100);
                     } else {
                         UI.renderClientes();
@@ -867,7 +991,6 @@
                     const o = UI.data.orcamentos.find(x => x.id === id);
                     if(!o) return;
                     
-                    // Populate select first
                     const select = document.getElementById('o-cliente');
                     select.innerHTML = '';
                     UI.data.clientes.forEach(c => {
@@ -880,7 +1003,7 @@
                     document.getElementById('o-data').value = o.dataEvento;
                     
                     const valInput = document.getElementById('o-valor');
-                    valInput.value = (o.valor * 100).toFixed(0); // Hack para a máscara funcionar
+                    valInput.value = (o.valor * 100).toFixed(0);
                     Utils.maskMoney(valInput);
                     
                     document.getElementById('o-status').value = o.status;
@@ -946,7 +1069,6 @@
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     
-                    // Header Azul
                     doc.setFillColor(59, 130, 246);
                     doc.rect(0, 0, 210, 40, 'F');
                     
@@ -957,7 +1079,6 @@
                     doc.setFontSize(10);
                     doc.text("Proposta de Serviços", 105, 28, { align: "center" });
 
-                    // Info
                     doc.setTextColor(0, 0, 0);
                     let y = 60;
                     
@@ -998,13 +1119,11 @@
                     
                     y += 40 + (splitDesc.length * 5);
 
-                    // Total
                     doc.setFontSize(16);
                     doc.setFont("helvetica", "bold");
                     doc.setTextColor(59, 130, 246);
                     doc.text(`TOTAL: ${Utils.formatCurrency(o.valor)}`, 190, y, { align: "right" });
 
-                    // Footer
                     doc.setFontSize(8);
                     doc.setTextColor(100);
                     doc.text(`Documento gerado digitalmente por DJ Manager Mobile`, 105, 280, { align: "center" });
@@ -1055,16 +1174,13 @@
             }
         };
 
-        // --- CLOSING MODALS ON OUTSIDE CLICK ---
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if(e.target === overlay) UI.closeModals();
             });
         });
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', UI.init);
-
     </script>
 </body>
 </html>
