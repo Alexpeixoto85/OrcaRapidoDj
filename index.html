@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -1496,165 +1495,173 @@
                     const s = Storage.getSettings();
                     
                     const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
+                    const doc = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
                     
-                    // --- THEME & IDENTITY ---
-                    const primaryColor = [59, 130, 246]; // #3b82f6 (Blue)
-                    const lightGray = [241, 245, 249]; // #f1f5f9
-                    const borderColor = [200, 200, 200];
+                    // --- CONFIGURAÇÕES ---
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const pageHeight = doc.internal.pageSize.getHeight();
+                    const margin = { left: 15, right: 15, top: 20, bottom: 20 };
+                    const contentWidth = pageWidth - margin.left - margin.right;
+                    let yPos = margin.top;
                     
-                    // --- HEADER BLOCK ---
+                    // --- CORES ---
+                    const primaryColor = [59, 130, 246];
+                    const lightGray = [241, 245, 249];
+                    
+                    // --- CABEÇALHO ---
+                    // Barra superior colorida
                     doc.setFillColor(...primaryColor);
-                    doc.rect(0, 0, 210, 45, 'F');
+                    doc.rect(0, 0, pageWidth, 25, 'F');
                     
-                    // Logo Rendering
+                    // Logo
                     if (s.logo) {
                         try {
-                            doc.addImage(s.logo, 'PNG', 14, 8, 28, 28);
-                        } catch (e) { console.error("Logo error", e); }
-                    } else {
-                        // Fallback circle if no logo
-                        doc.setFillColor(255, 255, 255);
-                        doc.circle(28, 22, 14, 'F');
-                        doc.setTextColor(...primaryColor);
-                        doc.setFontSize(14);
-                        doc.text("DJ", 24, 25);
+                            doc.addImage(s.logo, 'PNG', margin.left, 5, 15, 15);
+                        } catch (e) {
+                            console.log("Erro ao carregar logo:", e);
+                        }
                     }
-
-                    // Company Info (White Text on Blue)
+                    
+                    // Nome da empresa (branco sobre fundo azul)
                     doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(18);
+                    doc.setFontSize(14);
                     doc.setFont("helvetica", "bold");
-                    doc.text(s.nome.toUpperCase() || "SUA EMPRESA", 50, 18);
+                    doc.text(s.nome.toUpperCase(), margin.left + (s.logo ? 20 : 0), 12);
                     
-                    doc.setFontSize(9);
+                    // Informações de contato à direita
+                    doc.setFontSize(7);
                     doc.setFont("helvetica", "normal");
-                    doc.text(s.razao || "", 50, 24);
-                    doc.text(`${s.cnpj ? 'CNPJ: ' + s.cnpj : ''}`, 50, 29);
+                    doc.text(s.telefone || "", pageWidth - margin.right, 8, { align: "right" });
+                    doc.text(s.email || "", pageWidth - margin.right, 12, { align: "right" });
+                    doc.text(s.instagram || "", pageWidth - margin.right, 16, { align: "right" });
                     
-                    // Contact Info (Right Side Header)
-                    doc.setFontSize(9);
-                    doc.text(s.telefone || "", 200, 18, { align: "right" });
-                    doc.text(s.email || "", 200, 23, { align: "right" });
-                    doc.text(s.instagram || "", 200, 28, { align: "right" });
-
-                    // --- TITLE SECTION ---
-                    let yPos = 60;
+                    yPos = 35;
                     
-                    // Page Border / Identity Frame
-                    doc.setDrawColor(...primaryColor);
-                    doc.setLineWidth(0.5);
-                    doc.rect(10, 50, 190, 235); // Main Frame
-
-                    doc.setFontSize(16);
+                    // --- TÍTULO DO ORÇAMENTO ---
                     doc.setTextColor(...primaryColor);
+                    doc.setFontSize(16);
                     doc.setFont("helvetica", "bold");
-                    doc.text(`ORÇAMENTO #${o.numero}`, 105, yPos, { align: "center" });
+                    doc.text(`ORÇAMENTO #${o.numero}`, pageWidth / 2, yPos, { align: "center" });
                     
-                    yPos += 15;
-
-                    // --- CLIENT INFO BOX ---
-                    doc.setDrawColor(...borderColor);
+                    yPos += 10;
+                    
+                    // --- CLIENTE ---
+                    doc.setDrawColor(200, 200, 200);
                     doc.setFillColor(...lightGray);
-                    doc.roundedRect(15, yPos, 180, 22, 2, 2, 'FD');
+                    doc.roundedRect(margin.left, yPos, contentWidth, 15, 2, 2, 'F');
+                    
+                    doc.setFontSize(8);
+                    doc.setTextColor(100);
+                    doc.text("CLIENTE", margin.left + 5, yPos + 5);
                     
                     doc.setFontSize(10);
-                    doc.setTextColor(100); // Gray Label
-                    doc.text("CLIENTE", 20, yPos + 6);
-                    
-                    doc.setFontSize(11);
-                    doc.setTextColor(0); // Black Text
+                    doc.setTextColor(0);
                     doc.setFont("helvetica", "bold");
-                    doc.text(c.nome, 20, yPos + 14);
-                    doc.setFont("helvetica", "normal");
-                    doc.text(c.telefone, 100, yPos + 14);
+                    doc.text(c.nome, margin.left + 5, yPos + 11);
                     
-                    yPos += 30;
-
-                    // --- EVENT DETAILS GRID ---
-                    doc.setFontSize(12);
+                    yPos += 20;
+                    
+                    // --- DETALHES DO EVENTO ---
+                    doc.setFontSize(10);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
-                    doc.text("DETALHES DO EVENTO", 15, yPos);
+                    doc.text("DETALHES DO EVENTO", margin.left, yPos);
                     
-                    yPos += 5;
-                    // Draw a line
-                    doc.setDrawColor(...borderColor);
-                    doc.line(15, yPos, 195, yPos);
+                    yPos += 7;
                     
-                    yPos += 8;
-                    
+                    // Grid de detalhes
                     const drawDetail = (label, value, x, y) => {
                         doc.setFontSize(8);
                         doc.setTextColor(100);
                         doc.text(label, x, y);
-                        doc.setFontSize(10);
+                        doc.setFontSize(9);
                         doc.setTextColor(0);
-                        doc.text(value || "-", x, y + 5);
+                        doc.text(value || "-", x, y + 4);
                     };
-
-                    drawDetail("TIPO", o.evento, 20, yPos);
-                    drawDetail("DATA", Utils.formatDate(o.dataEvento), 70, yPos);
-                    drawDetail("HORÁRIO", o.horario, 120, yPos);
                     
-                    yPos += 12;
-                    drawDetail("LOCAL", o.local || "A definir", 20, yPos);
-
-                    // --- TABLE SERVICES ---
-                    yPos += 20;
-                    doc.setFontSize(12);
+                    drawDetail("TIPO", o.evento, margin.left, yPos);
+                    drawDetail("DATA", Utils.formatDate(o.dataEvento), margin.left + 60, yPos);
+                    drawDetail("HORÁRIO", o.horario || "-", margin.left + 120, yPos);
+                    
+                    yPos += 10;
+                    drawDetail("LOCAL", o.local || "A definir", margin.left, yPos);
+                    
+                    yPos += 15;
+                    
+                    // --- SERVIÇOS E VALOR ---
+                    doc.setFontSize(10);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
-                    doc.text("SERVIÇOS INCLUÍDOS", 15, yPos);
-
-                    const tableData = [
-                        [o.descricao || "Serviços de DJ, som e iluminação", Utils.formatCurrency(o.valor)],
-                    ];
-
-                    doc.autoTable({
-                        startY: yPos + 5,
-                        margin: { left: 15, right: 15 },
-                        head: [['DESCRIÇÃO', 'VALOR']],
-                        body: tableData,
-                        theme: 'grid',
-                        headStyles: { 
-                            fillColor: primaryColor, 
-                            textColor: [255, 255, 255], 
-                            fontStyle: 'bold',
-                            halign: 'center'
-                        },
-                        bodyStyles: { 
-                            fontSize: 10, 
-                            cellPadding: 6 
-                        },
-                        columnStyles: {
-                            0: { halign: 'left', cellWidth: 130 },
-                            1: { halign: 'right', fontStyle: 'bold', cellWidth: 45 }
-                        },
-                        foot: [['TOTAL', Utils.formatCurrency(o.valor)]],
-                        footStyles: { 
-                            fillColor: lightGray, 
-                            textColor: primaryColor, 
-                            fontStyle: 'bold', 
-                            halign: 'right' 
-                        }
-                    });
-
-                    yPos = doc.lastAutoTable.finalY + 15;
-
-                    // --- CONTRACT CLAUSES ---
-                    doc.setFontSize(12);
-                    doc.setTextColor(...primaryColor);
-                    doc.setFont("helvetica", "bold");
-                    doc.text("CLÁUSULAS DO CONTRATO", 15, yPos);
+                    doc.text("SERVIÇOS INCLUÍDOS", margin.left, yPos);
                     
-                    yPos += 5;
-                    doc.setDrawColor(...borderColor);
-                    doc.line(15, yPos, 195, yPos);
+                    yPos += 7;
+                    
+                    // Tabela simples
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
+                    
+                    // Cabeçalho da tabela
+                    doc.setFillColor(...primaryColor);
+                    doc.rect(margin.left, yPos, contentWidth, 8, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(9);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("DESCRIÇÃO", margin.left + 5, yPos + 5.5);
+                    doc.text("VALOR", margin.left + contentWidth - 25, yPos + 5.5, { align: "right" });
                     
                     yPos += 8;
                     
-                    // Adicionar cláusulas do contrato
+                    // Conteúdo da tabela
+                    doc.setFillColor(255, 255, 255);
+                    doc.rect(margin.left, yPos, contentWidth, 10, 'F');
+                    doc.setTextColor(0);
+                    doc.setFontSize(9);
+                    doc.setFont("helvetica", "normal");
+                    
+                    const descricao = o.descricao || "Serviços de DJ, som e iluminação";
+                    const lines = doc.splitTextToSize(descricao, contentWidth - 60);
+                    
+                    // Primeira linha
+                    doc.text(lines[0], margin.left + 5, yPos + 6);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 5, yPos + 6, { align: "right" });
+                    
+                    // Linhas adicionais
+                    for (let i = 1; i < lines.length; i++) {
+                        yPos += 4;
+                        doc.setFont("helvetica", "normal");
+                        doc.text(lines[i], margin.left + 5, yPos + 6);
+                    }
+                    
+                    yPos += 10;
+                    
+                    // Linha do total
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
+                    
+                    doc.setFillColor(...lightGray);
+                    doc.rect(margin.left, yPos, contentWidth, 10, 'F');
+                    doc.setTextColor(...primaryColor);
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("TOTAL", margin.left + 5, yPos + 6.5);
+                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 5, yPos + 6.5, { align: "right" });
+                    
+                    yPos += 15;
+                    
+                    // --- CLÁUSULAS COMPACTAS ---
+                    doc.setFontSize(10);
+                    doc.setTextColor(...primaryColor);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("CONDIÇÕES E CLÁUSULAS", margin.left, yPos);
+                    
+                    yPos += 7;
+                    
+                    // Cláusulas compactadas
                     const clausulas = (s.clausulasContrato || `1. O presente orçamento tem validade de 15 dias a partir da data de emissão.
 2. Para reserva da data, será necessário o pagamento de 50% do valor total como sinal.
 3. O pagamento do saldo restante deverá ser efetuado até o dia do evento.
@@ -1666,49 +1673,65 @@
 9. O repertório será definido em conjunto com o contratante, respeitando a classificação indicativa.
 10. O som e iluminação serão ajustados conforme as normas do local e legislação vigente.`).split('\n');
                     
-                    doc.setFontSize(9);
+                    doc.setFontSize(7);
                     doc.setTextColor(0);
                     doc.setFont("helvetica", "normal");
                     
                     clausulas.forEach((clausula, index) => {
-                        if(yPos > 250) {
+                        // Verificar se ainda cabe na página
+                        if (yPos > pageHeight - 30) {
                             doc.addPage();
-                            yPos = 20;
+                            yPos = margin.top;
                         }
-                        doc.text(clausula.trim(), 20, yPos, { maxWidth: 170 });
-                        yPos += 6;
+                        
+                        const lines = doc.splitTextToSize(clausula.trim(), contentWidth);
+                        lines.forEach(line => {
+                            doc.text(line, margin.left, yPos);
+                            yPos += 4;
+                        });
+                        yPos += 2; // Espaço entre cláusulas
                     });
-
-                    yPos += 10;
-
-                    // --- PAYMENT & FOOTER ---
-                    // Payment Box
-                    doc.setDrawColor(...borderColor);
-                    doc.roundedRect(15, yPos, 180, 25, 2, 2);
                     
-                    doc.setFontSize(10);
-                    doc.setTextColor(...primaryColor);
-                    doc.text("Formas de Pagamento", 20, yPos + 8);
+                    yPos += 5;
                     
-                    doc.setFontSize(9);
-                    doc.setTextColor(0);
-                    doc.text("• PIX (Chave: " + (s.pix || "Informar") + ")", 20, yPos + 15);
-                    doc.text("• Dinheiro", 100, yPos + 15);
-                    doc.text("• Cartão (taxas aplicáveis)", 150, yPos + 15);
-
-                    // Bottom Signatures
-                    let bottomY = 260;
+                    // --- FORMAS DE PAGAMENTO ---
+                    if (yPos < pageHeight - 30) {
+                        doc.setDrawColor(200, 200, 200);
+                        doc.setLineWidth(0.5);
+                        doc.roundedRect(margin.left, yPos, contentWidth, 12, 2, 2);
+                        
+                        doc.setFontSize(8);
+                        doc.setTextColor(...primaryColor);
+                        doc.text("FORMA DE PAGAMENTO", margin.left + 5, yPos + 5);
+                        
+                        doc.setFontSize(7);
+                        doc.setTextColor(0);
+                        doc.text(`PIX: ${s.pix || "Informar"}`, margin.left + 5, yPos + 9);
+                        doc.text("Dinheiro / Cartão", margin.left + 100, yPos + 9);
+                        
+                        yPos += 15;
+                    }
+                    
+                    // --- ASSINATURAS ---
+                    const signatureY = pageHeight - 25;
                     doc.setDrawColor(0);
-                    doc.line(25, bottomY, 85, bottomY); // Line 1
-                    doc.line(125, bottomY, 185, bottomY); // Line 2
+                    doc.setLineWidth(0.3);
+                    doc.line(margin.left + 20, signatureY, margin.left + 80, signatureY);
+                    doc.line(margin.left + 110, signatureY, margin.left + 170, signatureY);
                     
-                    doc.setFontSize(8);
+                    doc.setFontSize(7);
                     doc.setFont("helvetica", "normal");
-                    doc.text(s.nome, 55, bottomY + 5, { align: 'center' });
-                    doc.text("Contratante", 155, bottomY + 5, { align: 'center' });
-
+                    doc.text(s.nome, margin.left + 50, signatureY + 5, { align: "center" });
+                    doc.text("Contratante", margin.left + 140, signatureY + 5, { align: "center" });
+                    
+           
+                    // --- RODAPÉ ---
+                    doc.setFontSize(6);
+                    doc.setTextColor(150);
+                    doc.text(`${s.razao} | CNPJ: ${s.cnpj} | ${s.endereco.replace(/\n/g, ' ') || ''}`, pageWidth / 2, pageHeight - 5, { align: "center" });
+                    
                     doc.save(`Orcamento_${o.numero}.pdf`);
-                    Utils.toast('PDF Baixado!');
+                    Utils.toast('PDF baixado com sucesso!');
                 }
             },
 
