@@ -121,7 +121,10 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+        .stat-card:active { transform: scale(0.98); box-shadow: var(--shadow-sm); }
 
         .stat-icon {
             width: 32px; height: 32px;
@@ -170,6 +173,7 @@
             color: var(--secondary);
         }
 
+        /* List Card - Melhorado para clicar */
         .list-card {
             background: var(--surface);
             border-radius: var(--radius-md);
@@ -179,7 +183,8 @@
             position: relative;
             overflow: hidden;
             border-left: 4px solid transparent;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
         }
         .list-card:active { transform: scale(0.98); }
 
@@ -304,6 +309,145 @@
             margin-top: 10px;
         }
 
+        /* --- Card de Detalhes do Orçamento --- */
+        .details-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .details-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+        
+        .details-subtitle {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            margin-top: 5px;
+        }
+        
+        .details-section {
+            margin-bottom: 20px;
+        }
+        
+        .details-section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .details-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 1rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .private-notes {
+            background: #fff7ed;
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+        }
+        
+        .private-notes-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #c2410c;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .private-notes-content {
+            font-size: 0.9rem;
+            color: #7c2d12;
+            line-height: 1.4;
+        }
+        
+        .details-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .btn-details {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-details:active { transform: scale(0.95); }
+        
+        .btn-details-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-details-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        
+        .btn-details-secondary {
+            background: var(--light);
+            color: var(--secondary);
+        }
+        
+        .btn-details-danger {
+            background: var(--light);
+            color: var(--danger);
+        }
+
         /* Imagem Preview no Settings */
         .logo-preview-container {
             width: 100%; display: flex; justify-content: center; margin-bottom: 15px;
@@ -332,6 +476,31 @@
         .toast.show { transform: translateX(-50%) translateY(20px); }
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        
+        /* Badge para notificações */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        
+        .badge-primary { background: var(--primary); color: white; }
+        .badge-warning { background: var(--warning); color: white; }
+        .badge-danger { background: var(--danger); color: white; }
+        
+        /* Data e hora formatadas */
+        .date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--light);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
     </style>
 </head>
 <body>
@@ -382,7 +551,8 @@
                 <span class="tag tag-alert" id="alert-badge" style="display:none">!</span>
             </div>
             <div id="followup-list">
-                </div>
+                <!-- Lista de follow-ups será preenchida aqui -->
+            </div>
         </div>
 
         <div id="clientes-view" class="view">
@@ -445,6 +615,15 @@
             <i class="fas fa-chart-pie"></i> <span>Finanças</span>
         </a>
     </nav>
+
+    <!-- Modal de Detalhes do Orçamento -->
+    <div class="modal-overlay" id="overlay-orcamento-details"></div>
+    <div class="modal-sheet" id="sheet-orcamento-details">
+        <div class="sheet-handle"></div>
+        <div id="orcamento-details-content">
+            <!-- Conteúdo será preenchido dinamicamente -->
+        </div>
+    </div>
 
     <div class="modal-overlay" id="overlay-cliente"></div>
     <div class="modal-sheet" id="sheet-cliente">
@@ -620,6 +799,11 @@
                 const [y, m, d] = dateStr.split('-');
                 return `${d}/${m}/${y}`;
             },
+            formatDateTime: (dateStr) => {
+                if(!dateStr) return '-';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            },
             maskPhone: (input) => {
                 let v = input.value.replace(/\D/g, "");
                 v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
@@ -664,7 +848,17 @@
                 endereco: 'Rua Ernandes de Barros, 352\nSanta Lúcia, Maceió-AL\nCEP 57082-132',
                 pix: '31632000000138',
                 nextOrcamento: 27,
-                logo: null
+                logo: null,
+                clausulasContrato: `1. O presente orçamento tem validade de 15 dias a partir da data de emissão.
+2. Para reserva da data, será necessário o pagamento de 50% do valor total como sinal.
+3. O pagamento do saldo restante deverá ser efetuado até o dia do evento.
+4. Em caso de cancelamento pelo contratante com menos de 30 dias do evento, o sinal não será devolvido.
+5. O profissional se compromete a chegar ao local do evento com 2 horas de antecedência para montagem e testes.
+6. O horário de término do serviço será conforme acordado, com tolerância máxima de 30 minutos.
+7. O contratante é responsável por fornecer ponto de energia adequado e seguro.
+8. Em caso de eventos em locais abertos, é necessária proteção contra chuva para o equipamento.
+9. O repertório será definido em conjunto com o contratante, respeitando a classificação indicativa.
+10. O som e iluminação serão ajustados conforme as normas do local e legislação vigente.`
             },
             saveSettings: (data) => localStorage.setItem('djapp_settings', JSON.stringify(data))
         };
@@ -791,7 +985,7 @@
                 if(isAlert) statusTag = `<span class="tag tag-alert">Vencido</span>`;
 
                 return `
-                    <div class="list-card" style="border-left-color: ${isAlert ? 'var(--danger)' : 'var(--primary)'}">
+                    <div class="list-card" style="border-left-color: ${isAlert ? 'var(--danger)' : 'var(--primary)'}" onclick="UI.showOrcamentoDetails('${o.id}')">
                         <div class="card-header">
                             <div class="card-title">#${o.numero} - ${c.nome}</div>
                             ${statusTag}
@@ -799,13 +993,128 @@
                         <div class="card-subtitle"><i class="fas fa-calendar-day"></i> ${Utils.formatDate(o.dataEvento)} • ${o.evento}</div>
                         <div class="card-price">${Utils.formatCurrency(o.valor)}</div>
                         <div class="action-row">
-                            <button class="btn-sm btn-light" onclick="App.orcamento.edit('${o.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn-sm btn-primary-soft" onclick="App.pdf.generate('${o.id}')"><i class="fas fa-file-pdf"></i> PDF</button>
-                            <button class="btn-sm btn-whatsapp" onclick="App.whatsapp.openOrcamento('${o.id}')"><i class="fab fa-whatsapp"></i> Enviar</button>
-                            <button class="btn-sm btn-light" style="color:var(--danger)" onclick="App.orcamento.delete('${o.id}')"><i class="fas fa-trash"></i></button>
+                            <button class="btn-sm btn-light" onclick="event.stopPropagation(); App.orcamento.edit('${o.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn-sm btn-primary-soft" onclick="event.stopPropagation(); App.pdf.generate('${o.id}')"><i class="fas fa-file-pdf"></i> PDF</button>
+                            <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.openOrcamento('${o.id}')"><i class="fab fa-whatsapp"></i> Enviar</button>
+                            <button class="btn-sm btn-light" style="color:var(--danger)" onclick="event.stopPropagation(); App.orcamento.delete('${o.id}')"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 `;
+            },
+
+            // Nova função para exibir detalhes do orçamento
+            showOrcamentoDetails: (id) => {
+                const o = UI.data.orcamentos.find(x => x.id === id);
+                if(!o) return;
+                
+                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido', telefone: '', email: '' };
+                const settings = Storage.getSettings();
+                
+                let statusBadge = '';
+                if(o.status === 'pendente') statusBadge = `<span class="badge badge-warning">PENDENTE</span>`;
+                if(o.status === 'aceito') statusBadge = `<span class="badge badge-primary">FECHADO</span>`;
+                if(o.status === 'recusado') statusBadge = `<span class="badge badge-danger">RECUSADO</span>`;
+                
+                const detailsContent = `
+                    <div class="details-card">
+                        <div class="details-header">
+                            <div>
+                                <div class="details-title">Orçamento #${o.numero}</div>
+                                <div class="details-subtitle">Criado em: ${Utils.formatDateTime(o.dataCriacao)}</div>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-user"></i> CLIENTE</div>
+                            <div class="details-info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Nome</div>
+                                    <div class="info-value">${c.nome}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Telefone</div>
+                                    <div class="info-value">${c.telefone}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">${c.email || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-calendar-alt"></i> EVENTO</div>
+                            <div class="details-info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Tipo</div>
+                                    <div class="info-value">${o.evento}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Data</div>
+                                    <div class="info-value">${Utils.formatDate(o.dataEvento)}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Horário</div>
+                                    <div class="info-value">${o.horario || '-'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Local</div>
+                                    <div class="info-value">${o.local || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-money-bill-wave"></i> FINANCEIRO</div>
+                            <div class="details-info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Valor Total</div>
+                                    <div class="info-value" style="color: var(--primary); font-size: 1.2rem;">${Utils.formatCurrency(o.valor)}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Status</div>
+                                    <div class="info-value">${o.status === 'pendente' ? 'Pendente' : o.status === 'aceito' ? 'Aceito' : 'Recusado'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Validade</div>
+                                    <div class="info-value">${Utils.formatDate(o.validade)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-clipboard-list"></i> SERVIÇOS INCLUÍDOS</div>
+                            <div class="info-item">
+                                <div class="info-label">Descrição</div>
+                                <div class="info-value">${o.descricao || 'Serviços de DJ, som e iluminação'}</div>
+                            </div>
+                        </div>
+                        
+                        ${o.obsInternas ? `
+                        <div class="private-notes">
+                            <div class="private-notes-label"><i class="fas fa-eye-slash"></i> OBSERVAÇÕES INTERNAS</div>
+                            <div class="private-notes-content">${o.obsInternas}</div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="details-actions">
+                            <button class="btn-details btn-details-primary" onclick="App.orcamento.edit('${o.id}')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn-details btn-details-whatsapp" onclick="App.whatsapp.openOrcamento('${o.id}')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="btn-details btn-details-secondary" onclick="App.pdf.generate('${o.id}')">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn-block" style="background: var(--light); color: var(--secondary); margin-top: 8px;" onclick="UI.closeModals()">Fechar</button>
+                `;
+                
+                document.getElementById('orcamento-details-content').innerHTML = detailsContent;
+                UI.openModal('orcamento-details');
             },
 
             renderFinanceiro: () => {
@@ -1296,10 +1605,10 @@
                     doc.setFontSize(12);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
-                    doc.text("SERVIÇOS", 15, yPos);
+                    doc.text("SERVIÇOS INCLUÍDOS", 15, yPos);
 
                     const tableData = [
-                        [o.descricao || "Serviços de DJ", Utils.formatCurrency(o.valor)],
+                        [o.descricao || "Serviços de DJ, som e iluminação", Utils.formatCurrency(o.valor)],
                     ];
 
                     doc.autoTable({
@@ -1319,8 +1628,8 @@
                             cellPadding: 6 
                         },
                         columnStyles: {
-                            0: { halign: 'left' },
-                            1: { halign: 'right', fontStyle: 'bold' }
+                            0: { halign: 'left', cellWidth: 130 },
+                            1: { halign: 'right', fontStyle: 'bold', cellWidth: 45 }
                         },
                         foot: [['TOTAL', Utils.formatCurrency(o.valor)]],
                         footStyles: { 
@@ -1333,24 +1642,59 @@
 
                     yPos = doc.lastAutoTable.finalY + 15;
 
-                    // --- PAYMENT & FOOTER ---
-                    // Payment Box
-                    doc.setDrawColor(...borderColor);
-                    doc.roundedRect(15, yPos, 180, 35, 2, 2);
-                    
-                    doc.setFontSize(10);
+                    // --- CONTRACT CLAUSES ---
+                    doc.setFontSize(12);
                     doc.setTextColor(...primaryColor);
-                    doc.text("Pagamento e Condições", 20, yPos + 8);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("CLÁUSULAS DO CONTRATO", 15, yPos);
+                    
+                    yPos += 5;
+                    doc.setDrawColor(...borderColor);
+                    doc.line(15, yPos, 195, yPos);
+                    
+                    yPos += 8;
+                    
+                    // Adicionar cláusulas do contrato
+                    const clausulas = (s.clausulasContrato || `1. O presente orçamento tem validade de 15 dias a partir da data de emissão.
+2. Para reserva da data, será necessário o pagamento de 50% do valor total como sinal.
+3. O pagamento do saldo restante deverá ser efetuado até o dia do evento.
+4. Em caso de cancelamento pelo contratante com menos de 30 dias do evento, o sinal não será devolvido.
+5. O profissional se compromete a chegar ao local do evento com 2 horas de antecedência para montagem e testes.
+6. O horário de término do serviço será conforme acordado, com tolerância máxima de 30 minutos.
+7. O contratante é responsável por fornecer ponto de energia adequado e seguro.
+8. Em caso de eventos em locais abertos, é necessária proteção contra chuva para o equipamento.
+9. O repertório será definido em conjunto com o contratante, respeitando a classificação indicativa.
+10. O som e iluminação serão ajustados conforme as normas do local e legislação vigente.`).split('\n');
                     
                     doc.setFontSize(9);
                     doc.setTextColor(0);
-                    doc.text("• Sinal de 50% para reserva da data.", 20, yPos + 16);
-                    doc.text("• Restante no dia do evento.", 20, yPos + 22);
+                    doc.setFont("helvetica", "normal");
                     
-                    if(s.pix) {
-                        doc.setFont("helvetica", "bold");
-                        doc.text(`PIX: ${s.pix}`, 20, yPos + 30);
-                    }
+                    clausulas.forEach((clausula, index) => {
+                        if(yPos > 250) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        doc.text(clausula.trim(), 20, yPos, { maxWidth: 170 });
+                        yPos += 6;
+                    });
+
+                    yPos += 10;
+
+                    // --- PAYMENT & FOOTER ---
+                    // Payment Box
+                    doc.setDrawColor(...borderColor);
+                    doc.roundedRect(15, yPos, 180, 25, 2, 2);
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(...primaryColor);
+                    doc.text("Formas de Pagamento", 20, yPos + 8);
+                    
+                    doc.setFontSize(9);
+                    doc.setTextColor(0);
+                    doc.text("• PIX (Chave: " + (s.pix || "Informar") + ")", 20, yPos + 15);
+                    doc.text("• Dinheiro", 100, yPos + 15);
+                    doc.text("• Cartão (taxas aplicáveis)", 150, yPos + 15);
 
                     // Bottom Signatures
                     let bottomY = 260;
