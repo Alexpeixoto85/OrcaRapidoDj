@@ -151,6 +151,7 @@
         .bg-orange { background: #ffedd5; color: var(--warning); }
         .bg-red { background: #fee2e2; color: var(--danger); }
         .bg-purple { background: #f3e8ff; color: #8b5cf6; }
+        .bg-cyan { background: #cffafe; color: #06b6d4; }
 
         /* --- Lists & items --- */
         .section-title {
@@ -200,6 +201,8 @@
         .tag-accepted { background: #ecfdf5; color: #047857; }
         .tag-rejected { background: #fef2f2; color: #b91c1c; }
         .tag-alert { background: #fee2e2; color: #ef4444; animation: pulse 2s infinite; }
+        .tag-contact { background: #e0f2fe; color: #0369a1; }
+        .tag-scheduled { background: #fef3c7; color: #b45309; }
 
         .card-price { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-top: 8px; }
 
@@ -216,6 +219,7 @@
         .btn-light { background: #f1f5f9; color: var(--secondary); }
         .btn-primary-soft { background: #dbeafe; color: var(--primary); }
         .btn-whatsapp { background: #dcfce7; color: #16a34a; }
+        .btn-cyan { background: #cffafe; color: #0e7490; }
 
         /* --- Bottom Navigation --- */
         .bottom-nav {
@@ -489,6 +493,7 @@
         .badge-primary { background: var(--primary); color: white; }
         .badge-warning { background: var(--warning); color: white; }
         .badge-danger { background: var(--danger); color: white; }
+        .badge-cyan { background: #06b6d4; color: white; }
         
         /* Data e hora formatadas */
         .date-badge {
@@ -500,6 +505,54 @@
             border-radius: 6px;
             font-size: 0.8rem;
             color: var(--secondary);
+        }
+        
+        /* Alertas de contato agendado */
+        .contact-alert-card {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .contact-date-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #b45309;
+            background: #fef3c7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+        
+        /* Status de contato agendado */
+        .status-contact {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        
+        .status-contact.scheduled {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        
+        .status-contact.completed {
+            background: #d1fae5;
+            color: #047857;
         }
     </style>
 </head>
@@ -544,6 +597,16 @@
                     <div class="stat-value" id="dash-followup">0</div>
                     <div class="stat-label">Follow-up</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-cyan"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-value" id="dash-agendamentos">0</div>
+                    <div class="stat-label">Contatos Agend.</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-value" id="dash-media-mensal">R$ 0</div>
+                    <div class="stat-label">Média Mensal</div>
+                </div>
             </div>
 
             <div class="section-title">
@@ -552,6 +615,14 @@
             </div>
             <div id="followup-list">
                 <!-- Lista de follow-ups será preenchida aqui -->
+            </div>
+            
+            <div class="section-title">
+                Contatos Agendados para Hoje
+                <span class="tag tag-scheduled" id="scheduled-badge" style="display:none">!</span>
+            </div>
+            <div id="scheduled-contacts-list">
+                <!-- Lista de contatos agendados será preenchida aqui -->
             </div>
         </div>
 
@@ -719,6 +790,14 @@
                 <label class="form-label">Validade Orçamento</label>
                 <input type="date" id="o-validade" class="form-control">
             </div>
+            
+            <div class="form-group">
+                <label class="form-label" style="color: var(--accent);"><i class="fas fa-calendar-check"></i> Agendar Contato</label>
+                <input type="date" id="o-data-contato" class="form-control">
+                <div style="font-size: 0.8rem; color: var(--secondary); margin-top: 4px;">
+                    Data para retornar o contato com o cliente
+                </div>
+            </div>
 
             <div class="form-group">
                 <label class="form-label">Descrição / Serviços (Público)</label>
@@ -731,6 +810,54 @@
             </div>
 
             <button type="submit" class="btn-block">Salvar Orçamento</button>
+            <button type="button" class="btn-block" style="background: var(--light); color: var(--secondary); margin-top: 8px;" onclick="UI.closeModals()">Cancelar</button>
+        </form>
+    </div>
+
+    <!-- Modal para gerenciar contato agendado -->
+    <div class="modal-overlay" id="overlay-contact"></div>
+    <div class="modal-sheet" id="sheet-contact">
+        <div class="sheet-handle"></div>
+        <h3 class="section-title" id="title-contact">Agendar Contato</h3>
+        <form id="form-contact" onsubmit="App.contact.save(event)">
+            <input type="hidden" id="contact-orcamento-id">
+            
+            <div class="form-group">
+                <label class="form-label">Data para Contato</label>
+                <input type="date" id="contact-data" class="form-control" required>
+                <div style="font-size: 0.8rem; color: var(--secondary); margin-top: 4px;">
+                    Data em que deve retornar o contato com o cliente
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Observações do Contato</label>
+                <textarea id="contact-observacoes" class="form-control" placeholder="Anotações sobre o que foi conversado ou o que precisa ser abordado no próximo contato..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Status do Contato</label>
+                <select id="contact-status" class="form-control">
+                    <option value="agendado">Agendado</option>
+                    <option value="realizado">Realizado</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="contact-resultado-group" style="display: none;">
+                <label class="form-label">Resultado do Contato</label>
+                <select id="contact-resultado" class="form-control">
+                    <option value="">Selecione...</option>
+                    <option value="cliente_interessado">Cliente interessado</option>
+                    <option value="cliente_pensando">Cliente precisa pensar</option>
+                    <option value="novo_contato_agendado">Novo contato agendado</option>
+                    <option value="orcamento_aceito">Orçamento aceito</option>
+                    <option value="orcamento_recusado">Orçamento recusado</option>
+                    <option value="sem_interesse">Sem interesse</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-block">Salvar Contato</button>
             <button type="button" class="btn-block" style="background: var(--light); color: var(--secondary); margin-top: 8px;" onclick="UI.closeModals()">Cancelar</button>
         </form>
     </div>
@@ -853,7 +980,6 @@
                 });
             },
             calcularMediaMensal: (orcamentos) => {
-                // Agrupar por mês apenas os orçamentos aceitos (fechados)
                 const orcamentosAceitos = orcamentos.filter(o => o.status === 'aceito');
                 
                 if(orcamentosAceitos.length === 0) return 0;
@@ -863,18 +989,48 @@
                 orcamentosAceitos.forEach(o => {
                     if (!o.dataEvento) return;
                     
-                    const mesAno = o.dataEvento.substring(0, 7); // YYYY-MM
+                    const mesAno = o.dataEvento.substring(0, 7);
                     valoresPorMes[mesAno] = (valoresPorMes[mesAno] || 0) + o.valor;
                 });
                 
                 const mesesComDados = Object.keys(valoresPorMes);
                 if(mesesComDados.length === 0) return 0;
                 
-                // Calcular média
                 const somaTotal = Object.values(valoresPorMes).reduce((a, b) => a + b, 0);
                 const media = somaTotal / mesesComDados.length;
                 
                 return media;
+            },
+            getToday: () => {
+                const today = new Date();
+                return today.toISOString().split('T')[0];
+            },
+            isToday: (dateStr) => {
+                if(!dateStr) return false;
+                return dateStr === Utils.getToday();
+            },
+            isPast: (dateStr) => {
+                if(!dateStr) return false;
+                return dateStr < Utils.getToday();
+            },
+            getContactStatusText: (status) => {
+                const statusMap = {
+                    'agendado': 'Agendado',
+                    'realizado': 'Realizado',
+                    'cancelado': 'Cancelado'
+                };
+                return statusMap[status] || status;
+            },
+            getContactResultText: (resultado) => {
+                const resultMap = {
+                    'cliente_interessado': 'Cliente interessado',
+                    'cliente_pensando': 'Cliente precisa pensar',
+                    'novo_contato_agendado': 'Novo contato agendado',
+                    'orcamento_aceito': 'Orçamento aceito',
+                    'orcamento_recusado': 'Orçamento recusado',
+                    'sem_interesse': 'Sem interesse'
+                };
+                return resultMap[resultado] || resultado;
             }
         };
 
@@ -960,7 +1116,7 @@
                 document.getElementById('dash-total-orcamentos').innerText = orcamentos.length;
                 document.getElementById('dash-pendentes').innerText = orcamentos.filter(o => o.status === 'pendente').length;
                 
-                // Follow up logic
+                // Follow up logic - orçamentos vencidos
                 const today = new Date().toISOString().split('T')[0];
                 const followups = orcamentos.filter(o => 
                     o.status === 'pendente' && (o.validade < today || o.validade === today)
@@ -969,12 +1125,80 @@
                 document.getElementById('dash-followup').innerText = followups.length;
                 document.getElementById('alert-badge').style.display = followups.length > 0 ? 'inline-block' : 'none';
 
-                const list = document.getElementById('followup-list');
+                // Contatos agendados para hoje
+                const scheduledToday = orcamentos.filter(o => 
+                    o.dataContato && Utils.isToday(o.dataContato) && o.status === 'pendente'
+                );
+                
+                // Contatos agendados no passado (pendentes)
+                const scheduledPast = orcamentos.filter(o => 
+                    o.dataContato && Utils.isPast(o.dataContato) && o.status === 'pendente'
+                );
+                
+                const totalScheduled = scheduledToday.length + scheduledPast.length;
+                document.getElementById('dash-agendamentos').innerText = totalScheduled;
+                document.getElementById('scheduled-badge').style.display = totalScheduled > 0 ? 'inline-block' : 'none';
+                
+                // Média mensal
+                const mediaMensal = Utils.calcularMediaMensal(orcamentos);
+                document.getElementById('dash-media-mensal').innerText = Utils.formatCurrency(mediaMensal);
+
+                // Render follow-ups vencidos
+                const followupList = document.getElementById('followup-list');
                 if(followups.length === 0) {
-                    list.innerHTML = `<div class="empty-state"><i class="fas fa-thumbs-up"></i><p>Tudo em dia!</p></div>`;
+                    followupList.innerHTML = `<div class="empty-state"><i class="fas fa-thumbs-up"></i><p>Nenhum orçamento vencido!</p></div>`;
                 } else {
-                    list.innerHTML = followups.map(o => UI.createOrcamentoCard(o, true)).join('');
+                    followupList.innerHTML = followups.map(o => UI.createOrcamentoCard(o, true)).join('');
                 }
+                
+                // Render contatos agendados para hoje e passados
+                const scheduledList = document.getElementById('scheduled-contacts-list');
+                const allScheduled = [...scheduledPast, ...scheduledToday];
+                
+                if(allScheduled.length === 0) {
+                    scheduledList.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-check"></i><p>Nenhum contato agendado!</p></div>`;
+                } else {
+                    scheduledList.innerHTML = allScheduled.map(o => UI.createScheduledContactCard(o)).join('');
+                }
+            },
+
+            createScheduledContactCard: (o) => {
+                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                const isPast = Utils.isPast(o.dataContato);
+                const isToday = Utils.isToday(o.dataContato);
+                
+                let alertClass = '';
+                if(isPast) alertClass = 'contact-alert-card';
+                
+                return `
+                    <div class="list-card ${alertClass}" onclick="UI.showOrcamentoDetails('${o.id}')">
+                        <div class="card-header">
+                            <div class="card-title">#${o.numero} - ${c.nome}</div>
+                            <span class="tag ${isPast ? 'tag-alert' : 'tag-contact'}">
+                                ${isPast ? 'ATRASADO' : (isToday ? 'HOJE' : 'AGENDADO')}
+                            </span>
+                        </div>
+                        <div class="card-subtitle">
+                            <i class="fas fa-calendar-day"></i> ${Utils.formatDate(o.dataEvento)} • ${o.evento}
+                        </div>
+                        <div class="contact-date-label">
+                            <i class="fas fa-phone"></i> Contato: ${Utils.formatDate(o.dataContato)}
+                            ${o.observacoesContato ? `• ${o.observacoesContato.substring(0, 30)}...` : ''}
+                        </div>
+                        <div class="card-price">${Utils.formatCurrency(o.valor)}</div>
+                        <div class="action-row">
+                            <button class="btn-sm btn-cyan" onclick="event.stopPropagation(); App.contact.open('${o.id}')">
+                                <i class="fas fa-calendar-check"></i> Contato
+                            </button>
+                            <button class="btn-sm btn-primary-soft" onclick="event.stopPropagation(); App.whatsapp.openOrcamento('${o.id}')">
+                                <i class="fab fa-whatsapp"></i> Zap
+                            </button>
+                            <button class="btn-sm btn-light" onclick="event.stopPropagation(); UI.showOrcamentoDetails('${o.id}')">
+                                <i class="fas fa-eye"></i> Ver
+                            </button>
+                        </div>
+                    </div>
+                `;
             },
 
             renderClientes: (filter = '') => {
@@ -1027,6 +1251,19 @@
                 if(o.status === 'aceito') statusTag = `<span class="tag tag-accepted">Fechado</span>`;
                 if(o.status === 'recusado') statusTag = `<span class="tag tag-rejected">Recusado</span>`;
                 if(isAlert) statusTag = `<span class="tag tag-alert">Vencido</span>`;
+                
+                // Verificar se tem contato agendado
+                let contactBadge = '';
+                if(o.dataContato && o.status === 'pendente') {
+                    const isPast = Utils.isPast(o.dataContato);
+                    const isToday = Utils.isToday(o.dataContato);
+                    contactBadge = `
+                        <div class="contact-date-label">
+                            <i class="fas fa-phone"></i> Contato: ${Utils.formatDate(o.dataContato)}
+                            ${isPast ? '(ATRASADO)' : (isToday ? '(HOJE)' : '')}
+                        </div>
+                    `;
+                }
 
                 return `
                     <div class="list-card" style="border-left-color: ${isAlert ? 'var(--danger)' : 'var(--primary)'}" onclick="UI.showOrcamentoDetails('${o.id}')">
@@ -1035,18 +1272,19 @@
                             ${statusTag}
                         </div>
                         <div class="card-subtitle"><i class="fas fa-calendar-day"></i> ${Utils.formatDate(o.dataEvento)} • ${o.evento}</div>
+                        ${contactBadge}
                         <div class="card-price">${Utils.formatCurrency(o.valor)}</div>
                         <div class="action-row">
                             <button class="btn-sm btn-light" onclick="event.stopPropagation(); App.orcamento.edit('${o.id}')"><i class="fas fa-edit"></i></button>
                             <button class="btn-sm btn-primary-soft" onclick="event.stopPropagation(); App.pdf.generate('${o.id}')"><i class="fas fa-file-pdf"></i> PDF</button>
                             <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.openOrcamento('${o.id}')"><i class="fab fa-whatsapp"></i> Enviar</button>
+                            <button class="btn-sm btn-cyan" onclick="event.stopPropagation(); App.contact.open('${o.id}')"><i class="fas fa-calendar-check"></i></button>
                             <button class="btn-sm btn-light" style="color:var(--danger)" onclick="event.stopPropagation(); App.orcamento.delete('${o.id}')"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             },
 
-            // Nova função para exibir detalhes do orçamento
             showOrcamentoDetails: (id) => {
                 const o = UI.data.orcamentos.find(x => x.id === id);
                 if(!o) return;
@@ -1058,6 +1296,47 @@
                 if(o.status === 'pendente') statusBadge = `<span class="badge badge-warning">PENDENTE</span>`;
                 if(o.status === 'aceito') statusBadge = `<span class="badge badge-primary">FECHADO</span>`;
                 if(o.status === 'recusado') statusBadge = `<span class="badge badge-danger">RECUSADO</span>`;
+                
+                // Seção de contato agendado
+                let contactSection = '';
+                if(o.dataContato) {
+                    const isPast = Utils.isPast(o.dataContato);
+                    const isToday = Utils.isToday(o.dataContato);
+                    
+                    contactSection = `
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-calendar-check"></i> CONTATO AGENDADO</div>
+                            <div class="details-info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Data para Contato</div>
+                                    <div class="info-value">
+                                        ${Utils.formatDate(o.dataContato)}
+                                        ${isPast ? ' <span class="badge badge-danger">ATRASADO</span>' : ''}
+                                        ${isToday ? ' <span class="badge badge-warning">HOJE</span>' : ''}
+                                    </div>
+                                </div>
+                                ${o.statusContato ? `
+                                <div class="info-item">
+                                    <div class="info-label">Status do Contato</div>
+                                    <div class="info-value">${Utils.getContactStatusText(o.statusContato)}</div>
+                                </div>
+                                ` : ''}
+                                ${o.resultadoContato ? `
+                                <div class="info-item">
+                                    <div class="info-label">Resultado</div>
+                                    <div class="info-value">${Utils.getContactResultText(o.resultadoContato)}</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                            ${o.observacoesContato ? `
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="info-label">Observações</div>
+                                <div class="info-value">${o.observacoesContato}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
                 
                 const detailsContent = `
                     <div class="details-card">
@@ -1109,6 +1388,8 @@
                             </div>
                         </div>
                         
+                        ${contactSection}
+                        
                         <div class="details-section">
                             <div class="details-section-title"><i class="fas fa-money-bill-wave"></i> FINANCEIRO</div>
                             <div class="details-info-grid">
@@ -1149,6 +1430,9 @@
                             <button class="btn-details btn-details-whatsapp" onclick="App.whatsapp.openOrcamento('${o.id}')">
                                 <i class="fab fa-whatsapp"></i> WhatsApp
                             </button>
+                            <button class="btn-details btn-details-cyan" onclick="App.contact.open('${o.id}')">
+                                <i class="fas fa-calendar-check"></i> Contato
+                            </button>
                             <button class="btn-details btn-details-secondary" onclick="App.pdf.generate('${o.id}')">
                                 <i class="fas fa-file-pdf"></i> PDF
                             </button>
@@ -1162,7 +1446,6 @@
             },
 
             renderFinanceiro: () => {
-                // Calcular valores apenas para orçamentos pendentes e aceitos
                 const aceito = UI.data.orcamentos
                     .filter(o => o.status === 'aceito')
                     .reduce((acc, o) => acc + o.valor, 0);
@@ -1175,10 +1458,7 @@
                     .filter(o => o.status === 'recusado')
                     .reduce((acc, o) => acc + o.valor, 0);
                 
-                // Potencial total = aceito + pendente (recusados são subtraídos automaticamente)
                 const potencialTotal = aceito + pendente;
-                
-                // Calcular média mensal apenas dos orçamentos aceitos
                 const mediaMensal = Utils.calcularMediaMensal(UI.data.orcamentos);
 
                 document.getElementById('fin-total').innerText = Utils.formatCurrency(potencialTotal);
@@ -1193,14 +1473,13 @@
             renderChart: () => {
                 const ctx = document.getElementById('revenueChart').getContext('2d');
                 
-                // Agrupar dados: Fechados e Pendentes (recusados não entram no gráfico)
                 const confirmedData = {};
                 const pendingData = {};
                 
                 UI.data.orcamentos.forEach(o => {
                     if (!o.dataEvento || o.status === 'recusado') return;
                     
-                    const dateKey = o.dataEvento.substring(0, 7); // YYYY-MM
+                    const dateKey = o.dataEvento.substring(0, 7);
                     
                     if(o.status === 'aceito') {
                         confirmedData[dateKey] = (confirmedData[dateKey] || 0) + o.valor;
@@ -1209,7 +1488,6 @@
                     }
                 });
 
-                // Obter todas as chaves únicas (meses)
                 const allKeys = new Set([...Object.keys(confirmedData), ...Object.keys(pendingData)]);
                 const sortedKeys = Array.from(allKeys).sort();
 
@@ -1235,14 +1513,14 @@
                             {
                                 label: 'Fechado',
                                 data: dataConfirmed,
-                                backgroundColor: '#3b82f6', // Primary Blue
+                                backgroundColor: '#3b82f6',
                                 borderRadius: 4,
                                 stack: 'Stack 0',
                             },
                             {
                                 label: 'Pendente (Previsto)',
                                 data: dataPending,
-                                backgroundColor: '#f59e0b', // Warning Orange
+                                backgroundColor: '#f59e0b',
                                 borderRadius: 4,
                                 stack: 'Stack 0',
                             }
@@ -1439,6 +1717,7 @@
                         valor: Utils.parseCurrency(document.getElementById('o-valor').value),
                         status: document.getElementById('o-status').value,
                         validade: document.getElementById('o-validade').value,
+                        dataContato: document.getElementById('o-data-contato').value || null,
                         descricao: document.getElementById('o-descricao').value,
                         obsInternas: document.getElementById('o-obs-internas').value,
                         dataCriacao: new Date().toISOString()
@@ -1478,6 +1757,7 @@
                     
                     document.getElementById('o-status').value = o.status;
                     document.getElementById('o-validade').value = o.validade;
+                    document.getElementById('o-data-contato').value = o.dataContato || '';
                     document.getElementById('o-descricao').value = o.descricao;
                     document.getElementById('o-obs-internas').value = o.obsInternas || '';
                     
@@ -1492,6 +1772,75 @@
                         UI.renderOrcamentos();
                         UI.renderFinanceiro();
                         Utils.toast('Excluído!', 'success');
+                    }
+                }
+            },
+
+            contact: {
+                open: (orcamentoId) => {
+                    const o = UI.data.orcamentos.find(x => x.id === orcamentoId);
+                    if(!o) return;
+                    
+                    const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                    
+                    document.getElementById('contact-orcamento-id').value = orcamentoId;
+                    document.getElementById('contact-data').value = o.dataContato || '';
+                    document.getElementById('contact-observacoes').value = o.observacoesContato || '';
+                    document.getElementById('contact-status').value = o.statusContato || 'agendado';
+                    document.getElementById('contact-resultado').value = o.resultadoContato || '';
+                    
+                    document.getElementById('title-contact').innerText = `Agendar Contato - ${c.nome}`;
+                    
+                    // Mostrar/ocultar campo de resultado baseado no status
+                    App.contact.toggleResultField();
+                    
+                    UI.openModal('contact');
+                },
+                
+                toggleResultField: () => {
+                    const status = document.getElementById('contact-status').value;
+                    const resultadoGroup = document.getElementById('contact-resultado-group');
+                    
+                    if(status === 'realizado') {
+                        resultadoGroup.style.display = 'block';
+                        document.getElementById('contact-resultado').required = true;
+                    } else {
+                        resultadoGroup.style.display = 'none';
+                        document.getElementById('contact-resultado').required = false;
+                    }
+                },
+                
+                save: (e) => {
+                    e.preventDefault();
+                    const orcamentoId = document.getElementById('contact-orcamento-id').value;
+                    const dataContato = document.getElementById('contact-data').value;
+                    const observacoes = document.getElementById('contact-observacoes').value;
+                    const status = document.getElementById('contact-status').value;
+                    const resultado = document.getElementById('contact-resultado').value;
+                    
+                    const idx = UI.data.orcamentos.findIndex(o => o.id === orcamentoId);
+                    if(idx >= 0) {
+                        UI.data.orcamentos[idx].dataContato = dataContato;
+                        UI.data.orcamentos[idx].observacoesContato = observacoes;
+                        UI.data.orcamentos[idx].statusContato = status;
+                        UI.data.orcamentos[idx].resultadoContato = resultado;
+                        
+                        // Se o contato foi realizado e o resultado foi "orcamento_aceito", mudar status do orçamento
+                        if(status === 'realizado' && resultado === 'orcamento_aceito') {
+                            UI.data.orcamentos[idx].status = 'aceito';
+                        }
+                        
+                        // Se o contato foi realizado e o resultado foi "orcamento_recusado", mudar status do orçamento
+                        if(status === 'realizado' && resultado === 'orcamento_recusado') {
+                            UI.data.orcamentos[idx].status = 'recusado';
+                        }
+                        
+                        Storage.set('orcamentos', UI.data.orcamentos);
+                        Utils.toast('Contato salvo!');
+                        UI.closeModals();
+                        UI.renderDashboard();
+                        UI.renderOrcamentos();
+                        UI.renderFinanceiro();
                     }
                 }
             },
@@ -1565,23 +1914,18 @@
                         format: 'a4'
                     });
                     
-                    // --- CONFIGURAÇÕES ---
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const pageHeight = doc.internal.pageSize.getHeight();
                     const margin = { left: 15, right: 15, top: 20, bottom: 20 };
                     const contentWidth = pageWidth - margin.left - margin.right;
                     let yPos = margin.top;
                     
-                    // --- CORES ---
                     const primaryColor = [59, 130, 246];
                     const lightGray = [241, 245, 249];
                     
-                    // --- CABEÇALHO ---
-                    // Barra superior colorida
                     doc.setFillColor(...primaryColor);
                     doc.rect(0, 0, pageWidth, 25, 'F');
                     
-                    // Logo
                     if (s.logo) {
                         try {
                             doc.addImage(s.logo, 'PNG', margin.left, 5, 15, 15);
@@ -1590,13 +1934,11 @@
                         }
                     }
                     
-                    // Nome da empresa (branco sobre fundo azul)
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(14);
                     doc.setFont("helvetica", "bold");
                     doc.text(s.nome.toUpperCase(), margin.left + (s.logo ? 20 : 0), 12);
                     
-                    // Informações de contato à direita
                     doc.setFontSize(7);
                     doc.setFont("helvetica", "normal");
                     doc.text(s.telefone || "", pageWidth - margin.right, 8, { align: "right" });
@@ -1605,7 +1947,6 @@
                     
                     yPos = 35;
                     
-                    // --- TÍTULO DO ORÇAMENTO ---
                     doc.setTextColor(...primaryColor);
                     doc.setFontSize(16);
                     doc.setFont("helvetica", "bold");
@@ -1613,7 +1954,6 @@
                     
                     yPos += 10;
                     
-                    // --- CLIENTE ---
                     doc.setDrawColor(200, 200, 200);
                     doc.setFillColor(...lightGray);
                     doc.roundedRect(margin.left, yPos, contentWidth, 15, 2, 2, 'F');
@@ -1627,15 +1967,13 @@
                     doc.setFont("helvetica", "bold");
                     doc.text(c.nome, margin.left + 5, yPos + 11);
                     
-                    // Telefone do cliente formatado corretamente
+                    const telefoneFormatado = Utils.formatPhone(c.telefone);
                     doc.setFontSize(8);
                     doc.setTextColor(100);
-                    const telefoneFormatado = Utils.formatPhone(c.telefone);
                     doc.text(telefoneFormatado || "Telefone não informado", margin.left + 120, yPos + 11);
                     
                     yPos += 20;
                     
-                    // --- DETALHES DO EVENTO ---
                     doc.setFontSize(10);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
@@ -1643,7 +1981,6 @@
                     
                     yPos += 7;
                     
-                    // Grid de detalhes
                     const drawDetail = (label, value, x, y) => {
                         doc.setFontSize(8);
                         doc.setTextColor(100);
@@ -1662,7 +1999,6 @@
                     
                     yPos += 15;
                     
-                    // --- SERVIÇOS E VALOR ---
                     doc.setFontSize(10);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
@@ -1670,11 +2006,9 @@
                     
                     yPos += 7;
                     
-                    // Tabela simples
                     doc.setDrawColor(200, 200, 200);
                     doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
                     
-                    // Cabeçalho da tabela
                     doc.setFillColor(...primaryColor);
                     doc.rect(margin.left, yPos, contentWidth, 8, 'F');
                     doc.setTextColor(255, 255, 255);
@@ -1685,7 +2019,6 @@
                     
                     yPos += 8;
                     
-                    // Conteúdo da tabela
                     doc.setFillColor(255, 255, 255);
                     doc.rect(margin.left, yPos, contentWidth, 10, 'F');
                     doc.setTextColor(0);
@@ -1695,12 +2028,10 @@
                     const descricao = o.descricao || "Serviços de DJ, som e iluminação";
                     const lines = doc.splitTextToSize(descricao, contentWidth - 60);
                     
-                    // Primeira linha
                     doc.text(lines[0], margin.left + 5, yPos + 6);
                     doc.setFont("helvetica", "bold");
                     doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 5, yPos + 6, { align: "right" });
                     
-                    // Linhas adicionais
                     for (let i = 1; i < lines.length; i++) {
                         yPos += 4;
                         doc.setFont("helvetica", "normal");
@@ -1709,7 +2040,6 @@
                     
                     yPos += 10;
                     
-                    // Linha do total
                     doc.setDrawColor(200, 200, 200);
                     doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
                     
@@ -1723,7 +2053,6 @@
                     
                     yPos += 15;
                     
-                    // --- CLÁUSULAS COMPACTAS ---
                     doc.setFontSize(10);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
@@ -1731,7 +2060,6 @@
                     
                     yPos += 7;
                     
-                    // Cláusulas compactadas
                     const clausulas = (s.clausulasContrato || `1. O presente orçamento tem validade de 15 dias a partir da data de emissão.
 2. Para reserva da data, será necessário o pagamento de 50% do valor total como sinal.
 3. O pagamento do saldo restante deverá ser efetuado até o dia do evento.
@@ -1748,7 +2076,6 @@
                     doc.setFont("helvetica", "normal");
                     
                     clausulas.forEach((clausula, index) => {
-                        // Verificar se ainda cabe na página
                         if (yPos > pageHeight - 30) {
                             doc.addPage();
                             yPos = margin.top;
@@ -1759,12 +2086,11 @@
                             doc.text(line, margin.left, yPos);
                             yPos += 4;
                         });
-                        yPos += 2; // Espaço entre cláusulas
+                        yPos += 2;
                     });
                     
                     yPos += 5;
                     
-                    // --- FORMAS DE PAGAMENTO ---
                     if (yPos < pageHeight - 30) {
                         doc.setDrawColor(200, 200, 200);
                         doc.setLineWidth(0.5);
@@ -1782,7 +2108,6 @@
                         yPos += 15;
                     }
                     
-                    // --- ASSINATURAS ---
                     const signatureY = pageHeight - 25;
                     doc.setDrawColor(0);
                     doc.setLineWidth(0.3);
@@ -1794,7 +2119,6 @@
                     doc.text(s.nome, margin.left + 50, signatureY + 5, { align: "center" });
                     doc.text("Contratante", margin.left + 140, signatureY + 5, { align: "center" });
 
-                    // --- RODAPÉ ---
                     doc.setFontSize(6);
                     doc.setTextColor(150);
                     doc.text(`${s.razao} | CNPJ: ${s.cnpj} | ${s.endereco.replace(/\n/g, ' ') || ''}`, pageWidth / 2, pageHeight - 5, { align: "center" });
@@ -1845,10 +2169,16 @@
             }
         };
 
+        // Event listeners
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if(e.target === overlay) UI.closeModals();
             });
+        });
+
+        // Listener para mostrar/ocultar campo de resultado do contato
+        document.getElementById('contact-status').addEventListener('change', function() {
+            App.contact.toggleResultField();
         });
 
         document.addEventListener('DOMContentLoaded', UI.init);
