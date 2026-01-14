@@ -661,6 +661,34 @@
             font-size: 0.85rem;
             color: #78350f;
         }
+        
+        /* Filtros de status */
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--light);
+            color: var(--secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -684,7 +712,7 @@
         <div id="dashboard-view" class="view active">
             <div class="section-title">Visão Geral</div>
             <div class="stats-grid">
-                <div class="stat-card" onclick="UI.navigate('orcamentos')">
+                <div class="stat-card" onclick="UI.navigateToOrcamentos('all')">
                     <div class="stat-icon bg-blue"><i class="fas fa-file-invoice-dollar"></i></div>
                     <div class="stat-value" id="dash-total-orcamentos">0</div>
                     <div class="stat-label">Orçamentos</div>
@@ -694,17 +722,17 @@
                     <div class="stat-value" id="dash-total-clientes">0</div>
                     <div class="stat-label">Clientes</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('orcamentos')">
+                <div class="stat-card" onclick="UI.navigateToOrcamentos('pendente')">
                     <div class="stat-icon bg-orange"><i class="fas fa-clock"></i></div>
                     <div class="stat-value" id="dash-pendentes">0</div>
                     <div class="stat-label">Pendentes</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('orcamentos')">
+                <div class="stat-card" onclick="UI.navigateToOrcamentos('vencido')">
                     <div class="stat-icon bg-red"><i class="fas fa-bell"></i></div>
                     <div class="stat-value" id="dash-followup">0</div>
                     <div class="stat-label">Follow-up</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('orcamentos')">
+                <div class="stat-card" onclick="UI.navigateToOrcamentos('agendado')">
                     <div class="stat-icon bg-cyan"><i class="fas fa-calendar-check"></i></div>
                     <div class="stat-value" id="dash-agendamentos">0</div>
                     <div class="stat-label">Contatos Agend.</div>
@@ -746,6 +774,16 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" class="search-input" placeholder="Buscar orçamentos..." oninput="UI.renderOrcamentos(this.value)">
             </div>
+            
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="UI.filterOrcamentos('all')">Todos</button>
+                <button class="filter-btn" onclick="UI.filterOrcamentos('pendente')">Pendentes</button>
+                <button class="filter-btn" onclick="UI.filterOrcamentos('aceito')">Fechados</button>
+                <button class="filter-btn" onclick="UI.filterOrcamentos('recusado')">Recusados</button>
+                <button class="filter-btn" onclick="UI.filterOrcamentos('vencido')">Vencidos</button>
+                <button class="filter-btn" onclick="UI.filterOrcamentos('agendado')">Com Contato</button>
+            </div>
+            
             <div id="orcamentos-list"></div>
             <div id="rejected-section" style="display: none;">
                 <div class="section-title">Orçamentos Recusados</div>
@@ -763,17 +801,17 @@
             </div>
 
             <div class="section-title">Resumo Geral</div>
-            <div class="list-card" onclick="UI.navigate('orcamentos')">
+            <div class="list-card" onclick="UI.navigateToOrcamentos('all')">
                 <div class="card-subtitle">Potencial Total (Estimado)</div>
                 <div class="card-price" id="fin-total">R$ 0,00</div>
             </div>
             <div class="stats-grid">
-                <div class="stat-card" onclick="UI.navigate('orcamentos')">
+                <div class="stat-card" onclick="UI.navigateToOrcamentos('aceito')">
                     <div class="stat-icon bg-green"><i class="fas fa-check"></i></div>
                     <div class="stat-value" id="fin-aceito" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">Já Fechado</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('orcamentos')">
+                <div class="stat-card" onclick="UI.navigateToOrcamentos('pendente')">
                     <div class="stat-icon bg-orange"><i class="fas fa-hourglass-half"></i></div>
                     <div class="stat-value" id="fin-pendente" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">A Fechar</div>
@@ -783,7 +821,7 @@
                     <div class="stat-value" id="fin-recusado" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">Recusados</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('orcamentos')">
+                <div class="stat-card" onclick="UI.navigateToOrcamentos('all')">
                     <div class="stat-icon bg-purple"><i class="fas fa-chart-line"></i></div>
                     <div class="stat-value" id="fin-media-mensal" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">Média Mensal</div>
@@ -948,7 +986,7 @@
 
             <div class="form-group">
                 <label class="form-label">Descrição / Serviços (Público)</label>
-                <textarea id="o-descricao" class="form-control" placeholder="Dj, som, iluminação..."></textarea>
+                <textarea id="o-descricao" class="form-control" placeholder="Opcional: Informações adicionais sobre os serviços..."></textarea>
             </div>
 
             <div class="form-group">
@@ -1293,6 +1331,7 @@
             data: { clientes: [], orcamentos: [], pacotes: [], equipamentos: [] },
             chartInstance: null,
             showingRejected: false,
+            currentFilter: 'all',
             
             init: () => {
                 UI.data.clientes = Storage.get('clientes');
@@ -1300,71 +1339,14 @@
                 UI.data.pacotes = Storage.get('pacotes');
                 UI.data.equipamentos = Storage.get('equipamentos');
                 
-                // Se não houver pacotes cadastrados, criar alguns padrões
+                // Inicializar com arrays vazios para pacotes e equipamentos
                 if (UI.data.pacotes.length === 0) {
-                    UI.data.pacotes = [
-                        {
-                            id: Utils.id(),
-                            tipo: 'pacote',
-                            nome: 'Básico',
-                            descricao: 'DJ + Sistema de som básico + Iluminação simples',
-                            valor: 800,
-                            duracao: 4,
-                            status: 'ativo'
-                        },
-                        {
-                            id: Utils.id(),
-                            tipo: 'pacote',
-                            nome: 'Completo',
-                            descricao: 'DJ + Sistema de som profissional + Iluminação LED + Microfone sem fio',
-                            valor: 1200,
-                            duracao: 6,
-                            status: 'ativo'
-                        },
-                        {
-                            id: Utils.id(),
-                            tipo: 'pacote',
-                            nome: 'Premium',
-                            descricao: 'DJ + Sistema de som premium + Iluminação avançada + Efeitos especiais + 2 microfones',
-                            valor: 1800,
-                            duracao: 8,
-                            status: 'ativo'
-                        }
-                    ];
+                    UI.data.pacotes = [];
                     Storage.set('pacotes', UI.data.pacotes);
                 }
                 
-                // Se não houver equipamentos cadastrados, criar alguns padrões
                 if (UI.data.equipamentos.length === 0) {
-                    UI.data.equipamentos = [
-                        {
-                            id: Utils.id(),
-                            tipo: 'equipamento',
-                            nome: 'Máquina de Fumaça',
-                            descricao: 'Máquina de fumaça profissional para efeitos especiais',
-                            valor: 200,
-                            duracao: null,
-                            status: 'ativo'
-                        },
-                        {
-                            id: Utils.id(),
-                            tipo: 'equipamento',
-                            nome: 'Laser Show',
-                            descricao: 'Sistema de laser profissional com controle remoto',
-                            valor: 350,
-                            duracao: null,
-                            status: 'ativo'
-                        },
-                        {
-                            id: Utils.id(),
-                            tipo: 'equipamento',
-                            nome: 'Tela Projeção',
-                            descricao: 'Tela de projeção 3x2m com suporte',
-                            valor: 150,
-                            duracao: null,
-                            status: 'ativo'
-                        }
-                    ];
+                    UI.data.equipamentos = [];
                     Storage.set('equipamentos', UI.data.equipamentos);
                 }
                 
@@ -1409,6 +1391,13 @@
                 const el = document.querySelector(`.nav-item[data-target="${tabName}-view"]`);
                 if(el) UI.switchTab(el);
             },
+            
+            navigateToOrcamentos: (filter = 'all') => {
+                UI.navigate('orcamentos');
+                setTimeout(() => {
+                    UI.filterOrcamentos(filter);
+                }, 100);
+            },
 
             // --- RENDER FUNCTIONS ---
             renderDashboard: () => {
@@ -1420,7 +1409,7 @@
                 // Follow up logic - orçamentos vencidos
                 const today = new Date().toISOString().split('T')[0];
                 const followups = orcamentos.filter(o => 
-                    o.status === 'pendente' && (o.validade < today || o.validade === today)
+                    o.status === 'pendente' && o.validade && (o.validade < today || o.validade === today)
                 );
                 
                 document.getElementById('dash-followup').innerText = followups.length;
@@ -1527,9 +1516,7 @@
 
             renderOrcamentos: (filter = '') => {
                 const list = document.getElementById('orcamentos-list');
-                let filtered = UI.data.orcamentos
-                    .filter(o => o.status !== 'recusado')
-                    .sort((a,b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+                let filtered = UI.getFilteredOrcamentos(UI.currentFilter);
                 
                 if(filter) {
                     filtered = filtered.filter(o => {
@@ -1540,7 +1527,7 @@
                 }
 
                 if(filtered.length === 0) {
-                    list.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice"></i><p>Nenhum orçamento.</p></div>`;
+                    list.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice"></i><p>Nenhum orçamento encontrado.</p></div>`;
                 } else {
                     list.innerHTML = filtered.map(o => UI.createOrcamentoCard(o)).join('');
                 }
@@ -1562,6 +1549,61 @@
                     
                     rejectedSection.style.display = 'block';
                 }
+            },
+            
+            getFilteredOrcamentos: (filterType) => {
+                const today = new Date().toISOString().split('T')[0];
+                let filtered = [...UI.data.orcamentos];
+                
+                switch(filterType) {
+                    case 'pendente':
+                        filtered = filtered.filter(o => o.status === 'pendente');
+                        break;
+                    case 'aceito':
+                        filtered = filtered.filter(o => o.status === 'aceito');
+                        break;
+                    case 'recusado':
+                        filtered = filtered.filter(o => o.status === 'recusado');
+                        break;
+                    case 'vencido':
+                        filtered = filtered.filter(o => 
+                            o.status === 'pendente' && o.validade && (o.validade < today || o.validade === today)
+                        );
+                        break;
+                    case 'agendado':
+                        filtered = filtered.filter(o => o.dataContato && o.status === 'pendente');
+                        break;
+                    case 'all':
+                    default:
+                        filtered = filtered.filter(o => o.status !== 'recusado');
+                        break;
+                }
+                
+                return filtered.sort((a,b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+            },
+            
+            filterOrcamentos: (filterType) => {
+                UI.currentFilter = filterType;
+                
+                // Atualizar botões de filtro
+                document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                const activeBtn = document.querySelector(`.filter-buttons .filter-btn:nth-child(${{
+                    'all': 1,
+                    'pendente': 2,
+                    'aceito': 3,
+                    'recusado': 4,
+                    'vencido': 5,
+                    'agendado': 6
+                }[filterType] || 1})`);
+                
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                }
+                
+                UI.renderOrcamentos();
             },
 
             createOrcamentoCard: (o, isAlert = false, isRejected = false) => {
@@ -1623,7 +1665,7 @@
                 let content = '';
                 
                 if (pacotes.length === 0 && equipamentos.length === 0) {
-                    content = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Nenhum pacote ou equipamento cadastrado.</p></div>`;
+                    content = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Nenhum pacote ou equipamento cadastrado.</p><p>Clique no botão + para adicionar o primeiro.</p></div>`;
                 } else {
                     if (pacotes.length > 0) {
                         content += `<div class="section-title">Pacotes de Serviços</div>`;
@@ -1718,6 +1760,20 @@
                             </div>
                         `;
                     }
+                }
+                
+                // Descrição (somente se existir)
+                let descricaoSection = '';
+                if (o.descricao && o.descricao.trim()) {
+                    descricaoSection = `
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-clipboard-list"></i> DESCRIÇÃO ADICIONAL</div>
+                            <div class="info-item">
+                                <div class="info-label">Detalhes</div>
+                                <div class="info-value">${o.descricao}</div>
+                            </div>
+                        </div>
+                    `;
                 }
                 
                 // Seção de contato agendado
@@ -1816,12 +1872,10 @@
                             <div class="details-info-grid">
                                 ${pacoteInfo}
                                 ${equipamentosInfo}
-                                <div class="info-item">
-                                    <div class="info-label">Descrição</div>
-                                    <div class="info-value">${o.descricao || 'Serviços de DJ, som e iluminação'}</div>
-                                </div>
                             </div>
                         </div>
+                        
+                        ${descricaoSection}
                         
                         ${contactSection}
                         
@@ -2023,6 +2077,7 @@
                     if (!UI.showingRejected) {
                         UI.toggleRejected();
                     }
+                    UI.filterOrcamentos('recusado');
                 }, 100);
             },
             
@@ -2195,29 +2250,45 @@
                 // Carregar pacotes
                 const pacotesContainer = document.getElementById('pacotes-container');
                 const pacotesAtivos = UI.data.pacotes.filter(p => p.status === 'ativo');
-                pacotesContainer.innerHTML = pacotesAtivos.map(p => `
-                    <div class="selection-item" data-id="${p.id}" onclick="App.orcamento.selectPacote('${p.id}')">
-                        <div class="selection-header">
-                            <div class="selection-title">${p.nome}</div>
-                            <div class="selection-price">${Utils.formatCurrency(p.valor)}</div>
+                if (pacotesAtivos.length === 0) {
+                    pacotesContainer.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--secondary);">
+                        <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>Nenhum pacote cadastrado.</p>
+                        <p style="font-size: 0.8rem;">Cadastre pacotes na aba "Pacotes"</p>
+                    </div>`;
+                } else {
+                    pacotesContainer.innerHTML = pacotesAtivos.map(p => `
+                        <div class="selection-item" data-id="${p.id}" onclick="App.orcamento.selectPacote('${p.id}')">
+                            <div class="selection-header">
+                                <div class="selection-title">${p.nome}</div>
+                                <div class="selection-price">${Utils.formatCurrency(p.valor)}</div>
+                            </div>
+                            <div class="selection-desc">${p.descricao}</div>
+                            ${p.duracao ? `<div class="selection-desc"><i class="fas fa-clock"></i> ${p.duracao}h de serviço</div>` : ''}
                         </div>
-                        <div class="selection-desc">${p.descricao}</div>
-                        ${p.duracao ? `<div class="selection-desc"><i class="fas fa-clock"></i> ${p.duracao}h de serviço</div>` : ''}
-                    </div>
-                `).join('');
+                    `).join('');
+                }
                 
                 // Carregar equipamentos
                 const equipContainer = document.getElementById('equipamentos-container');
                 const equipAtivos = UI.data.equipamentos.filter(e => e.status === 'ativo');
-                equipContainer.innerHTML = equipAtivos.map(e => `
-                    <div class="selection-item" data-id="${e.id}" onclick="App.orcamento.selectEquipamento('${e.id}')">
-                        <div class="selection-header">
-                            <div class="selection-title">${e.nome}</div>
-                            <div class="selection-price">${Utils.formatCurrency(e.valor)}</div>
+                if (equipAtivos.length === 0) {
+                    equipContainer.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--secondary);">
+                        <i class="fas fa-tools" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>Nenhum equipamento cadastrado.</p>
+                        <p style="font-size: 0.8rem;">Cadastre equipamentos na aba "Pacotes"</p>
+                    </div>`;
+                } else {
+                    equipContainer.innerHTML = equipAtivos.map(e => `
+                        <div class="selection-item" data-id="${e.id}" onclick="App.orcamento.selectEquipamento('${e.id}')">
+                            <div class="selection-header">
+                                <div class="selection-title">${e.nome}</div>
+                                <div class="selection-price">${Utils.formatCurrency(e.valor)}</div>
+                            </div>
+                            <div class="selection-desc">${e.descricao}</div>
                         </div>
-                        <div class="selection-desc">${e.descricao}</div>
-                    </div>
-                `).join('');
+                    `).join('');
+                }
                 
                 const sett = Storage.getSettings();
                 const today = new Date();
@@ -2488,29 +2559,45 @@
                     // Carregar pacotes
                     const pacotesContainer = document.getElementById('pacotes-container');
                     const pacotesAtivos = UI.data.pacotes.filter(p => p.status === 'ativo');
-                    pacotesContainer.innerHTML = pacotesAtivos.map(p => `
-                        <div class="selection-item ${o.pacoteSelecionado === p.id ? 'selected' : ''}" data-id="${p.id}" onclick="App.orcamento.selectPacote('${p.id}')">
-                            <div class="selection-header">
-                                <div class="selection-title">${p.nome}</div>
-                                <div class="selection-price">${Utils.formatCurrency(p.valor)}</div>
+                    if (pacotesAtivos.length === 0) {
+                        pacotesContainer.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--secondary);">
+                            <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <p>Nenhum pacote cadastrado.</p>
+                            <p style="font-size: 0.8rem;">Cadastre pacotes na aba "Pacotes"</p>
+                        </div>`;
+                    } else {
+                        pacotesContainer.innerHTML = pacotesAtivos.map(p => `
+                            <div class="selection-item ${o.pacoteSelecionado === p.id ? 'selected' : ''}" data-id="${p.id}" onclick="App.orcamento.selectPacote('${p.id}')">
+                                <div class="selection-header">
+                                    <div class="selection-title">${p.nome}</div>
+                                    <div class="selection-price">${Utils.formatCurrency(p.valor)}</div>
+                                </div>
+                                <div class="selection-desc">${p.descricao}</div>
+                                ${p.duracao ? `<div class="selection-desc"><i class="fas fa-clock"></i> ${p.duracao}h de serviço</div>` : ''}
                             </div>
-                            <div class="selection-desc">${p.descricao}</div>
-                            ${p.duracao ? `<div class="selection-desc"><i class="fas fa-clock"></i> ${p.duracao}h de serviço</div>` : ''}
-                        </div>
-                    `).join('');
+                        `).join('');
+                    }
                     
                     // Carregar equipamentos
                     const equipContainer = document.getElementById('equipamentos-container');
                     const equipAtivos = UI.data.equipamentos.filter(e => e.status === 'ativo');
-                    equipContainer.innerHTML = equipAtivos.map(e => `
-                        <div class="selection-item ${(o.equipamentosSelecionados || []).includes(e.id) ? 'selected' : ''}" data-id="${e.id}" onclick="App.orcamento.selectEquipamento('${e.id}')">
-                            <div class="selection-header">
-                                <div class="selection-title">${e.nome}</div>
-                                <div class="selection-price">${Utils.formatCurrency(e.valor)}</div>
+                    if (equipAtivos.length === 0) {
+                        equipContainer.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--secondary);">
+                            <i class="fas fa-tools" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <p>Nenhum equipamento cadastrado.</p>
+                            <p style="font-size: 0.8rem;">Cadastre equipamentos na aba "Pacotes"</p>
+                        </div>`;
+                    } else {
+                        equipContainer.innerHTML = equipAtivos.map(e => `
+                            <div class="selection-item ${(o.equipamentosSelecionados || []).includes(e.id) ? 'selected' : ''}" data-id="${e.id}" onclick="App.orcamento.selectEquipamento('${e.id}')">
+                                <div class="selection-header">
+                                    <div class="selection-title">${e.nome}</div>
+                                    <div class="selection-price">${Utils.formatCurrency(e.valor)}</div>
+                                </div>
+                                <div class="selection-desc">${e.descricao}</div>
                             </div>
-                            <div class="selection-desc">${e.descricao}</div>
-                        </div>
-                    `).join('');
+                        `).join('');
+                    }
                     
                     // Configurar seleções
                     App.orcamento.selectedPacote = o.pacoteSelecionado || null;
@@ -2811,107 +2898,128 @@
                     
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const pageHeight = doc.internal.pageSize.getHeight();
-                    const margin = { left: 15, right: 15, top: 20, bottom: 20 };
+                    const margin = { left: 20, right: 20, top: 25, bottom: 25 }; // Margens aumentadas
                     const contentWidth = pageWidth - margin.left - margin.right;
                     let yPos = margin.top;
                     
                     const primaryColor = [59, 130, 246];
                     const lightGray = [241, 245, 249];
                     
+                    // Cabeçalho com cor
                     doc.setFillColor(...primaryColor);
-                    doc.rect(0, 0, pageWidth, 25, 'F');
+                    doc.rect(0, 0, pageWidth, 30, 'F'); // Altura aumentada
                     
+                    // Logo
                     if (s.logo) {
                         try {
-                            doc.addImage(s.logo, 'PNG', margin.left, 5, 15, 15);
+                            doc.addImage(s.logo, 'PNG', margin.left, 8, 18, 18); // Posição ajustada
                         } catch (e) {
                             console.log("Erro ao carregar logo:", e);
                         }
                     }
                     
+                    // Nome da empresa
                     doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(14);
-                    doc.setFont("helvetica", "bold");
-                    doc.text(s.nome.toUpperCase(), margin.left + (s.logo ? 20 : 0), 12);
-                    
-                    doc.setFontSize(7);
-                    doc.setFont("helvetica", "normal");
-                    doc.text(s.telefone || "", pageWidth - margin.right, 8, { align: "right" });
-                    doc.text(s.email || "", pageWidth - margin.right, 12, { align: "right" });
-                    doc.text(s.instagram || "", pageWidth - margin.right, 16, { align: "right" });
-                    
-                    yPos = 35;
-                    
-                    doc.setTextColor(...primaryColor);
                     doc.setFontSize(16);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(s.nome.toUpperCase(), margin.left + (s.logo ? 22 : 0), 18); // Posição ajustada
+                    
+                    // Informações de contato
+                    doc.setFontSize(8);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(s.telefone || "", pageWidth - margin.right, 12, { align: "right" });
+                    doc.text(s.email || "", pageWidth - margin.right, 17, { align: "right" });
+                    doc.text(s.instagram || "", pageWidth - margin.right, 22, { align: "right" });
+                    
+                    yPos = 40; // Mais espaço após cabeçalho
+                    
+                    // Título do orçamento
+                    doc.setTextColor(...primaryColor);
+                    doc.setFontSize(18);
                     doc.setFont("helvetica", "bold");
                     doc.text(`ORÇAMENTO #${o.numero}`, pageWidth / 2, yPos, { align: "center" });
                     
-                    yPos += 10;
+                    yPos += 12;
                     
+                    // Área do cliente
                     doc.setDrawColor(200, 200, 200);
                     doc.setFillColor(...lightGray);
-                    doc.roundedRect(margin.left, yPos, contentWidth, 15, 2, 2, 'F');
+                    doc.roundedRect(margin.left, yPos, contentWidth, 18, 3, 3, 'F'); // Altura aumentada
                     
-                    doc.setFontSize(8);
+                    doc.setFontSize(9);
                     doc.setTextColor(100);
-                    doc.text("CLIENTE", margin.left + 5, yPos + 5);
+                    doc.text("CLIENTE", margin.left + 8, yPos + 7);
                     
-                    doc.setFontSize(10);
+                    doc.setFontSize(11);
                     doc.setTextColor(0);
                     doc.setFont("helvetica", "bold");
-                    doc.text(c.nome, margin.left + 5, yPos + 11);
+                    doc.text(c.nome, margin.left + 8, yPos + 14);
                     
                     const telefoneFormatado = Utils.formatPhone(c.telefone);
-                    doc.setFontSize(8);
+                    doc.setFontSize(9);
                     doc.setTextColor(100);
-                    doc.text(telefoneFormatado || "Telefone não informado", margin.left + 120, yPos + 11);
+                    doc.text(telefoneFormatado || "Telefone não informado", margin.left + contentWidth - 8, yPos + 14, { align: "right" });
                     
-                    yPos += 20;
+                    yPos += 22; // Mais espaço
                     
-                    doc.setFontSize(10);
+                    // Detalhes do evento
+                    doc.setFontSize(11);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
                     doc.text("DETALHES DO EVENTO", margin.left, yPos);
                     
-                    yPos += 7;
+                    yPos += 8;
                     
                     const drawDetail = (label, value, x, y) => {
                         doc.setFontSize(8);
                         doc.setTextColor(100);
                         doc.text(label, x, y);
-                        doc.setFontSize(9);
+                        doc.setFontSize(10);
                         doc.setTextColor(0);
-                        doc.text(value || "-", x, y + 4);
+                        const lines = doc.splitTextToSize(value || "-", 50);
+                        lines.forEach((line, index) => {
+                            doc.text(line, x, y + 5 + (index * 5));
+                        });
+                        return y + 5 + (lines.length * 5);
                     };
                     
-                    drawDetail("TIPO", o.evento, margin.left, yPos);
-                    drawDetail("DATA", Utils.formatDate(o.dataEvento), margin.left + 60, yPos);
-                    drawDetail("HORÁRIO", o.horario || "-", margin.left + 120, yPos);
+                    let detailY = yPos;
+                    detailY = Math.max(
+                        drawDetail("TIPO", o.evento, margin.left, detailY),
+                        drawDetail("DATA", Utils.formatDate(o.dataEvento), margin.left + 60, yPos),
+                        drawDetail("HORÁRIO", o.horario || "-", margin.left + 120, yPos)
+                    );
                     
-                    yPos += 10;
-                    drawDetail("LOCAL", o.local || "A definir", margin.left, yPos);
+                    detailY += 5;
+                    detailY = drawDetail("LOCAL", o.local || "A definir", margin.left, detailY);
                     
-                    yPos += 15;
+                    yPos = detailY + 10;
                     
-                    doc.setFontSize(10);
+                    // Verificar se precisa de nova página
+                    if (yPos > pageHeight - 60) {
+                        doc.addPage();
+                        yPos = margin.top;
+                    }
+                    
+                    // Serviços contratados
+                    doc.setFontSize(11);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
-                    doc.text("SERVIÇOS INCLUÍDOS", margin.left, yPos);
+                    doc.text("SERVIÇOS CONTRATADOS", margin.left, yPos);
                     
-                    yPos += 7;
+                    yPos += 8;
                     
                     // Detalhes do pacote
                     if (o.pacoteSelecionado) {
                         const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
                         if (pacote) {
-                            doc.setFontSize(9);
+                            doc.setFontSize(10);
                             doc.setTextColor(0);
                             doc.setFont("helvetica", "bold");
                             doc.text(`PACOTE: ${pacote.nome}`, margin.left, yPos);
-                            yPos += 5;
+                            yPos += 6;
                             
-                            doc.setFontSize(8);
+                            doc.setFontSize(9);
                             doc.setFont("helvetica", "normal");
                             const descLines = doc.splitTextToSize(pacote.descricao, contentWidth);
                             descLines.forEach(line => {
@@ -2924,13 +3032,13 @@
                     
                     // Detalhes dos equipamentos
                     if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
-                        doc.setFontSize(9);
+                        doc.setFontSize(10);
                         doc.setTextColor(0);
                         doc.setFont("helvetica", "bold");
                         doc.text("EQUIPAMENTOS EXTRAS:", margin.left, yPos);
-                        yPos += 5;
+                        yPos += 6;
                         
-                        doc.setFontSize(8);
+                        doc.setFontSize(9);
                         doc.setFont("helvetica", "normal");
                         
                         o.equipamentosSelecionados.forEach(eqId => {
@@ -2943,64 +3051,102 @@
                         yPos += 2;
                     }
                     
-                    // Descrição geral
+                    // Descrição adicional (somente se existir)
+                    if (o.descricao && o.descricao.trim()) {
+                        doc.setFontSize(10);
+                        doc.setTextColor(0);
+                        doc.setFont("helvetica", "bold");
+                        doc.text("DESCRIÇÃO ADICIONAL:", margin.left, yPos);
+                        yPos += 6;
+                        
+                        doc.setFontSize(9);
+                        doc.setFont("helvetica", "normal");
+                        const descLines = doc.splitTextToSize(o.descricao, contentWidth);
+                        descLines.forEach(line => {
+                            doc.text(line, margin.left, yPos);
+                            yPos += 4;
+                        });
+                        yPos += 2;
+                    }
+                    
+                    // Verificar se precisa de nova página
+                    if (yPos > pageHeight - 80) {
+                        doc.addPage();
+                        yPos = margin.top;
+                    }
+                    
+                    // Tabela de valores
                     doc.setDrawColor(200, 200, 200);
                     doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
                     
                     doc.setFillColor(...primaryColor);
-                    doc.rect(margin.left, yPos, contentWidth, 8, 'F');
+                    doc.rect(margin.left, yPos, contentWidth, 9, 'F'); // Altura aumentada
                     doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(9);
+                    doc.setFontSize(10);
                     doc.setFont("helvetica", "bold");
-                    doc.text("DESCRIÇÃO", margin.left + 5, yPos + 5.5);
-                    doc.text("VALOR", margin.left + contentWidth - 25, yPos + 5.5, { align: "right" });
+                    doc.text("DESCRIÇÃO", margin.left + 8, yPos + 6);
+                    doc.text("VALOR", margin.left + contentWidth - 15, yPos + 6, { align: "right" });
                     
-                    yPos += 8;
+                    yPos += 9;
                     
                     doc.setFillColor(255, 255, 255);
-                    doc.rect(margin.left, yPos, contentWidth, 10, 'F');
+                    doc.rect(margin.left, yPos, contentWidth, 12, 'F'); // Altura aumentada
                     doc.setTextColor(0);
-                    doc.setFontSize(9);
+                    doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
                     
-                    const descricao = o.descricao || "Serviços de DJ, som e iluminação";
-                    const lines = doc.splitTextToSize(descricao, contentWidth - 60);
-                    
-                    doc.text(lines[0], margin.left + 5, yPos + 6);
-                    doc.setFont("helvetica", "bold");
-                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 5, yPos + 6, { align: "right" });
-                    
-                    for (let i = 1; i < lines.length; i++) {
-                        yPos += 4;
-                        doc.setFont("helvetica", "normal");
-                        doc.text(lines[i], margin.left + 5, yPos + 6);
+                    let descricaoText = "Serviços contratados";
+                    if (o.pacoteSelecionado) {
+                        const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
+                        if (pacote) {
+                            descricaoText = pacote.nome;
+                        }
                     }
                     
-                    yPos += 10;
+                    const descLines = doc.splitTextToSize(descricaoText, contentWidth - 60);
+                    
+                    doc.text(descLines[0], margin.left + 8, yPos + 8);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 8, yPos + 8, { align: "right" });
+                    
+                    for (let i = 1; i < descLines.length; i++) {
+                        yPos += 5;
+                        doc.setFont("helvetica", "normal");
+                        doc.text(descLines[i], margin.left + 8, yPos + 8);
+                    }
+                    
+                    yPos += 12;
                     
                     doc.setDrawColor(200, 200, 200);
                     doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
                     
                     doc.setFillColor(...lightGray);
-                    doc.rect(margin.left, yPos, contentWidth, 10, 'F');
+                    doc.rect(margin.left, yPos, contentWidth, 12, 'F'); // Altura aumentada
                     doc.setTextColor(...primaryColor);
-                    doc.setFontSize(10);
+                    doc.setFontSize(11);
                     doc.setFont("helvetica", "bold");
-                    doc.text("TOTAL", margin.left + 5, yPos + 6.5);
-                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 5, yPos + 6.5, { align: "right" });
+                    doc.text("TOTAL", margin.left + 8, yPos + 8);
+                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 8, yPos + 8, { align: "right" });
                     
-                    yPos += 15;
+                    yPos += 18;
                     
-                    doc.setFontSize(10);
+                    // Verificar se precisa de nova página para cláusulas
+                    if (yPos > pageHeight - 100) {
+                        doc.addPage();
+                        yPos = margin.top;
+                    }
+                    
+                    // Cláusulas e condições
+                    doc.setFontSize(11);
                     doc.setTextColor(...primaryColor);
                     doc.setFont("helvetica", "bold");
                     doc.text("CONDIÇÕES E CLÁUSULAS", margin.left, yPos);
                     
-                    yPos += 7;
+                    yPos += 8;
                     
                     const clausulasArray = clausulas.split('\n');
                     
-                    doc.setFontSize(7);
+                    doc.setFontSize(8); // Tamanho reduzido para caber melhor
                     doc.setTextColor(0);
                     doc.setFont("helvetica", "normal");
                     
@@ -3018,39 +3164,51 @@
                         yPos += 2;
                     });
                     
-                    yPos += 5;
+                    yPos += 8;
                     
-                    if (yPos < pageHeight - 30) {
+                    // Verificar se tem espaço para forma de pagamento
+                    if (yPos < pageHeight - 40) {
                         doc.setDrawColor(200, 200, 200);
                         doc.setLineWidth(0.5);
-                        doc.roundedRect(margin.left, yPos, contentWidth, 12, 2, 2);
+                        doc.roundedRect(margin.left, yPos, contentWidth, 14, 3, 3); // Altura aumentada
+                        
+                        doc.setFontSize(9);
+                        doc.setTextColor(...primaryColor);
+                        doc.text("FORMA DE PAGAMENTO", margin.left + 8, yPos + 6);
                         
                         doc.setFontSize(8);
-                        doc.setTextColor(...primaryColor);
-                        doc.text("FORMA DE PAGAMENTO", margin.left + 5, yPos + 5);
-                        
-                        doc.setFontSize(7);
                         doc.setTextColor(0);
-                        doc.text(`PIX: ${s.pix || "Informar"}`, margin.left + 5, yPos + 9);
-                        doc.text("Nome: José Alex Peixoto de Assis", margin.left + 100, yPos + 9);
+                        doc.text(`PIX: ${s.pix || "Informar"}`, margin.left + 8, yPos + 11);
+                        doc.text("Nome: José Alex Peixoto de Assis", margin.left + 100, yPos + 11);
                         
-                        yPos += 15;
+                        yPos += 18;
                     }
                     
-                    const signatureY = pageHeight - 25;
-                    doc.setDrawColor(0);
-                    doc.setLineWidth(0.3);
-                    doc.line(margin.left + 20, signatureY, margin.left + 80, signatureY);
-                    doc.line(margin.left + 110, signatureY, margin.left + 170, signatureY);
+                    // Assinaturas (sempre na última página)
+                    if (yPos > pageHeight - 30) {
+                        doc.addPage();
+                        yPos = margin.top;
+                    }
                     
-                    doc.setFontSize(7);
+                    const signatureY = pageHeight - 35; // Mais espaço no fundo
+                    doc.setDrawColor(0);
+                    doc.setLineWidth(0.4);
+                    doc.line(margin.left + 25, signatureY, margin.left + 85, signatureY);
+                    doc.line(margin.left + 115, signatureY, margin.left + 175, signatureY);
+                    
+                    doc.setFontSize(8);
                     doc.setFont("helvetica", "normal");
-                    doc.text(s.nome, margin.left + 50, signatureY + 5, { align: "center" });
-                    doc.text("Contratante", margin.left + 140, signatureY + 5, { align: "center" });
+                    doc.text(s.nome, margin.left + 55, signatureY + 6, { align: "center" });
+                    doc.text("Contratante", margin.left + 145, signatureY + 6, { align: "center" });
 
-                    doc.setFontSize(6);
+                    // Rodapé
+                    doc.setFontSize(7);
                     doc.setTextColor(150);
-                    doc.text(`${s.razao} | CNPJ: ${s.cnpj} | ${s.endereco.replace(/\n/g, ' ') || ''}`, pageWidth / 2, pageHeight - 5, { align: "center" });
+                    const footerText = `${s.razao} | CNPJ: ${s.cnpj} | ${s.endereco.replace(/\n/g, ' ') || ''}`;
+                    const footerLines = doc.splitTextToSize(footerText, contentWidth);
+                    footerLines.forEach((line, index) => {
+                        doc.text(line, pageWidth / 2, pageHeight - 15 + (index * 4), { align: "center" });
+                    });
                     
                     doc.save(`Orcamento_${o.numero}.pdf`);
                     Utils.toast('PDF baixado com sucesso!');
