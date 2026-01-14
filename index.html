@@ -19,10 +19,10 @@
     <style>
         :root {
             /* Cores Modernas Palette */
-            --primary: #3b82f6; /* Azul vibrante */
+            --primary: #3b82f6;
             --primary-dark: #1d4ed8;
-            --secondary: #64748b; /* Slate */
-            --accent: #8b5cf6; /* Roxo */
+            --secondary: #64748b;
+            --accent: #8b5cf6;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
@@ -50,7 +50,7 @@
             background-color: #f1f5f9;
             color: var(--dark);
             height: 100vh;
-            overflow: hidden; /* App-like feel */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             user-select: none;
@@ -96,7 +96,7 @@
         main {
             flex: 1;
             overflow-y: auto;
-            padding: calc(var(--header-height) + 16px) 16px calc(var(--nav-height) + 80px); /* Extra padding bottom for FAB */
+            padding: calc(var(--header-height) + 16px) 16px calc(var(--nav-height) + 80px);
             scroll-behavior: smooth;
         }
 
@@ -554,6 +554,113 @@
             background: #d1fae5;
             color: #047857;
         }
+        
+        /* Alertas de data duplicada */
+        .date-alert {
+            background: #fee2e2;
+            border: 1px solid var(--danger);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #b91c1c;
+        }
+        
+        /* Seleção de pacotes e equipamentos */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .selection-item {
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .selection-item.selected {
+            background: #dbeafe;
+            border-color: var(--primary);
+        }
+        
+        .selection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .selection-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .selection-price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .selection-desc {
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+        
+        /* Orçamentos recusados ocultos */
+        .rejected-hidden {
+            display: none;
+        }
+        
+        .show-rejected-toggle {
+            background: var(--light);
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 10px;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        
+        /* Aviso de data duplicada */
+        .duplicate-date-warning {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .duplicate-date-warning i {
+            color: #f59e0b;
+            margin-top: 2px;
+        }
+        
+        .duplicate-date-warning .warning-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 4px;
+        }
+        
+        .duplicate-date-warning .warning-details {
+            font-size: 0.85rem;
+            color: #78350f;
+        }
     </style>
 </head>
 <body>
@@ -587,22 +694,22 @@
                     <div class="stat-value" id="dash-total-clientes">0</div>
                     <div class="stat-label">Clientes</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="UI.navigate('orcamentos')">
                     <div class="stat-icon bg-orange"><i class="fas fa-clock"></i></div>
                     <div class="stat-value" id="dash-pendentes">0</div>
                     <div class="stat-label">Pendentes</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="UI.navigate('orcamentos')">
                     <div class="stat-icon bg-red"><i class="fas fa-bell"></i></div>
                     <div class="stat-value" id="dash-followup">0</div>
                     <div class="stat-label">Follow-up</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="UI.navigate('orcamentos')">
                     <div class="stat-icon bg-cyan"><i class="fas fa-calendar-check"></i></div>
                     <div class="stat-value" id="dash-agendamentos">0</div>
                     <div class="stat-label">Contatos Agend.</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="UI.navigate('financeiro')">
                     <div class="stat-icon bg-purple"><i class="fas fa-chart-line"></i></div>
                     <div class="stat-value" id="dash-media-mensal">R$ 0</div>
                     <div class="stat-label">Média Mensal</div>
@@ -640,6 +747,13 @@
                 <input type="text" class="search-input" placeholder="Buscar orçamentos..." oninput="UI.renderOrcamentos(this.value)">
             </div>
             <div id="orcamentos-list"></div>
+            <div id="rejected-section" style="display: none;">
+                <div class="section-title">Orçamentos Recusados</div>
+                <div id="rejected-list"></div>
+            </div>
+            <button class="show-rejected-toggle" onclick="UI.toggleRejected()">
+                <i class="fas fa-eye"></i> Mostrar Orçamentos Recusados
+            </button>
         </div>
 
         <div id="financeiro-view" class="view">
@@ -649,32 +763,41 @@
             </div>
 
             <div class="section-title">Resumo Geral</div>
-            <div class="list-card">
+            <div class="list-card" onclick="UI.navigate('orcamentos')">
                 <div class="card-subtitle">Potencial Total (Estimado)</div>
                 <div class="card-price" id="fin-total">R$ 0,00</div>
             </div>
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card" onclick="UI.navigate('orcamentos')">
                     <div class="stat-icon bg-green"><i class="fas fa-check"></i></div>
                     <div class="stat-value" id="fin-aceito" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">Já Fechado</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="UI.navigate('orcamentos')">
                     <div class="stat-icon bg-orange"><i class="fas fa-hourglass-half"></i></div>
                     <div class="stat-value" id="fin-pendente" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">A Fechar</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="UI.showRejected()">
                     <div class="stat-icon bg-red"><i class="fas fa-times-circle"></i></div>
                     <div class="stat-value" id="fin-recusado" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">Recusados</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="UI.navigate('orcamentos')">
                     <div class="stat-icon bg-purple"><i class="fas fa-chart-line"></i></div>
                     <div class="stat-value" id="fin-media-mensal" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">Média Mensal</div>
                 </div>
             </div>
+        </div>
+        
+        <div id="pacotes-view" class="view">
+            <div class="section-title">Pacotes & Equipamentos</div>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Buscar pacotes ou equipamentos..." oninput="UI.renderPacotes(this.value)">
+            </div>
+            <div id="pacotes-list"></div>
         </div>
     </main>
 
@@ -694,6 +817,9 @@
         </a>
         <a href="#" class="nav-item" data-target="financeiro-view" onclick="UI.switchTab(this)">
             <i class="fas fa-chart-pie"></i> <span>Finanças</span>
+        </a>
+        <a href="#" class="nav-item" data-target="pacotes-view" onclick="UI.switchTab(this)">
+            <i class="fas fa-box-open"></i> <span>Pacotes</span>
         </a>
     </nav>
 
@@ -758,8 +884,12 @@
                 </div>
                 <div style="flex: 1;">
                     <label class="form-label">Data Evento</label>
-                    <input type="date" id="o-data" class="form-control" required>
+                    <input type="date" id="o-data" class="form-control" required onchange="App.orcamento.checkDuplicateDate()">
                 </div>
+            </div>
+
+            <div id="duplicate-date-warning" style="display: none;">
+                <!-- Alerta de data duplicada será inserido aqui -->
             </div>
 
             <div class="form-group">
@@ -773,8 +903,25 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Valor (R$)</label>
-                <input type="text" inputmode="numeric" id="o-valor" class="form-control" placeholder="0,00" required oninput="Utils.maskMoney(this)">
+                <label class="form-label">Pacote de Serviços</label>
+                <div id="pacotes-container" class="selection-grid">
+                    <!-- Pacotes serão carregados dinamicamente -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Equipamentos Extras</label>
+                <div id="equipamentos-container" class="selection-grid">
+                    <!-- Equipamentos serão carregados dinamicamente -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Valor Total (R$)</label>
+                <input type="text" inputmode="numeric" id="o-valor" class="form-control" placeholder="0,00" required oninput="Utils.maskMoney(this)" readonly>
+                <div style="font-size: 0.8rem; color: var(--secondary); margin-top: 4px;">
+                    Valor calculado automaticamente a partir do pacote e equipamentos selecionados
+                </div>
             </div>
 
             <div class="form-group">
@@ -862,6 +1009,58 @@
         </form>
     </div>
 
+    <!-- Modal para gerenciar pacotes e equipamentos -->
+    <div class="modal-overlay" id="overlay-pacote"></div>
+    <div class="modal-sheet" id="sheet-pacote">
+        <div class="sheet-handle"></div>
+        <h3 class="section-title" id="title-pacote">Novo Pacote/Equipamento</h3>
+        <form id="form-pacote" onsubmit="App.pacote.save(event)">
+            <input type="hidden" id="p-id">
+            
+            <div class="form-group">
+                <label class="form-label">Tipo</label>
+                <select id="p-tipo" class="form-control" required>
+                    <option value="pacote">Pacote de Serviços</option>
+                    <option value="equipamento">Equipamento Extra</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Nome</label>
+                <input type="text" id="p-nome" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <textarea id="p-descricao" class="form-control" placeholder="Descreva os serviços ou equipamentos incluídos..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Valor (R$)</label>
+                <input type="text" inputmode="numeric" id="p-valor" class="form-control" placeholder="0,00" required oninput="Utils.maskMoney(this)">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Duração (horas)</label>
+                <input type="number" id="p-duracao" class="form-control" placeholder="4" min="1" max="12">
+                <div style="font-size: 0.8rem; color: var(--secondary); margin-top: 4px;">
+                    Apenas para pacotes de serviços
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="p-status" class="form-control">
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-block">Salvar</button>
+            <button type="button" class="btn-block" style="background: var(--light); color: var(--secondary); margin-top: 8px;" onclick="UI.closeModals()">Cancelar</button>
+        </form>
+    </div>
+
     <div class="modal-overlay" id="overlay-settings"></div>
     <div class="modal-sheet" id="sheet-settings">
         <div class="sheet-handle"></div>
@@ -930,7 +1129,7 @@
         const Utils = {
             id: () => Date.now().toString(36) + Math.random().toString(36).substr(2),
             formatCurrency: (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-            parseCurrency: (str) => parseFloat(str.replace('R$', '').replace('.', '').replace(',', '.').trim()) || 0,
+            parseCurrency: (str) => parseFloat(str.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0,
             formatDate: (dateStr) => {
                 if(!dateStr) return '-';
                 const [y, m, d] = dateStr.split('-');
@@ -1031,6 +1230,41 @@
                     'sem_interesse': 'Sem interesse'
                 };
                 return resultMap[resultado] || resultado;
+            },
+            getClausulasByType: (tipoPacote, temEquipamentos) => {
+                let clausulas = [];
+                
+                // Clausulas base
+                clausulas.push("1. O presente orçamento tem validade de 15 dias a partir da data de emissão.");
+                clausulas.push("2. Para reserva da data, será necessário o pagamento de 50% do valor total como sinal.");
+                clausulas.push("3. O pagamento do saldo restante deverá ser efetuado até o dia do evento.");
+                clausulas.push("4. Em caso de cancelamento pelo contratante com menos de 30 dias do evento, o sinal não será devolvido.");
+                
+                // Clausulas base adicionais
+                clausulas.push("5. O profissional se compromete a chegar ao local do evento com 2 horas de antecedência para montagem e testes.");
+                clausulas.push("6. O horário de término do serviço será conforme acordado, com tolerância máxima de 30 minutos.");
+                clausulas.push("7. O contratante é responsável por fornecer ponto de energia adequado e seguro.");
+                clausulas.push("8. Em caso de eventos em locais abertos, é necessária proteção contra chuva para o equipamento.");
+                clausulas.push("9. O repertório será definido em conjunto com o contratante, respeitando a classificação indicativa.");
+                clausulas.push("10. O som e iluminação serão ajustados conforme as normas do local e legislação vigente.");
+                
+                // Clausulas específicas para equipamentos extras
+                if (temEquipamentos) {
+                    clausulas.push("11. Os equipamentos extras incluídos neste orçamento serão montados e operados por nosso técnico especializado.");
+                    clausulas.push("12. Danos aos equipamentos causados por mau uso do contratante serão de responsabilidade do mesmo.");
+                    clausulas.push("13. O transporte e montagem dos equipamentos extras estão incluídos no valor total.");
+                }
+                
+                // Clausulas específicas por tipo de pacote
+                if (tipoPacote === 'premium') {
+                    clausulas.push("14. O pacote premium inclui efeitos especiais e iluminação profissional com garantia de qualidade.");
+                    clausulas.push("15. Será fornecido um técnico especializado para operação dos efeitos especiais durante todo o evento.");
+                } else if (tipoPacote === 'completo') {
+                    clausulas.push("14. O pacote completo inclui som, iluminação e microfones sem fio para cerimônia.");
+                    clausulas.push("15. A duração do serviço é de até 8 horas, incluindo montagem e desmontagem.");
+                }
+                
+                return clausulas.join('\n');
             }
         };
 
@@ -1049,28 +1283,91 @@
                 pix: '31632000000138',
                 nextOrcamento: 27,
                 logo: null,
-                clausulasContrato: `1. O presente orçamento tem validade de 15 dias a partir da data de emissão.
-2. Para reserva da data, será necessário o pagamento de 50% do valor total como sinal.
-3. O pagamento do saldo restante deverá ser efetuado até o dia do evento.
-4. Em caso de cancelamento pelo contratante com menos de 30 dias do evento, o sinal não será devolvido.
-5. O profissional se compromete a chegar ao local do evento com 2 horas de antecedência para montagem e testes.
-6. O horário de término do serviço será conforme acordado, com tolerância máxima de 30 minutos.
-7. O contratante é responsável por fornecer ponto de energia adequado e seguro.
-8. Em caso de eventos em locais abertos, é necessária proteção contra chuva para o equipamento.
-9. O repertório será definido em conjunto com o contratante, respeitando a classificação indicativa.
-10. O som e iluminação serão ajustados conforme as normas do local e legislação vigente.`
+                clausulasContrato: Utils.getClausulasByType('basico', false)
             },
             saveSettings: (data) => localStorage.setItem('djapp_settings', JSON.stringify(data))
         };
 
         // --- UI MANAGER ---
         const UI = {
-            data: { clientes: [], orcamentos: [] },
+            data: { clientes: [], orcamentos: [], pacotes: [], equipamentos: [] },
             chartInstance: null,
+            showingRejected: false,
             
             init: () => {
                 UI.data.clientes = Storage.get('clientes');
                 UI.data.orcamentos = Storage.get('orcamentos');
+                UI.data.pacotes = Storage.get('pacotes');
+                UI.data.equipamentos = Storage.get('equipamentos');
+                
+                // Se não houver pacotes cadastrados, criar alguns padrões
+                if (UI.data.pacotes.length === 0) {
+                    UI.data.pacotes = [
+                        {
+                            id: Utils.id(),
+                            tipo: 'pacote',
+                            nome: 'Básico',
+                            descricao: 'DJ + Sistema de som básico + Iluminação simples',
+                            valor: 800,
+                            duracao: 4,
+                            status: 'ativo'
+                        },
+                        {
+                            id: Utils.id(),
+                            tipo: 'pacote',
+                            nome: 'Completo',
+                            descricao: 'DJ + Sistema de som profissional + Iluminação LED + Microfone sem fio',
+                            valor: 1200,
+                            duracao: 6,
+                            status: 'ativo'
+                        },
+                        {
+                            id: Utils.id(),
+                            tipo: 'pacote',
+                            nome: 'Premium',
+                            descricao: 'DJ + Sistema de som premium + Iluminação avançada + Efeitos especiais + 2 microfones',
+                            valor: 1800,
+                            duracao: 8,
+                            status: 'ativo'
+                        }
+                    ];
+                    Storage.set('pacotes', UI.data.pacotes);
+                }
+                
+                // Se não houver equipamentos cadastrados, criar alguns padrões
+                if (UI.data.equipamentos.length === 0) {
+                    UI.data.equipamentos = [
+                        {
+                            id: Utils.id(),
+                            tipo: 'equipamento',
+                            nome: 'Máquina de Fumaça',
+                            descricao: 'Máquina de fumaça profissional para efeitos especiais',
+                            valor: 200,
+                            duracao: null,
+                            status: 'ativo'
+                        },
+                        {
+                            id: Utils.id(),
+                            tipo: 'equipamento',
+                            nome: 'Laser Show',
+                            descricao: 'Sistema de laser profissional com controle remoto',
+                            valor: 350,
+                            duracao: null,
+                            status: 'ativo'
+                        },
+                        {
+                            id: Utils.id(),
+                            tipo: 'equipamento',
+                            nome: 'Tela Projeção',
+                            descricao: 'Tela de projeção 3x2m com suporte',
+                            valor: 150,
+                            duracao: null,
+                            status: 'ativo'
+                        }
+                    ];
+                    Storage.set('equipamentos', UI.data.equipamentos);
+                }
+                
                 UI.renderDashboard();
                 
                 // Tabs listeners
@@ -1095,6 +1392,9 @@
                 } else if (target === 'clientes-view') {
                     fab.style.display = 'flex';
                     fab.onclick = () => UI.openNewCliente(false);
+                } else if (target === 'pacotes-view') {
+                    fab.style.display = 'flex';
+                    fab.onclick = UI.openNewPacote;
                 } else {
                     fab.style.display = 'none';
                 }
@@ -1102,6 +1402,7 @@
                 if(target === 'clientes-view') UI.renderClientes();
                 if(target === 'orcamentos-view') UI.renderOrcamentos();
                 if(target === 'financeiro-view') UI.renderFinanceiro();
+                if(target === 'pacotes-view') UI.renderPacotes();
             },
 
             navigate: (tabName) => {
@@ -1211,14 +1512,14 @@
                 }
 
                 list.innerHTML = filtered.map(c => `
-                    <div class="list-card">
+                    <div class="list-card" onclick="UI.showClienteDetails('${c.id}')">
                         <div class="card-header">
                             <div class="card-title">${c.nome}</div>
                         </div>
                         <div class="card-subtitle"><i class="fas fa-phone"></i> ${c.telefone}</div>
                         <div class="action-row">
-                            <button class="btn-sm btn-light" onclick="App.cliente.edit('${c.id}')"><i class="fas fa-edit"></i> Editar</button>
-                            <button class="btn-sm btn-whatsapp" onclick="App.whatsapp.openCliente('${c.id}')"><i class="fab fa-whatsapp"></i> Zap</button>
+                            <button class="btn-sm btn-light" onclick="event.stopPropagation(); App.cliente.edit('${c.id}')"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.openCliente('${c.id}')"><i class="fab fa-whatsapp"></i> Zap</button>
                         </div>
                     </div>
                 `).join('');
@@ -1226,7 +1527,9 @@
 
             renderOrcamentos: (filter = '') => {
                 const list = document.getElementById('orcamentos-list');
-                let filtered = UI.data.orcamentos.sort((a,b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+                let filtered = UI.data.orcamentos
+                    .filter(o => o.status !== 'recusado')
+                    .sort((a,b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
                 
                 if(filter) {
                     filtered = filtered.filter(o => {
@@ -1238,18 +1541,35 @@
 
                 if(filtered.length === 0) {
                     list.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice"></i><p>Nenhum orçamento.</p></div>`;
-                    return;
+                } else {
+                    list.innerHTML = filtered.map(o => UI.createOrcamentoCard(o)).join('');
                 }
-
-                list.innerHTML = filtered.map(o => UI.createOrcamentoCard(o)).join('');
+                
+                // Render recusados separadamente se estiverem sendo mostrados
+                if (UI.showingRejected) {
+                    const rejected = UI.data.orcamentos
+                        .filter(o => o.status === 'recusado')
+                        .sort((a,b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+                    
+                    const rejectedList = document.getElementById('rejected-list');
+                    const rejectedSection = document.getElementById('rejected-section');
+                    
+                    if (rejected.length === 0) {
+                        rejectedList.innerHTML = `<div class="empty-state"><i class="fas fa-times-circle"></i><p>Nenhum orçamento recusado.</p></div>`;
+                    } else {
+                        rejectedList.innerHTML = rejected.map(o => UI.createOrcamentoCard(o, false, true)).join('');
+                    }
+                    
+                    rejectedSection.style.display = 'block';
+                }
             },
 
-            createOrcamentoCard: (o, isAlert = false) => {
+            createOrcamentoCard: (o, isAlert = false, isRejected = false) => {
                 const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
                 let statusTag = '';
                 if(o.status === 'pendente') statusTag = `<span class="tag tag-pending">Pendente</span>`;
                 if(o.status === 'aceito') statusTag = `<span class="tag tag-accepted">Fechado</span>`;
-                if(o.status === 'recusado') statusTag = `<span class="tag tag-rejected">Recusado</span>`;
+                if(o.status === 'recusado' || isRejected) statusTag = `<span class="tag tag-rejected">Recusado</span>`;
                 if(isAlert) statusTag = `<span class="tag tag-alert">Vencido</span>`;
                 
                 // Verificar se tem contato agendado
@@ -1264,14 +1584,24 @@
                         </div>
                     `;
                 }
+                
+                // Mostrar pacote selecionado
+                let pacoteInfo = '';
+                if (o.pacoteSelecionado) {
+                    const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
+                    if (pacote) {
+                        pacoteInfo = `<div class="card-subtitle"><i class="fas fa-box"></i> Pacote: ${pacote.nome}</div>`;
+                    }
+                }
 
                 return `
-                    <div class="list-card" style="border-left-color: ${isAlert ? 'var(--danger)' : 'var(--primary)'}" onclick="UI.showOrcamentoDetails('${o.id}')">
+                    <div class="list-card ${isRejected ? 'rejected-hidden' : ''}" style="border-left-color: ${isAlert ? 'var(--danger)' : (isRejected ? 'var(--danger)' : 'var(--primary)')}" onclick="UI.showOrcamentoDetails('${o.id}')">
                         <div class="card-header">
                             <div class="card-title">#${o.numero} - ${c.nome}</div>
                             ${statusTag}
                         </div>
                         <div class="card-subtitle"><i class="fas fa-calendar-day"></i> ${Utils.formatDate(o.dataEvento)} • ${o.evento}</div>
+                        ${pacoteInfo}
                         ${contactBadge}
                         <div class="card-price">${Utils.formatCurrency(o.valor)}</div>
                         <div class="action-row">
@@ -1283,6 +1613,67 @@
                         </div>
                     </div>
                 `;
+            },
+            
+            renderPacotes: (filter = '') => {
+                const list = document.getElementById('pacotes-list');
+                const pacotes = UI.data.pacotes.filter(p => p.status === 'ativo');
+                const equipamentos = UI.data.equipamentos.filter(e => e.status === 'ativo');
+                
+                let content = '';
+                
+                if (pacotes.length === 0 && equipamentos.length === 0) {
+                    content = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Nenhum pacote ou equipamento cadastrado.</p></div>`;
+                } else {
+                    if (pacotes.length > 0) {
+                        content += `<div class="section-title">Pacotes de Serviços</div>`;
+                        const filteredPacotes = filter ? pacotes.filter(p => p.nome.toLowerCase().includes(filter.toLowerCase())) : pacotes;
+                        if (filteredPacotes.length === 0) {
+                            content += `<div class="empty-state"><i class="fas fa-box"></i><p>Nenhum pacote encontrado.</p></div>`;
+                        } else {
+                            content += filteredPacotes.map(p => `
+                                <div class="list-card" onclick="App.pacote.edit('${p.id}')">
+                                    <div class="card-header">
+                                        <div class="card-title">${p.nome}</div>
+                                        <span class="tag ${p.tipo === 'pacote' ? 'tag-contact' : 'tag-scheduled'}">${p.tipo === 'pacote' ? 'PACOTE' : 'EQUIP.'}</span>
+                                    </div>
+                                    <div class="card-subtitle">${p.descricao}</div>
+                                    <div class="card-price">${Utils.formatCurrency(p.valor)}</div>
+                                    ${p.duracao ? `<div class="card-subtitle"><i class="fas fa-clock"></i> Duração: ${p.duracao}h</div>` : ''}
+                                    <div class="action-row">
+                                        <button class="btn-sm btn-light" onclick="event.stopPropagation(); App.pacote.edit('${p.id}')"><i class="fas fa-edit"></i> Editar</button>
+                                        <button class="btn-sm btn-light" style="color:var(--danger)" onclick="event.stopPropagation(); App.pacote.delete('${p.id}')"><i class="fas fa-trash"></i> Excluir</button>
+                                    </div>
+                                </div>
+                            `).join('');
+                        }
+                    }
+                    
+                    if (equipamentos.length > 0) {
+                        content += `<div class="section-title" style="margin-top: 20px;">Equipamentos Extras</div>`;
+                        const filteredEquip = filter ? equipamentos.filter(e => e.nome.toLowerCase().includes(filter.toLowerCase())) : equipamentos;
+                        if (filteredEquip.length === 0) {
+                            content += `<div class="empty-state"><i class="fas fa-tools"></i><p>Nenhum equipamento encontrado.</p></div>`;
+                        } else {
+                            content += filteredEquip.map(e => `
+                                <div class="list-card" onclick="App.pacote.edit('${e.id}')">
+                                    <div class="card-header">
+                                        <div class="card-title">${e.nome}</div>
+                                        <span class="tag tag-scheduled">EQUIP.</span>
+                                    </div>
+                                    <div class="card-subtitle">${e.descricao}</div>
+                                    <div class="card-price">${Utils.formatCurrency(e.valor)}</div>
+                                    <div class="action-row">
+                                        <button class="btn-sm btn-light" onclick="event.stopPropagation(); App.pacote.edit('${e.id}')"><i class="fas fa-edit"></i> Editar</button>
+                                        <button class="btn-sm btn-light" style="color:var(--danger)" onclick="event.stopPropagation(); App.pacote.delete('${e.id}')"><i class="fas fa-trash"></i> Excluir</button>
+                                    </div>
+                                </div>
+                            `).join('');
+                        }
+                    }
+                }
+                
+                list.innerHTML = content;
             },
 
             showOrcamentoDetails: (id) => {
@@ -1296,6 +1687,38 @@
                 if(o.status === 'pendente') statusBadge = `<span class="badge badge-warning">PENDENTE</span>`;
                 if(o.status === 'aceito') statusBadge = `<span class="badge badge-primary">FECHADO</span>`;
                 if(o.status === 'recusado') statusBadge = `<span class="badge badge-danger">RECUSADO</span>`;
+                
+                // Informações do pacote
+                let pacoteInfo = '';
+                if (o.pacoteSelecionado) {
+                    const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
+                    if (pacote) {
+                        pacoteInfo = `
+                            <div class="info-item">
+                                <div class="info-label">Pacote</div>
+                                <div class="info-value">${pacote.nome} - ${Utils.formatCurrency(pacote.valor)}</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Informações dos equipamentos
+                let equipamentosInfo = '';
+                if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
+                    const equipamentos = o.equipamentosSelecionados.map(eqId => {
+                        const equip = UI.data.equipamentos.find(e => e.id === eqId);
+                        return equip ? `${equip.nome} (${Utils.formatCurrency(equip.valor)})` : '';
+                    }).filter(Boolean).join(', ');
+                    
+                    if (equipamentos) {
+                        equipamentosInfo = `
+                            <div class="info-item">
+                                <div class="info-label">Equipamentos Extras</div>
+                                <div class="info-value">${equipamentos}</div>
+                            </div>
+                        `;
+                    }
+                }
                 
                 // Seção de contato agendado
                 let contactSection = '';
@@ -1388,6 +1811,18 @@
                             </div>
                         </div>
                         
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-box-open"></i> SERVIÇOS CONTRATADOS</div>
+                            <div class="details-info-grid">
+                                ${pacoteInfo}
+                                ${equipamentosInfo}
+                                <div class="info-item">
+                                    <div class="info-label">Descrição</div>
+                                    <div class="info-value">${o.descricao || 'Serviços de DJ, som e iluminação'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         ${contactSection}
                         
                         <div class="details-section">
@@ -1405,14 +1840,6 @@
                                     <div class="info-label">Validade</div>
                                     <div class="info-value">${Utils.formatDate(o.validade)}</div>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="details-section">
-                            <div class="details-section-title"><i class="fas fa-clipboard-list"></i> SERVIÇOS INCLUÍDOS</div>
-                            <div class="info-item">
-                                <div class="info-label">Descrição</div>
-                                <div class="info-value">${o.descricao || 'Serviços de DJ, som e iluminação'}</div>
                             </div>
                         </div>
                         
@@ -1574,6 +2001,158 @@
                     }
                 });
             },
+            
+            toggleRejected: () => {
+                UI.showingRejected = !UI.showingRejected;
+                const button = document.querySelector('.show-rejected-toggle');
+                const rejectedSection = document.getElementById('rejected-section');
+                
+                if (UI.showingRejected) {
+                    button.innerHTML = '<i class="fas fa-eye-slash"></i> Ocultar Orçamentos Recusados';
+                    rejectedSection.style.display = 'block';
+                    UI.renderOrcamentos();
+                } else {
+                    button.innerHTML = '<i class="fas fa-eye"></i> Mostrar Orçamentos Recusados';
+                    rejectedSection.style.display = 'none';
+                }
+            },
+            
+            showRejected: () => {
+                UI.navigate('orcamentos');
+                setTimeout(() => {
+                    if (!UI.showingRejected) {
+                        UI.toggleRejected();
+                    }
+                }, 100);
+            },
+            
+            showClienteDetails: (id) => {
+                const c = UI.data.clientes.find(x => x.id === id);
+                if (!c) return;
+                
+                // Contar orçamentos do cliente
+                const orcamentosCliente = UI.data.orcamentos.filter(o => o.clienteId === id);
+                const aceitos = orcamentosCliente.filter(o => o.status === 'aceito').length;
+                const pendentes = orcamentosCliente.filter(o => o.status === 'pendente').length;
+                const recusados = orcamentosCliente.filter(o => o.status === 'recusado').length;
+                
+                // Calcular valor total gasto
+                const valorTotal = orcamentosCliente
+                    .filter(o => o.status === 'aceito')
+                    .reduce((acc, o) => acc + o.valor, 0);
+                
+                const detailsContent = `
+                    <div class="details-card">
+                        <div class="details-header">
+                            <div>
+                                <div class="details-title">${c.nome}</div>
+                                <div class="details-subtitle">Cliente desde: ${Utils.formatDate(c.dataCadastro || new Date().toISOString().split('T')[0])}</div>
+                            </div>
+                            <span class="badge badge-primary">${orcamentosCliente.length} ORÇ.</span>
+                        </div>
+                        
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-info-circle"></i> INFORMAÇÕES</div>
+                            <div class="details-info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Telefone</div>
+                                    <div class="info-value">${c.telefone}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">${c.email || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-chart-bar"></i> ESTATÍSTICAS</div>
+                            <div class="stats-grid" style="margin-top: 10px;">
+                                <div class="stat-card">
+                                    <div class="stat-icon bg-green"><i class="fas fa-check"></i></div>
+                                    <div class="stat-value">${aceitos}</div>
+                                    <div class="stat-label">Fechados</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon bg-orange"><i class="fas fa-hourglass-half"></i></div>
+                                    <div class="stat-value">${pendentes}</div>
+                                    <div class="stat-label">Pendentes</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon bg-red"><i class="fas fa-times"></i></div>
+                                    <div class="stat-value">${recusados}</div>
+                                    <div class="stat-label">Recusados</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon bg-purple"><i class="fas fa-money-bill-wave"></i></div>
+                                    <div class="stat-value">${Utils.formatCurrency(valorTotal)}</div>
+                                    <div class="stat-label">Total Gasto</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${orcamentosCliente.length > 0 ? `
+                        <div class="details-section">
+                            <div class="details-section-title"><i class="fas fa-file-invoice"></i> ÚLTIMOS ORÇAMENTOS</div>
+                            <div style="max-height: 200px; overflow-y: auto;">
+                                ${orcamentosCliente.slice(0, 5).map(o => `
+                                    <div class="list-card" style="margin-bottom: 8px;" onclick="UI.showOrcamentoDetails('${o.id}')">
+                                        <div class="card-header">
+                                            <div class="card-title">#${o.numero} - ${o.evento}</div>
+                                            <span class="tag ${o.status === 'aceito' ? 'tag-accepted' : (o.status === 'pendente' ? 'tag-pending' : 'tag-rejected')}">
+                                                ${o.status === 'aceito' ? 'FECHADO' : (o.status === 'pendente' ? 'PENDENTE' : 'RECUSADO')}
+                                            </span>
+                                        </div>
+                                        <div class="card-subtitle">${Utils.formatDate(o.dataEvento)} • ${Utils.formatCurrency(o.valor)}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="details-actions">
+                            <button class="btn-details btn-details-primary" onclick="App.cliente.edit('${c.id}')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn-details btn-details-whatsapp" onclick="App.whatsapp.openCliente('${c.id}')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="btn-details btn-details-secondary" onclick="UI.openNewOrcamentoForCliente('${c.id}')">
+                                <i class="fas fa-plus"></i> Novo Orçamento
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn-block" style="background: var(--light); color: var(--secondary); margin-top: 8px;" onclick="UI.closeModals()">Fechar</button>
+                `;
+                
+                // Criar um modal temporário para mostrar os detalhes
+                const tempModal = document.createElement('div');
+                tempModal.className = 'modal-overlay active';
+                tempModal.innerHTML = `
+                    <div class="modal-sheet" style="transform: translateY(0);">
+                        <div class="sheet-handle"></div>
+                        <div id="cliente-details-content">${detailsContent}</div>
+                    </div>
+                `;
+                
+                tempModal.addEventListener('click', (e) => {
+                    if (e.target === tempModal) {
+                        document.body.removeChild(tempModal);
+                    }
+                });
+                
+                document.body.appendChild(tempModal);
+            },
+            
+            openNewOrcamentoForCliente: (clienteId) => {
+                UI.closeModals();
+                setTimeout(() => {
+                    UI.openNewOrcamento();
+                    setTimeout(() => {
+                        document.getElementById('o-cliente').value = clienteId;
+                    }, 100);
+                }, 300);
+            },
 
             // --- MODALS ---
             openModal: (type) => {
@@ -1610,13 +2189,54 @@
                 document.getElementById('form-orcamento').reset();
                 document.getElementById('o-id').value = '';
                 document.getElementById('title-orcamento').innerText = 'Novo Orçamento';
+                document.getElementById('duplicate-date-warning').innerHTML = '';
+                document.getElementById('duplicate-date-warning').style.display = 'none';
+                
+                // Carregar pacotes
+                const pacotesContainer = document.getElementById('pacotes-container');
+                const pacotesAtivos = UI.data.pacotes.filter(p => p.status === 'ativo');
+                pacotesContainer.innerHTML = pacotesAtivos.map(p => `
+                    <div class="selection-item" data-id="${p.id}" onclick="App.orcamento.selectPacote('${p.id}')">
+                        <div class="selection-header">
+                            <div class="selection-title">${p.nome}</div>
+                            <div class="selection-price">${Utils.formatCurrency(p.valor)}</div>
+                        </div>
+                        <div class="selection-desc">${p.descricao}</div>
+                        ${p.duracao ? `<div class="selection-desc"><i class="fas fa-clock"></i> ${p.duracao}h de serviço</div>` : ''}
+                    </div>
+                `).join('');
+                
+                // Carregar equipamentos
+                const equipContainer = document.getElementById('equipamentos-container');
+                const equipAtivos = UI.data.equipamentos.filter(e => e.status === 'ativo');
+                equipContainer.innerHTML = equipAtivos.map(e => `
+                    <div class="selection-item" data-id="${e.id}" onclick="App.orcamento.selectEquipamento('${e.id}')">
+                        <div class="selection-header">
+                            <div class="selection-title">${e.nome}</div>
+                            <div class="selection-price">${Utils.formatCurrency(e.valor)}</div>
+                        </div>
+                        <div class="selection-desc">${e.descricao}</div>
+                    </div>
+                `).join('');
                 
                 const sett = Storage.getSettings();
                 const today = new Date();
                 today.setDate(today.getDate() + 15);
                 document.getElementById('o-validade').value = today.toISOString().split('T')[0];
                 
+                // Resetar seleções
+                App.orcamento.selectedPacote = null;
+                App.orcamento.selectedEquipamentos = [];
+                document.getElementById('o-valor').value = '0,00';
+                
                 UI.openModal('orcamento');
+            },
+            
+            openNewPacote: () => {
+                document.getElementById('form-pacote').reset();
+                document.getElementById('p-id').value = '';
+                document.getElementById('title-pacote').innerText = 'Novo Pacote/Equipamento';
+                UI.openModal('pacote');
             },
 
             openSettings: () => {
@@ -1655,7 +2275,13 @@
                     const telefone = document.getElementById('c-telefone').value;
                     const email = document.getElementById('c-email').value;
 
-                    const newClient = { id, nome, telefone, email };
+                    const newClient = { 
+                        id, 
+                        nome, 
+                        telefone, 
+                        email,
+                        dataCadastro: new Date().toISOString().split('T')[0]
+                    };
                     
                     const existingIdx = UI.data.clientes.findIndex(c => c.id === id);
                     if(existingIdx >= 0) {
@@ -1689,6 +2315,102 @@
             },
 
             orcamento: {
+                selectedPacote: null,
+                selectedEquipamentos: [],
+                
+                checkDuplicateDate: () => {
+                    const dataEvento = document.getElementById('o-data').value;
+                    if (!dataEvento) return;
+                    
+                    const orcamentoId = document.getElementById('o-id').value;
+                    const existingOrcamentos = UI.data.orcamentos.filter(o => 
+                        o.dataEvento === dataEvento && 
+                        o.id !== orcamentoId && 
+                        (o.status === 'aceito' || o.status === 'pendente')
+                    );
+                    
+                    const warningDiv = document.getElementById('duplicate-date-warning');
+                    
+                    if (existingOrcamentos.length > 0) {
+                        let warningHtml = `<div class="duplicate-date-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <div class="warning-title">Atenção: Data já ocupada!</div>
+                                <div class="warning-details">`;
+                        
+                        existingOrcamentos.forEach(o => {
+                            const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                            warningHtml += `• Orçamento #${o.numero} para ${c.nome} (${o.evento})<br>`;
+                        });
+                        
+                        warningHtml += `</div></div></div>`;
+                        warningDiv.innerHTML = warningHtml;
+                        warningDiv.style.display = 'block';
+                    } else {
+                        warningDiv.innerHTML = '';
+                        warningDiv.style.display = 'none';
+                    }
+                },
+                
+                selectPacote: (pacoteId) => {
+                    // Remover seleção anterior
+                    document.querySelectorAll('#pacotes-container .selection-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    // Selecionar novo
+                    const selectedItem = document.querySelector(`#pacotes-container .selection-item[data-id="${pacoteId}"]`);
+                    if (selectedItem) {
+                        selectedItem.classList.add('selected');
+                        App.orcamento.selectedPacote = pacoteId;
+                        App.orcamento.calcularValorTotal();
+                    }
+                },
+                
+                selectEquipamento: (equipamentoId) => {
+                    const selectedItem = document.querySelector(`#equipamentos-container .selection-item[data-id="${equipamentoId}"]`);
+                    if (selectedItem) {
+                        const index = App.orcamento.selectedEquipamentos.indexOf(equipamentoId);
+                        
+                        if (index === -1) {
+                            // Adicionar
+                            selectedItem.classList.add('selected');
+                            App.orcamento.selectedEquipamentos.push(equipamentoId);
+                        } else {
+                            // Remover
+                            selectedItem.classList.remove('selected');
+                            App.orcamento.selectedEquipamentos.splice(index, 1);
+                        }
+                        
+                        App.orcamento.calcularValorTotal();
+                    }
+                },
+                
+                calcularValorTotal: () => {
+                    let total = 0;
+                    
+                    // Valor do pacote
+                    if (App.orcamento.selectedPacote) {
+                        const pacote = UI.data.pacotes.find(p => p.id === App.orcamento.selectedPacote);
+                        if (pacote) {
+                            total += pacote.valor;
+                        }
+                    }
+                    
+                    // Valor dos equipamentos
+                    App.orcamento.selectedEquipamentos.forEach(eqId => {
+                        const equip = UI.data.equipamentos.find(e => e.id === eqId);
+                        if (equip) {
+                            total += equip.valor;
+                        }
+                    });
+                    
+                    // Atualizar campo de valor
+                    const valorInput = document.getElementById('o-valor');
+                    valorInput.value = (total * 100).toFixed(0);
+                    Utils.maskMoney(valorInput);
+                },
+                
                 save: (e) => {
                     e.preventDefault();
                     const id = document.getElementById('o-id').value || Utils.id();
@@ -1720,7 +2442,9 @@
                         dataContato: document.getElementById('o-data-contato').value || null,
                         descricao: document.getElementById('o-descricao').value,
                         obsInternas: document.getElementById('o-obs-internas').value,
-                        dataCriacao: new Date().toISOString()
+                        dataCriacao: new Date().toISOString(),
+                        pacoteSelecionado: App.orcamento.selectedPacote,
+                        equipamentosSelecionados: [...App.orcamento.selectedEquipamentos]
                     };
 
                     const idx = UI.data.orcamentos.findIndex(o => o.id === id);
@@ -1761,7 +2485,42 @@
                     document.getElementById('o-descricao').value = o.descricao;
                     document.getElementById('o-obs-internas').value = o.obsInternas || '';
                     
+                    // Carregar pacotes
+                    const pacotesContainer = document.getElementById('pacotes-container');
+                    const pacotesAtivos = UI.data.pacotes.filter(p => p.status === 'ativo');
+                    pacotesContainer.innerHTML = pacotesAtivos.map(p => `
+                        <div class="selection-item ${o.pacoteSelecionado === p.id ? 'selected' : ''}" data-id="${p.id}" onclick="App.orcamento.selectPacote('${p.id}')">
+                            <div class="selection-header">
+                                <div class="selection-title">${p.nome}</div>
+                                <div class="selection-price">${Utils.formatCurrency(p.valor)}</div>
+                            </div>
+                            <div class="selection-desc">${p.descricao}</div>
+                            ${p.duracao ? `<div class="selection-desc"><i class="fas fa-clock"></i> ${p.duracao}h de serviço</div>` : ''}
+                        </div>
+                    `).join('');
+                    
+                    // Carregar equipamentos
+                    const equipContainer = document.getElementById('equipamentos-container');
+                    const equipAtivos = UI.data.equipamentos.filter(e => e.status === 'ativo');
+                    equipContainer.innerHTML = equipAtivos.map(e => `
+                        <div class="selection-item ${(o.equipamentosSelecionados || []).includes(e.id) ? 'selected' : ''}" data-id="${e.id}" onclick="App.orcamento.selectEquipamento('${e.id}')">
+                            <div class="selection-header">
+                                <div class="selection-title">${e.nome}</div>
+                                <div class="selection-price">${Utils.formatCurrency(e.valor)}</div>
+                            </div>
+                            <div class="selection-desc">${e.descricao}</div>
+                        </div>
+                    `).join('');
+                    
+                    // Configurar seleções
+                    App.orcamento.selectedPacote = o.pacoteSelecionado || null;
+                    App.orcamento.selectedEquipamentos = o.equipamentosSelecionados || [];
+                    
                     document.getElementById('title-orcamento').innerText = `Editar Orçamento #${o.numero}`;
+                    
+                    // Verificar data duplicada
+                    App.orcamento.checkDuplicateDate();
+                    
                     UI.openModal('orcamento');
                 },
                 delete: (id) => {
@@ -1771,6 +2530,102 @@
                         UI.renderDashboard();
                         UI.renderOrcamentos();
                         UI.renderFinanceiro();
+                        Utils.toast('Excluído!', 'success');
+                    }
+                }
+            },
+            
+            pacote: {
+                save: (e) => {
+                    e.preventDefault();
+                    const id = document.getElementById('p-id').value || Utils.id();
+                    const tipo = document.getElementById('p-tipo').value;
+                    const nome = document.getElementById('p-nome').value;
+                    const descricao = document.getElementById('p-descricao').value;
+                    const valor = Utils.parseCurrency(document.getElementById('p-valor').value);
+                    const duracao = document.getElementById('p-duracao').value ? parseInt(document.getElementById('p-duracao').value) : null;
+                    const status = document.getElementById('p-status').value;
+
+                    const pacote = {
+                        id,
+                        tipo,
+                        nome,
+                        descricao,
+                        valor,
+                        duracao,
+                        status,
+                        dataCriacao: new Date().toISOString()
+                    };
+                    
+                    let collection = tipo === 'pacote' ? UI.data.pacotes : UI.data.equipamentos;
+                    const idx = collection.findIndex(p => p.id === id);
+                    
+                    if(idx >= 0) {
+                        collection[idx] = pacote;
+                    } else {
+                        collection.push(pacote);
+                    }
+                    
+                    if (tipo === 'pacote') {
+                        Storage.set('pacotes', UI.data.pacotes);
+                    } else {
+                        Storage.set('equipamentos', UI.data.equipamentos);
+                    }
+                    
+                    Utils.toast(`${tipo === 'pacote' ? 'Pacote' : 'Equipamento'} salvo!`);
+                    UI.closeModals();
+                    UI.renderPacotes();
+                },
+                edit: (id) => {
+                    // Procurar em pacotes
+                    let item = UI.data.pacotes.find(x => x.id === id);
+                    let tipo = 'pacote';
+                    
+                    // Se não encontrou, procurar em equipamentos
+                    if (!item) {
+                        item = UI.data.equipamentos.find(x => x.id === id);
+                        tipo = 'equipamento';
+                    }
+                    
+                    if (!item) return;
+                    
+                    document.getElementById('p-id').value = item.id;
+                    document.getElementById('p-tipo').value = tipo;
+                    document.getElementById('p-nome').value = item.nome;
+                    document.getElementById('p-descricao').value = item.descricao || '';
+                    
+                    const valInput = document.getElementById('p-valor');
+                    valInput.value = (item.valor * 100).toFixed(0);
+                    Utils.maskMoney(valInput);
+                    
+                    document.getElementById('p-duracao').value = item.duracao || '';
+                    document.getElementById('p-status').value = item.status || 'ativo';
+                    
+                    document.getElementById('title-pacote').innerText = `Editar ${tipo === 'pacote' ? 'Pacote' : 'Equipamento'}`;
+                    UI.openModal('pacote');
+                },
+                delete: (id) => {
+                    if(confirm('Excluir este item?')) {
+                        // Verificar se está sendo usado em algum orçamento
+                        const usado = UI.data.orcamentos.some(o => 
+                            o.pacoteSelecionado === id || 
+                            (o.equipamentosSelecionados && o.equipamentosSelecionados.includes(id))
+                        );
+                        
+                        if (usado) {
+                            Utils.toast('Este item está sendo usado em orçamentos!', 'error');
+                            return;
+                        }
+                        
+                        // Remover de pacotes
+                        UI.data.pacotes = UI.data.pacotes.filter(p => p.id !== id);
+                        Storage.set('pacotes', UI.data.pacotes);
+                        
+                        // Remover de equipamentos
+                        UI.data.equipamentos = UI.data.equipamentos.filter(e => e.id !== id);
+                        Storage.set('equipamentos', UI.data.equipamentos);
+                        
+                        UI.renderPacotes();
                         Utils.toast('Excluído!', 'success');
                     }
                 }
@@ -1894,6 +2749,27 @@
                     let msg = `Olá ${c.nome.split(' ')[0]}! Aqui é ${s.nome}.\n\n`;
                     msg += `Segue o orçamento *#${o.numero}* para seu evento (${o.evento}).\n`;
                     msg += `Data: ${Utils.formatDate(o.dataEvento)}\n`;
+                    
+                    // Adicionar informações do pacote se houver
+                    if (o.pacoteSelecionado) {
+                        const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
+                        if (pacote) {
+                            msg += `Pacote: ${pacote.nome}\n`;
+                        }
+                    }
+                    
+                    // Adicionar informações dos equipamentos se houver
+                    if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
+                        const equipamentos = o.equipamentosSelecionados.map(eqId => {
+                            const equip = UI.data.equipamentos.find(e => e.id === eqId);
+                            return equip ? equip.nome : '';
+                        }).filter(Boolean).join(', ');
+                        
+                        if (equipamentos) {
+                            msg += `Equipamentos extras: ${equipamentos}\n`;
+                        }
+                    }
+                    
                     msg += `*Valor: ${Utils.formatCurrency(o.valor)}*\n\n`;
                     msg += `Qualquer dúvida estou à disposição!`;
                     
@@ -1906,6 +2782,25 @@
                     const o = UI.data.orcamentos.find(x => x.id === id);
                     const c = UI.data.clientes.find(x => x.id === o.clienteId);
                     const s = Storage.getSettings();
+                    
+                    // Determinar tipo de pacote para cláusulas
+                    let tipoPacote = 'basico';
+                    let temEquipamentos = false;
+                    
+                    if (o.pacoteSelecionado) {
+                        const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
+                        if (pacote) {
+                            if (pacote.nome.toLowerCase().includes('premium')) tipoPacote = 'premium';
+                            else if (pacote.nome.toLowerCase().includes('completo')) tipoPacote = 'completo';
+                        }
+                    }
+                    
+                    if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
+                        temEquipamentos = true;
+                    }
+                    
+                    // Gerar cláusulas apropriadas
+                    const clausulas = Utils.getClausulasByType(tipoPacote, temEquipamentos);
                     
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF({
@@ -2006,6 +2901,49 @@
                     
                     yPos += 7;
                     
+                    // Detalhes do pacote
+                    if (o.pacoteSelecionado) {
+                        const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
+                        if (pacote) {
+                            doc.setFontSize(9);
+                            doc.setTextColor(0);
+                            doc.setFont("helvetica", "bold");
+                            doc.text(`PACOTE: ${pacote.nome}`, margin.left, yPos);
+                            yPos += 5;
+                            
+                            doc.setFontSize(8);
+                            doc.setFont("helvetica", "normal");
+                            const descLines = doc.splitTextToSize(pacote.descricao, contentWidth);
+                            descLines.forEach(line => {
+                                doc.text(line, margin.left, yPos);
+                                yPos += 4;
+                            });
+                            yPos += 2;
+                        }
+                    }
+                    
+                    // Detalhes dos equipamentos
+                    if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
+                        doc.setFontSize(9);
+                        doc.setTextColor(0);
+                        doc.setFont("helvetica", "bold");
+                        doc.text("EQUIPAMENTOS EXTRAS:", margin.left, yPos);
+                        yPos += 5;
+                        
+                        doc.setFontSize(8);
+                        doc.setFont("helvetica", "normal");
+                        
+                        o.equipamentosSelecionados.forEach(eqId => {
+                            const equip = UI.data.equipamentos.find(e => e.id === eqId);
+                            if (equip) {
+                                doc.text(`• ${equip.nome}`, margin.left, yPos);
+                                yPos += 4;
+                            }
+                        });
+                        yPos += 2;
+                    }
+                    
+                    // Descrição geral
                     doc.setDrawColor(200, 200, 200);
                     doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
                     
@@ -2060,22 +2998,13 @@
                     
                     yPos += 7;
                     
-                    const clausulas = (s.clausulasContrato || `1. O presente orçamento tem validade de 15 dias a partir da data de emissão.
-2. Para reserva da data, será necessário o pagamento de 50% do valor total como sinal.
-3. O pagamento do saldo restante deverá ser efetuado até o dia do evento.
-4. Em caso de cancelamento pelo contratante com menos de 30 dias do evento, o sinal não será devolvido.
-5. O profissional se compromete a chegar ao local do evento com 2 horas de antecedência para montagem e testes.
-6. O horário de término do serviço será conforme acordado, com tolerância máxima de 30 minutos.
-7. O contratante é responsável por fornecer ponto de energia adequado e seguro.
-8. Em caso de eventos em locais abertos, é necessária proteção contra chuva para o equipamento.
-9. O repertório será definido em conjunto com o contratante, respeitando a classificação indicativa.
-10. O som e iluminação serão ajustados conforme as normas do local e legislação vigente.`).split('\n');
+                    const clausulasArray = clausulas.split('\n');
                     
                     doc.setFontSize(7);
                     doc.setTextColor(0);
                     doc.setFont("helvetica", "normal");
                     
-                    clausulas.forEach((clausula, index) => {
+                    clausulasArray.forEach((clausula, index) => {
                         if (yPos > pageHeight - 30) {
                             doc.addPage();
                             yPos = margin.top;
@@ -2133,6 +3062,8 @@
                     const data = {
                         clientes: UI.data.clientes,
                         orcamentos: UI.data.orcamentos,
+                        pacotes: UI.data.pacotes,
+                        equipamentos: UI.data.equipamentos,
                         settings: Storage.getSettings()
                     };
                     const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
@@ -2152,6 +3083,8 @@
                             const data = JSON.parse(e.target.result);
                             if(data.clientes) Storage.set('clientes', data.clientes);
                             if(data.orcamentos) Storage.set('orcamentos', data.orcamentos);
+                            if(data.pacotes) Storage.set('pacotes', data.pacotes);
+                            if(data.equipamentos) Storage.set('equipamentos', data.equipamentos);
                             if(data.settings) Storage.saveSettings(data.settings);
                             location.reload();
                         } catch(err) {
