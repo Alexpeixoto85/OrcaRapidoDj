@@ -689,6 +689,74 @@
             color: white;
             border-color: var(--primary);
         }
+        
+        /* Modal de confirmação WhatsApp */
+        .confirm-whatsapp-modal {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            margin: auto;
+            text-align: center;
+        }
+        
+        .confirm-whatsapp-modal .modal-icon {
+            font-size: 3rem;
+            color: #25D366;
+            margin-bottom: 16px;
+        }
+        
+        .confirm-whatsapp-modal .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+        
+        .confirm-whatsapp-modal .modal-description {
+            color: var(--secondary);
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+        
+        .confirm-whatsapp-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .confirm-whatsapp-btn {
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .confirm-whatsapp-btn:active { transform: scale(0.98); }
+        
+        .confirm-whatsapp-btn.conversa {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+        
+        .confirm-whatsapp-btn.orcamento {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .confirm-whatsapp-btn.cancelar {
+            background: var(--light);
+            color: var(--secondary);
+        }
     </style>
 </head>
 <body>
@@ -1099,6 +1167,41 @@
         </form>
     </div>
 
+    <!-- Modal de confirmação WhatsApp -->
+    <div class="modal-overlay" id="overlay-whatsapp-confirm"></div>
+    <div class="modal-sheet" id="sheet-whatsapp-confirm">
+        <div class="sheet-handle"></div>
+        <div class="confirm-whatsapp-modal">
+            <div class="modal-icon">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <div class="modal-title">Enviar para WhatsApp</div>
+            <div class="modal-description">
+                Como você gostaria de iniciar a conversa com o cliente?
+            </div>
+            <div class="confirm-whatsapp-options">
+                <button class="confirm-whatsapp-btn conversa" onclick="App.whatsapp.openConversaSimples()">
+                    <i class="fas fa-comment-dots"></i>
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 700; font-size: 1.1rem;">Apenas Conversa</div>
+                        <div style="font-size: 0.85rem; font-weight: normal;">Abrir conversa simples sem enviar orçamento</div>
+                    </div>
+                </button>
+                <button class="confirm-whatsapp-btn orcamento" onclick="App.whatsapp.openOrcamentoCompleto()">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: 700; font-size: 1.1rem;">Enviar Orçamento</div>
+                        <div style="font-size: 0.85rem; font-weight: normal;">Enviar orçamento completo com todos os detalhes</div>
+                    </div>
+                </button>
+            </div>
+            <button class="confirm-whatsapp-btn cancelar" onclick="UI.closeModals()">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="overlay-settings"></div>
     <div class="modal-sheet" id="sheet-settings">
         <div class="sheet-handle"></div>
@@ -1303,6 +1406,12 @@
                 }
                 
                 return clausulas.join('\n');
+            },
+            getSaudacao: () => {
+                const hora = new Date().getHours();
+                if (hora < 12) return "Bom dia";
+                if (hora < 18) return "Boa tarde";
+                return "Boa noite";
             }
         };
 
@@ -1332,6 +1441,7 @@
             chartInstance: null,
             showingRejected: false,
             currentFilter: 'all',
+            currentWhatsappOrcamentoId: null,
             
             init: () => {
                 UI.data.clientes = Storage.get('clientes');
@@ -1480,7 +1590,7 @@
                             <button class="btn-sm btn-cyan" onclick="event.stopPropagation(); App.contact.open('${o.id}')">
                                 <i class="fas fa-calendar-check"></i> Contato
                             </button>
-                            <button class="btn-sm btn-primary-soft" onclick="event.stopPropagation(); App.whatsapp.openOrcamento('${o.id}')">
+                            <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.confirmOpen('${o.id}')">
                                 <i class="fab fa-whatsapp"></i> Zap
                             </button>
                             <button class="btn-sm btn-light" onclick="event.stopPropagation(); UI.showOrcamentoDetails('${o.id}')">
@@ -1649,7 +1759,7 @@
                         <div class="action-row">
                             <button class="btn-sm btn-light" onclick="event.stopPropagation(); App.orcamento.edit('${o.id}')"><i class="fas fa-edit"></i></button>
                             <button class="btn-sm btn-primary-soft" onclick="event.stopPropagation(); App.pdf.generate('${o.id}')"><i class="fas fa-file-pdf"></i> PDF</button>
-                            <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.openOrcamento('${o.id}')"><i class="fab fa-whatsapp"></i> Enviar</button>
+                            <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.confirmOpen('${o.id}')"><i class="fab fa-whatsapp"></i> Enviar</button>
                             <button class="btn-sm btn-cyan" onclick="event.stopPropagation(); App.contact.open('${o.id}')"><i class="fas fa-calendar-check"></i></button>
                             <button class="btn-sm btn-light" style="color:var(--danger)" onclick="event.stopPropagation(); App.orcamento.delete('${o.id}')"><i class="fas fa-trash"></i></button>
                         </div>
@@ -1908,7 +2018,7 @@
                             <button class="btn-details btn-details-primary" onclick="App.orcamento.edit('${o.id}')">
                                 <i class="fas fa-edit"></i> Editar
                             </button>
-                            <button class="btn-details btn-details-whatsapp" onclick="App.whatsapp.openOrcamento('${o.id}')">
+                            <button class="btn-details btn-details-whatsapp" onclick="App.whatsapp.confirmOpen('${o.id}')">
                                 <i class="fab fa-whatsapp"></i> WhatsApp
                             </button>
                             <button class="btn-details btn-details-cyan" onclick="App.contact.open('${o.id}')">
@@ -2333,6 +2443,11 @@
                 }
                 
                 UI.openModal('settings');
+            },
+            
+            openWhatsappConfirm: (orcamentoId) => {
+                UI.currentWhatsappOrcamentoId = orcamentoId;
+                UI.openModal('whatsapp-confirm');
             }
         };
 
@@ -2821,19 +2936,42 @@
             },
 
             whatsapp: {
-                openCliente: (id) => {
-                    const c = UI.data.clientes.find(x => x.id === id);
-                    if(!c) return;
-                    const num = c.telefone.replace(/\D/g, '');
-                    window.open(`https://wa.me/55${num}`, '_blank');
+                confirmOpen: (id) => {
+                    UI.openWhatsappConfirm(id);
                 },
-                openOrcamento: (id) => {
-                    const o = UI.data.orcamentos.find(x => x.id === id);
+                
+                openConversaSimples: () => {
+                    if (!UI.currentWhatsappOrcamentoId) return;
+                    
+                    const o = UI.data.orcamentos.find(x => x.id === UI.currentWhatsappOrcamentoId);
+                    if (!o) return;
+                    
+                    const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                    if (!c) return;
+                    
+                    const num = c.telefone.replace(/\D/g, '');
+                    const saudacao = Utils.getSaudacao();
+                    
+                    let msg = `${saudacao}, ${c.nome.split(' ')[0]}! Tudo bem?\n\n`;
+                    msg += `Gostaria de conversar sobre o seu pedido de orçamento (#${o.numero}) para o evento de ${o.evento}.\n\n`;
+                    msg += `Fico à disposição para esclarecer qualquer dúvida!`;
+                    
+                    window.open(`https://wa.me/55${num}?text=${encodeURIComponent(msg)}`, '_blank');
+                    UI.closeModals();
+                    UI.currentWhatsappOrcamentoId = null;
+                },
+                
+                openOrcamentoCompleto: () => {
+                    if (!UI.currentWhatsappOrcamentoId) return;
+                    
+                    const o = UI.data.orcamentos.find(x => x.id === UI.currentWhatsappOrcamentoId);
                     const c = UI.data.clientes.find(x => x.id === o.clienteId);
                     const s = Storage.getSettings();
                     
                     const num = c.telefone.replace(/\D/g, '');
-                    let msg = `Olá ${c.nome.split(' ')[0]}! Aqui é ${s.nome}.\n\n`;
+                    const saudacao = Utils.getSaudacao();
+                    
+                    let msg = `${saudacao} ${c.nome.split(' ')[0]}! Aqui é ${s.nome}.\n\n`;
                     msg += `Segue o orçamento *#${o.numero}* para seu evento (${o.evento}).\n`;
                     msg += `Data: ${Utils.formatDate(o.dataEvento)}\n`;
                     
@@ -2861,6 +2999,15 @@
                     msg += `Qualquer dúvida estou à disposição!`;
                     
                     window.open(`https://wa.me/55${num}?text=${encodeURIComponent(msg)}`, '_blank');
+                    UI.closeModals();
+                    UI.currentWhatsappOrcamentoId = null;
+                },
+                
+                openCliente: (id) => {
+                    const c = UI.data.clientes.find(x => x.id === id);
+                    if(!c) return;
+                    const num = c.telefone.replace(/\D/g, '');
+                    window.open(`https://wa.me/55${num}`, '_blank');
                 }
             },
 
