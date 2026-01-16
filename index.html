@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -207,6 +206,7 @@
         .tag-scheduled { background: #fef3c7; color: #b45309; }
         .tag-birthday { background: #fce7f3; color: #db2777; }
         .tag-anniversary { background: #fef3c7; color: #d97706; }
+        .tag-recontact { background: #dcfce7; color: #16a34a; }
 
         .card-price { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-top: 8px; }
 
@@ -506,6 +506,7 @@
         .badge-danger { background: var(--danger); color: white; }
         .badge-cyan { background: #06b6d4; color: white; }
         .badge-pink { background: #db2777; color: white; }
+        .badge-success { background: #10b981; color: white; }
         
         /* Data e hora formatadas */
         .date-badge {
@@ -783,6 +784,12 @@
             margin-bottom: 12px;
         }
         
+        .recontact-alert-card {
+            background: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            margin-bottom: 12px;
+        }
+        
         .birthday-label {
             display: flex;
             align-items: center;
@@ -805,6 +812,32 @@
             padding: 4px 8px;
             border-radius: 4px;
             margin-top: 4px;
+        }
+        
+        .recontact-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #16a34a;
+            background: #dcfce7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+        
+        /* Eventos recorrentes */
+        .recurrent-event-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: #e0f2fe;
+            color: #0369a1;
+            margin-left: 8px;
         }
     </style>
 </head>
@@ -859,6 +892,16 @@
                     <div class="stat-value" id="dash-media-mensal">R$ 0</div>
                     <div class="stat-label">Média Mensal</div>
                 </div>
+                <div class="stat-card" onclick="UI.scrollTo('birthday-alerts')">
+                    <div class="stat-icon bg-pink"><i class="fas fa-birthday-cake"></i></div>
+                    <div class="stat-value" id="dash-aniversariantes">0</div>
+                    <div class="stat-label">Aniversariantes</div>
+                </div>
+                <div class="stat-card" onclick="UI.scrollTo('recontact-alerts')">
+                    <div class="stat-icon bg-success" style="background: #d1fae5; color: #10b981;"><i class="fas fa-calendar-plus"></i></div>
+                    <div class="stat-value" id="dash-recontato">0</div>
+                    <div class="stat-label">Para Recontato</div>
+                </div>
             </div>
 
             <div class="section-title">
@@ -877,7 +920,7 @@
                 <!-- Lista de contatos agendados será preenchida aqui -->
             </div>
             
-            <div class="section-title">
+            <div class="section-title" id="birthday-alerts">
                 Aniversariantes de Hoje
                 <span class="tag tag-birthday" id="birthday-badge" style="display:none">🎂</span>
             </div>
@@ -885,9 +928,17 @@
                 <!-- Lista de aniversariantes será preenchida aqui -->
             </div>
             
+            <div class="section-title" id="recontact-alerts">
+                Eventos para Recontato (Recorrentes - 6 meses antes)
+                <span class="tag tag-recontact" id="recontact-badge" style="display:none">📅</span>
+            </div>
+            <div id="recontact-list">
+                <!-- Lista de eventos para recontato será preenchida aqui -->
+            </div>
+            
             <div class="section-title">
-                Eventos para Recontato (Próximos 3 meses)
-                <span class="tag tag-anniversary" id="anniversary-badge" style="display:none">📅</span>
+                Aniversários de Eventos (Próximos 3 meses)
+                <span class="tag tag-anniversary" id="anniversary-badge" style="display:none">🎉</span>
             </div>
             <div id="anniversary-list">
                 <!-- Lista de eventos para recontato será preenchida aqui -->
@@ -1052,11 +1103,13 @@
                 <div style="flex: 1;">
                     <label class="form-label">Tipo Evento</label>
                     <select id="o-evento" class="form-control">
-                        <option value="Infantil">Infantil</option>
                         <option value="Aniversário">Aniversário</option>
                         <option value="15 Anos">15 Anos</option>
                         <option value="Casamento">Casamento</option>
+                        <option value="Formatura">Formatura</option>
+                        <option value="Confraternização">Confraternização</option>
                         <option value="Corporativo">Corporativo</option>
+                        <option value="Infantil">Infantil</option>
                         <option value="Outro">Outro</option>
                     </select>
                 </div>
@@ -1494,31 +1547,57 @@
                 return birth.getDate() === today.getDate() && birth.getMonth() === today.getMonth();
             },
             
-            // NOVO: Calcular data para recontato anual (3 meses antes do evento)
-            getAnniversaryContactDate: (eventDate) => {
-                if (!eventDate) return null;
+            // NOVO: Verificar se é aniversário nos próximos 7 dias
+            isBirthdayNextWeek: (birthdate) => {
+                if (!birthdate) return false;
+                const today = new Date();
+                const birth = new Date(birthdate);
+                const nextWeek = new Date();
+                nextWeek.setDate(today.getDate() + 7);
+                
+                // Ajustar ano para o ano atual
+                birth.setFullYear(today.getFullYear());
+                
+                return birth >= today && birth <= nextWeek;
+            },
+            
+            // NOVO: Verificar se evento é recorrente
+            isRecurrentEvent: (eventType) => {
+                const recurrentEvents = ['Aniversário', '15 Anos', 'Formatura', 'Confraternização', 'Corporativo'];
+                return recurrentEvents.includes(eventType);
+            },
+            
+            // NOVO: Calcular data para recontato (6 meses antes do próximo evento)
+            getRecontactDate: (eventDate, eventType) => {
+                if (!eventDate || !Utils.isRecurrentEvent(eventType)) return null;
+                
                 const event = new Date(eventDate);
-                const contactDate = new Date(event);
-                contactDate.setFullYear(event.getFullYear() + 1);
-                contactDate.setMonth(event.getMonth() - 3);
+                const nextYearEvent = new Date(event);
+                nextYearEvent.setFullYear(event.getFullYear() + 1);
+                
+                // 6 meses antes do evento do próximo ano
+                const contactDate = new Date(nextYearEvent);
+                contactDate.setMonth(nextYearEvent.getMonth() - 6);
+                
                 return contactDate.toISOString().split('T')[0];
             },
             
-            // NOVO: Verificar se está dentro dos próximos 3 meses para recontato
-            isAnniversarySoon: (eventDate) => {
-                if (!eventDate) return false;
+            // NOVO: Verificar se está dentro dos próximos 6 meses para recontato
+            needsRecontact: (eventDate, eventType) => {
+                if (!eventDate || !Utils.isRecurrentEvent(eventType)) return false;
+                
                 const today = new Date();
                 const event = new Date(eventDate);
                 const nextYearEvent = new Date(event);
                 nextYearEvent.setFullYear(today.getFullYear() + 1);
                 
-                // Data para contato (3 meses antes do evento)
+                // Data para contato (6 meses antes do evento)
                 const contactDate = new Date(nextYearEvent);
-                contactDate.setMonth(nextYearEvent.getMonth() - 3);
+                contactDate.setMonth(nextYearEvent.getMonth() - 6);
                 
-                // Verificar se está nos próximos 90 dias
+                // Verificar se está nos próximos 180 dias
                 const daysDiff = (contactDate - today) / (1000 * 60 * 60 * 24);
-                return daysDiff >= 0 && daysDiff <= 90;
+                return daysDiff >= 0 && daysDiff <= 180;
             },
             
             // NOVO: Formatar data de nascimento para exibição
@@ -1526,6 +1605,43 @@
                 if (!dateStr) return '-';
                 const [y, m, d] = dateStr.split('-');
                 return `${d}/${m}`;
+            },
+            
+            // NOVO: Calcular data do próximo aniversário
+            getNextBirthday: (birthdate) => {
+                if (!birthdate) return null;
+                const today = new Date();
+                const birth = new Date(birthdate);
+                const currentYear = today.getFullYear();
+                
+                birth.setFullYear(currentYear);
+                if (birth < today) {
+                    birth.setFullYear(currentYear + 1);
+                }
+                
+                return birth.toISOString().split('T')[0];
+            },
+            
+            // NOVO: Verificar se é aniversário do evento (1 ano depois)
+            isEventAnniversarySoon: (eventDate) => {
+                if (!eventDate) return false;
+                const today = new Date();
+                const event = new Date(eventDate);
+                const anniversary = new Date(event);
+                anniversary.setFullYear(event.getFullYear() + 1);
+                
+                // Verificar se está nos próximos 90 dias
+                const daysDiff = (anniversary - today) / (1000 * 60 * 60 * 24);
+                return daysDiff >= 0 && daysDiff <= 90;
+            },
+            
+            // NOVO: Calcular dias até próxima data
+            getDaysUntil: (dateStr) => {
+                if (!dateStr) return null;
+                const today = new Date();
+                const target = new Date(dateStr);
+                const diffTime = target - today;
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             }
         };
 
@@ -1622,6 +1738,13 @@
                     UI.filterOrcamentos(filter);
                 }, 100);
             },
+            
+            scrollTo: (elementId) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            },
 
             // --- RENDER FUNCTIONS ---
             renderDashboard: () => {
@@ -1661,15 +1784,26 @@
                 const aniversariantes = clientes.filter(c => 
                     c.nascimento && Utils.isBirthdayToday(c.nascimento)
                 );
+                document.getElementById('dash-aniversariantes').innerText = aniversariantes.length;
                 document.getElementById('birthday-badge').style.display = aniversariantes.length > 0 ? 'inline-block' : 'none';
                 
-                // Eventos para recontato (próximos 3 meses)
+                // Eventos para recontato (recorrentes - 6 meses antes)
                 const eventosParaRecontato = orcamentos.filter(o => 
                     o.status === 'aceito' && 
                     o.dataEvento && 
-                    Utils.isAnniversarySoon(o.dataEvento)
+                    o.evento &&
+                    Utils.needsRecontact(o.dataEvento, o.evento)
                 );
-                document.getElementById('anniversary-badge').style.display = eventosParaRecontato.length > 0 ? 'inline-block' : 'none';
+                document.getElementById('dash-recontato').innerText = eventosParaRecontato.length;
+                document.getElementById('recontact-badge').style.display = eventosParaRecontato.length > 0 ? 'inline-block' : 'none';
+
+                // Eventos para aniversário (próximos 3 meses)
+                const eventosAnniversary = orcamentos.filter(o => 
+                    o.status === 'aceito' && 
+                    o.dataEvento && 
+                    Utils.isEventAnniversarySoon(o.dataEvento)
+                );
+                document.getElementById('anniversary-badge').style.display = eventosAnniversary.length > 0 ? 'inline-block' : 'none';
 
                 // Render follow-ups vencidos
                 const followupList = document.getElementById('followup-list');
@@ -1698,11 +1832,19 @@
                 }
                 
                 // Render eventos para recontato
-                const anniversaryList = document.getElementById('anniversary-list');
+                const recontactList = document.getElementById('recontact-list');
                 if (eventosParaRecontato.length === 0) {
-                    anniversaryList.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-alt"></i><p>Nenhum evento para recontato nos próximos 3 meses!</p></div>`;
+                    recontactList.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-plus"></i><p>Nenhum evento para recontato nos próximos 6 meses!</p></div>`;
                 } else {
-                    anniversaryList.innerHTML = eventosParaRecontato.map(o => UI.createAnniversaryCard(o)).join('');
+                    recontactList.innerHTML = eventosParaRecontato.map(o => UI.createRecontactCard(o)).join('');
+                }
+                
+                // Render eventos para aniversário
+                const anniversaryList = document.getElementById('anniversary-list');
+                if (eventosAnniversary.length === 0) {
+                    anniversaryList.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-alt"></i><p>Nenhum aniversário de evento nos próximos 3 meses!</p></div>`;
+                } else {
+                    anniversaryList.innerHTML = eventosAnniversary.map(o => UI.createAnniversaryCard(o)).join('');
                 }
             },
 
@@ -1714,10 +1856,14 @@
                 let alertClass = '';
                 if(isPast) alertClass = 'contact-alert-card';
                 
+                // Verificar se é evento recorrente
+                const isRecurrent = Utils.isRecurrentEvent(o.evento);
+                const recurrentBadge = isRecurrent ? '<span class="recurrent-event-badge"><i class="fas fa-redo"></i> Recorrente</span>' : '';
+                
                 return `
                     <div class="list-card ${alertClass}" onclick="UI.showOrcamentoDetails('${o.id}')">
                         <div class="card-header">
-                            <div class="card-title">#${o.numero} - ${c.nome}</div>
+                            <div class="card-title">#${o.numero} - ${c.nome} ${recurrentBadge}</div>
                             <span class="tag ${isPast ? 'tag-alert' : 'tag-contact'}">
                                 ${isPast ? 'ATRASADO' : (isToday ? 'HOJE' : 'AGENDADO')}
                             </span>
@@ -1746,25 +1892,65 @@
             },
             
             createBirthdayCard: (c) => {
+                const nextBirthday = Utils.getNextBirthday(c.nascimento);
+                const daysUntil = Utils.getDaysUntil(nextBirthday);
+                const birthdayMessage = daysUntil === 0 ? 'HOJE!' : `em ${daysUntil} dia${daysUntil !== 1 ? 's' : ''}`;
+                
                 return `
                     <div class="list-card birthday-alert-card" onclick="UI.showClienteDetails('${c.id}')">
                         <div class="card-header">
                             <div class="card-title">${c.nome}</div>
-                            <span class="tag tag-birthday">🎂 ANIVERSÁRIO</span>
+                            <span class="tag tag-birthday">🎂 ANIVERSÁRIO ${daysUntil === 0 ? 'HOJE!' : ''}</span>
                         </div>
                         <div class="card-subtitle">
                             <i class="fas fa-birthday-cake"></i> Aniversário: ${Utils.formatBirthdate(c.nascimento)}
                             <i class="fas fa-phone" style="margin-left: 12px;"></i> ${c.telefone}
                         </div>
                         <div class="birthday-label">
-                            <i class="fas fa-gift"></i> Parabéns! Entre em contato para desejar feliz aniversário.
+                            <i class="fas fa-gift"></i> ${daysUntil === 0 ? '🎉 PARABÉNS! Entre em contato para desejar feliz aniversário!' : `Próximo aniversário ${birthdayMessage}`}
                         </div>
                         <div class="action-row">
                             <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.openBirthdayGreeting('${c.id}')">
-                                <i class="fab fa-whatsapp"></i> Parabenizar
+                                <i class="fab fa-whatsapp"></i> ${daysUntil === 0 ? 'Parabenizar' : 'Lembrar'}
                             </button>
                             <button class="btn-sm btn-light" onclick="event.stopPropagation(); UI.openNewOrcamentoForCliente('${c.id}')">
                                 <i class="fas fa-gift"></i> Oferecer Presente
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            createRecontactCard: (o) => {
+                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                const recontactDate = Utils.getRecontactDate(o.dataEvento, o.evento);
+                const daysUntil = Utils.getDaysUntil(recontactDate);
+                const nextEventDate = new Date(o.dataEvento);
+                nextEventDate.setFullYear(nextEventDate.getFullYear() + 1);
+                
+                return `
+                    <div class="list-card recontact-alert-card" onclick="UI.showOrcamentoDetails('${o.id}')">
+                        <div class="card-header">
+                            <div class="card-title">#${o.numero} - ${c.nome}</div>
+                            <span class="tag tag-recontact">📅 RECONTATO</span>
+                        </div>
+                        <div class="card-subtitle">
+                            <i class="fas fa-calendar-day"></i> Evento anterior: ${Utils.formatDate(o.dataEvento)} • ${o.evento}
+                        </div>
+                        <div class="recontact-label">
+                            <i class="fas fa-calendar-check"></i> 
+                            <div>
+                                <strong>Próximo evento:</strong> ${Utils.formatDate(nextEventDate.toISOString().split('T')[0])}
+                                <br><strong>Recontato sugerido:</strong> ${Utils.formatDate(recontactDate)} (em ${daysUntil} dia${daysUntil !== 1 ? 's' : ''})
+                            </div>
+                        </div>
+                        <div class="card-price">${Utils.formatCurrency(o.valor)}</div>
+                        <div class="action-row">
+                            <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.openRecontact('${o.id}')">
+                                <i class="fab fa-whatsapp"></i> Recontatar
+                            </button>
+                            <button class="btn-sm btn-light" onclick="event.stopPropagation(); UI.openNewOrcamentoForCliente('${c.id}')">
+                                <i class="fas fa-plus"></i> Novo Orçamento
                             </button>
                         </div>
                     </div>
@@ -1775,28 +1961,31 @@
                 const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
                 const nextEventDate = new Date(o.dataEvento);
                 nextEventDate.setFullYear(nextEventDate.getFullYear() + 1);
-                const contactDate = Utils.getAnniversaryContactDate(o.dataEvento);
+                const daysUntil = Utils.getDaysUntil(nextEventDate.toISOString().split('T')[0]);
                 
                 return `
                     <div class="list-card anniversary-alert-card" onclick="UI.showOrcamentoDetails('${o.id}')">
                         <div class="card-header">
                             <div class="card-title">#${o.numero} - ${c.nome}</div>
-                            <span class="tag tag-anniversary">📅 RECONTATO</span>
+                            <span class="tag tag-anniversary">🎉 1 ANO</span>
                         </div>
                         <div class="card-subtitle">
-                            <i class="fas fa-calendar-day"></i> Evento anterior: ${Utils.formatDate(o.dataEvento)} • ${o.evento}
+                            <i class="fas fa-calendar-day"></i> Evento realizado: ${Utils.formatDate(o.dataEvento)} • ${o.evento}
                         </div>
                         <div class="anniversary-label">
-                            <i class="fas fa-calendar-check"></i> Próximo evento: ${Utils.formatDate(nextEventDate.toISOString().split('T')[0])}
-                            <br>Contato sugerido: ${Utils.formatDate(contactDate)}
+                            <i class="fas fa-champagne-glasses"></i> 
+                            <div>
+                                <strong>Completando 1 ano em:</strong> ${Utils.formatDate(nextEventDate.toISOString().split('T')[0])}
+                                <br>(${daysUntil} dia${daysUntil !== 1 ? 's' : ''})
+                            </div>
                         </div>
                         <div class="card-price">${Utils.formatCurrency(o.valor)}</div>
                         <div class="action-row">
-                            <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.openAnniversaryContact('${o.id}')">
-                                <i class="fab fa-whatsapp"></i> Recontatar
+                            <button class="btn-sm btn-whatsapp" onclick="event.stopPropagation(); App.whatsapp.openAnniversaryGreeting('${o.id}')">
+                                <i class="fab fa-whatsapp"></i> Parabenizar
                             </button>
                             <button class="btn-sm btn-light" onclick="event.stopPropagation(); UI.openNewOrcamentoForCliente('${c.id}')">
-                                <i class="fas fa-plus"></i> Novo Orçamento
+                                <i class="fas fa-calendar-plus"></i> Novo Evento
                             </button>
                         </div>
                     </div>
@@ -1817,12 +2006,18 @@
 
                 list.innerHTML = filtered.map(c => {
                     const birthdayBadge = c.nascimento && Utils.isBirthdayToday(c.nascimento) ? 
-                        `<span class="tag tag-birthday" style="margin-left: 8px;">🎂</span>` : '';
+                        `<span class="tag tag-birthday" style="margin-left: 8px;">🎂 HOJE</span>` : 
+                        (c.nascimento && Utils.isBirthdayNextWeek(c.nascimento) ? 
+                        `<span class="tag tag-scheduled" style="margin-left: 8px;">🎂 Em breve</span>` : '');
+                    
+                    // Contar orçamentos do cliente
+                    const orcamentosCount = UI.data.orcamentos.filter(o => o.clienteId === c.id).length;
                     
                     return `
                     <div class="list-card" onclick="UI.showClienteDetails('${c.id}')">
                         <div class="card-header">
                             <div class="card-title">${c.nome} ${birthdayBadge}</div>
+                            ${orcamentosCount > 0 ? `<span class="badge badge-primary">${orcamentosCount} orç.</span>` : ''}
                         </div>
                         <div class="card-subtitle">
                             <i class="fas fa-phone"></i> ${c.telefone}
@@ -1936,6 +2131,10 @@
                 if(o.status === 'recusado' || isRejected) statusTag = `<span class="tag tag-rejected">Recusado</span>`;
                 if(isAlert) statusTag = `<span class="tag tag-alert">Vencido</span>`;
                 
+                // Verificar se é evento recorrente
+                const isRecurrent = Utils.isRecurrentEvent(o.evento);
+                const recurrentBadge = isRecurrent ? '<span class="recurrent-event-badge"><i class="fas fa-redo"></i> Recorrente</span>' : '';
+                
                 // Verificar se tem contato agendado
                 let contactBadge = '';
                 if(o.dataContato && o.status === 'pendente') {
@@ -1961,7 +2160,7 @@
                 return `
                     <div class="list-card ${isRejected ? 'rejected-hidden' : ''}" style="border-left-color: ${isAlert ? 'var(--danger)' : (isRejected ? 'var(--danger)' : 'var(--primary)')}" onclick="UI.showOrcamentoDetails('${o.id}')">
                         <div class="card-header">
-                            <div class="card-title">#${o.numero} - ${c.nome}</div>
+                            <div class="card-title">#${o.numero} - ${c.nome} ${recurrentBadge}</div>
                             ${statusTag}
                         </div>
                         <div class="card-subtitle"><i class="fas fa-calendar-day"></i> ${Utils.formatDate(o.dataEvento)} • ${o.evento}</div>
@@ -2066,6 +2265,10 @@
                 if(o.status === 'aceito') statusBadge = `<span class="badge badge-primary">FECHADO</span>`;
                 if(o.status === 'recusado') statusBadge = `<span class="badge badge-danger">RECUSADO</span>`;
                 
+                // Verificar se é evento recorrente
+                const isRecurrent = Utils.isRecurrentEvent(o.evento);
+                const recurrentInfo = isRecurrent ? `<span class="badge badge-success" style="margin-left: 8px;"><i class="fas fa-redo"></i> EVENTO RECORRENTE</span>` : '';
+                
                 // Informações do pacote
                 let pacoteInfo = '';
                 if (o.pacoteSelecionado) {
@@ -2153,11 +2356,51 @@
                     `;
                 }
                 
+                // Seção de recontato (para eventos recorrentes)
+                let recontactSection = '';
+                if (isRecurrent && o.status === 'aceito' && o.dataEvento) {
+                    const recontactDate = Utils.getRecontactDate(o.dataEvento, o.evento);
+                    const needsRecontact = Utils.needsRecontact(o.dataEvento, o.evento);
+                    const nextEventDate = new Date(o.dataEvento);
+                    nextEventDate.setFullYear(nextEventDate.getFullYear() + 1);
+                    
+                    if (recontactDate) {
+                        const daysUntil = Utils.getDaysUntil(recontactDate);
+                        const alertClass = needsRecontact ? 'badge badge-warning' : 'badge badge-success';
+                        
+                        recontactSection = `
+                            <div class="details-section">
+                                <div class="details-section-title"><i class="fas fa-calendar-plus"></i> RECONTATO RECORRENTE</div>
+                                <div class="details-info-grid">
+                                    <div class="info-item">
+                                        <div class="info-label">Próximo Evento</div>
+                                        <div class="info-value">${Utils.formatDate(nextEventDate.toISOString().split('T')[0])}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Recontato Sugerido</div>
+                                        <div class="info-value">
+                                            ${Utils.formatDate(recontactDate)}
+                                            <span class="${alertClass}" style="margin-left: 8px;">
+                                                ${needsRecontact ? `EM ${daysUntil} DIA${daysUntil !== 1 ? 'S' : ''}` : 'AGENDADO'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 12px;">
+                                    <button class="btn-details btn-details-whatsapp" onclick="App.whatsapp.openRecontact('${o.id}')" style="width: 100%;">
+                                        <i class="fab fa-whatsapp"></i> Recontatar Cliente
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
                 const detailsContent = `
                     <div class="details-card">
                         <div class="details-header">
                             <div>
-                                <div class="details-title">Orçamento #${o.numero}</div>
+                                <div class="details-title">Orçamento #${o.numero} ${recurrentInfo}</div>
                                 <div class="details-subtitle">Criado em: ${Utils.formatDateTime(o.dataCriacao)}</div>
                             </div>
                             ${statusBadge}
@@ -2181,7 +2424,11 @@
                                 ${c.nascimento ? `
                                 <div class="info-item">
                                     <div class="info-label">Nascimento</div>
-                                    <div class="info-value">${Utils.formatDate(c.nascimento)} ${Utils.isBirthdayToday(c.nascimento) ? ' <span class="badge badge-pink">🎂 HOJE!</span>' : ''}</div>
+                                    <div class="info-value">
+                                        ${Utils.formatDate(c.nascimento)} 
+                                        ${Utils.isBirthdayToday(c.nascimento) ? ' <span class="badge badge-pink">🎂 HOJE!</span>' : ''}
+                                        ${Utils.isBirthdayNextWeek(c.nascimento) ? ' <span class="badge badge-warning">🎂 EM BREVE</span>' : ''}
+                                    </div>
                                 </div>
                                 ` : ''}
                             </div>
@@ -2220,6 +2467,8 @@
                         ${descricaoSection}
                         
                         ${contactSection}
+                        
+                        ${recontactSection}
                         
                         <div class="details-section">
                             <div class="details-section-title"><i class="fas fa-money-bill-wave"></i> FINANCEIRO</div>
@@ -2438,6 +2687,27 @@
                     .filter(o => o.status === 'aceito')
                     .reduce((acc, o) => acc + o.valor, 0);
                 
+                // Próximo aniversário
+                let nextBirthdayInfo = '';
+                if (c.nascimento) {
+                    const nextBirthday = Utils.getNextBirthday(c.nascimento);
+                    const daysUntil = Utils.getDaysUntil(nextBirthday);
+                    const isToday = daysUntil === 0;
+                    
+                    nextBirthdayInfo = `
+                        <div class="info-item">
+                            <div class="info-label">Próximo Aniversário</div>
+                            <div class="info-value">
+                                ${Utils.formatDate(nextBirthday)}
+                                ${isToday ? 
+                                    '<span class="badge badge-pink">🎂 HOJE!</span>' : 
+                                    `<span class="badge ${daysUntil <= 7 ? 'badge-warning' : 'badge-success'}">Em ${daysUntil} dia${daysUntil !== 1 ? 's' : ''}</span>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                }
+                
                 const detailsContent = `
                     <div class="details-card">
                         <div class="details-header">
@@ -2462,8 +2732,9 @@
                                 ${c.nascimento ? `
                                 <div class="info-item">
                                     <div class="info-label">Nascimento</div>
-                                    <div class="info-value">${Utils.formatDate(c.nascimento)} ${Utils.isBirthdayToday(c.nascimento) ? ' <span class="badge badge-pink">🎂 HOJE!</span>' : ''}</div>
+                                    <div class="info-value">${Utils.formatDate(c.nascimento)}</div>
                                 </div>
+                                ${nextBirthdayInfo}
                                 ` : ''}
                             </div>
                         </div>
@@ -2891,13 +3162,20 @@
                     const idx = UI.data.orcamentos.findIndex(o => o.id === id);
                     if(idx >= 0) {
                         UI.data.orcamentos[idx].status = status;
-                        // Se mudar para aceito, adicionar data de contato automática para o próximo ano
-                        if (status === 'aceito' && UI.data.orcamentos[idx].dataEvento) {
-                            const nextYearEvent = new Date(UI.data.orcamentos[idx].dataEvento);
-                            nextYearEvent.setFullYear(nextYearEvent.getFullYear() + 1);
-                            const contactDate = Utils.getAnniversaryContactDate(UI.data.orcamentos[idx].dataEvento);
-                            UI.data.orcamentos[idx].dataContato = contactDate;
-                            UI.data.orcamentos[idx].observacoesContato = 'Recontato automático para o próximo ano';
+                        // Se mudar para aceito e for evento recorrente, configurar recontato automático
+                        if (status === 'aceito' && UI.data.orcamentos[idx].dataEvento && 
+                            Utils.isRecurrentEvent(UI.data.orcamentos[idx].evento)) {
+                            
+                            const recontactDate = Utils.getRecontactDate(
+                                UI.data.orcamentos[idx].dataEvento, 
+                                UI.data.orcamentos[idx].evento
+                            );
+                            
+                            if (recontactDate) {
+                                UI.data.orcamentos[idx].dataContato = recontactDate;
+                                UI.data.orcamentos[idx].observacoesContato = 'Recontato automático para evento recorrente';
+                                UI.data.orcamentos[idx].statusContato = 'agendado';
+                            }
                         }
                         Storage.set('orcamentos', UI.data.orcamentos);
                         Utils.toast(`Status alterado para ${status === 'pendente' ? 'Pendente' : status === 'aceito' ? 'Fechado' : 'Recusado'}!`);
@@ -3324,11 +3602,24 @@
                     
                     const num = c.telefone.replace(/\D/g, '');
                     const saudacao = Utils.getSaudacao();
+                    const nextBirthday = Utils.getNextBirthday(c.nascimento);
+                    const daysUntil = Utils.getDaysUntil(nextBirthday);
+                    const isToday = daysUntil === 0;
                     
-                    let msg = `${saudacao}, ${c.nome.split(' ')[0]}! 🎉🎂\n\n`;
-                    msg += `Desejo a você um FELIZ ANIVERSÁRIO cheio de alegrias, conquistas e muitas bênçãos!\n\n`;
-                    msg += `Que este novo ano de vida seja repleto de momentos especiais ao lado das pessoas que você ama.\n\n`;
-                    msg += `Um grande abraço! 🎈`;
+                    let msg = '';
+                    
+                    if (isToday) {
+                        msg = `${saudacao}, ${c.nome.split(' ')[0]}! 🎉🎂\n\n`;
+                        msg += `Desejo a você um FELIZ ANIVERSÁRIO cheio de alegrias, conquistas e muitas bênçãos!\n\n`;
+                        msg += `Que este novo ano de vida seja repleto de momentos especiais ao lado das pessoas que você ama.\n\n`;
+                        msg += `Um grande abraço! 🎈`;
+                    } else {
+                        msg = `${saudacao}, ${c.nome.split(' ')[0]}! Tudo bem?\n\n`;
+                        msg += `Passando para lembrar que seu aniversário está chegando! 🎂\n\n`;
+                        msg += `Você comemora no dia ${Utils.formatBirthdate(c.nascimento)} (em ${daysUntil} dia${daysUntil !== 1 ? 's' : ''}).\n\n`;
+                        msg += `Gostaria de preparar algo especial para celebrar essa data? Posso ajudar com música e animação!\n\n`;
+                        msg += `Fico no aguardo do seu retorno! 😊`;
+                    }
                     
                     window.open(`https://wa.me/55${num}?text=${encodeURIComponent(msg)}`, '_blank');
                     
@@ -3337,12 +3628,48 @@
                         o.clienteId === clienteId && o.status === 'pendente'
                     );
                     if (orcamentoPendente) {
-                        App.contact.saveAuto(orcamentoPendente.id, 'whatsapp', 'Parabenizado pelo aniversário');
+                        App.contact.saveAuto(orcamentoPendente.id, 'whatsapp', 
+                            isToday ? 'Parabenizado pelo aniversário' : 'Lembrete de aniversário próximo'
+                        );
                     }
                 },
                 
-                // NOVO: Mensagem para recontato anual
-                openAnniversaryContact: (orcamentoId) => {
+                // NOVO: Mensagem para recontato de eventos recorrentes
+                openRecontact: (orcamentoId) => {
+                    const o = UI.data.orcamentos.find(x => x.id === orcamentoId);
+                    if(!o) return;
+                    
+                    const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                    if(!c) return;
+                    
+                    if (!Utils.isRecurrentEvent(o.evento)) {
+                        Utils.toast('Este não é um evento recorrente!', 'error');
+                        return;
+                    }
+                    
+                    const num = c.telefone.replace(/\D/g, '');
+                    const saudacao = Utils.getSaudacao();
+                    const nextEventDate = new Date(o.dataEvento);
+                    nextEventDate.setFullYear(nextEventDate.getFullYear() + 1);
+                    const recontactDate = Utils.getRecontactDate(o.dataEvento, o.evento);
+                    const daysUntilEvent = Utils.getDaysUntil(nextEventDate.toISOString().split('T')[0]);
+                    
+                    let msg = `${saudacao}, ${c.nome.split(' ')[0]}! Tudo bem?\n\n`;
+                    msg += `Passando para lembrar que está chegando a época do seu ${o.evento.toLowerCase()} do ano passado! 🎉\n\n`;
+                    msg += `No ano passado, você realizou seu ${o.evento.toLowerCase()} no dia ${Utils.formatDate(o.dataEvento)}.\n`;
+                    msg += `Para este ano, a data equivalente seria ${Utils.formatDate(nextEventDate.toISOString().split('T')[0])} (em ${daysUntilEvent} dia${daysUntilEvent !== 1 ? 's' : ''}).\n\n`;
+                    msg += `Gostaria de reservar essa data novamente para celebrar com você?\n`;
+                    msg += `Posso preparar um orçamento especial com as mesmas condições ou até melhor! 😊\n\n`;
+                    msg += `O que você acha? Podemos conversar melhor sobre isso?`;
+                    
+                    window.open(`https://wa.me/55${num}?text=${encodeURIComponent(msg)}`, '_blank');
+                    
+                    // Salvar contato automaticamente
+                    App.contact.saveAuto(orcamentoId, 'whatsapp', 'Recontato para evento recorrente');
+                },
+                
+                // NOVO: Mensagem para aniversário de evento
+                openAnniversaryGreeting: (orcamentoId) => {
                     const o = UI.data.orcamentos.find(x => x.id === orcamentoId);
                     if(!o) return;
                     
@@ -3353,19 +3680,20 @@
                     const saudacao = Utils.getSaudacao();
                     const nextEventDate = new Date(o.dataEvento);
                     nextEventDate.setFullYear(nextEventDate.getFullYear() + 1);
+                    const daysUntil = Utils.getDaysUntil(nextEventDate.toISOString().split('T')[0]);
                     
                     let msg = `${saudacao}, ${c.nome.split(' ')[0]}! Tudo bem?\n\n`;
-                    msg += `Passando para lembrar que está chegando a data do seu evento do ano passado! 🎉\n\n`;
-                    msg += `No ano passado, você realizou seu ${o.evento.toLowerCase()} no dia ${Utils.formatDate(o.dataEvento)}.\n`;
-                    msg += `Para este ano (${nextEventDate.getFullYear()}), a data equivalente seria ${Utils.formatDate(nextEventDate.toISOString().split('T')[0])}.\n\n`;
-                    msg += `Gostaria de reservar essa data novamente para celebrar com você?\n`;
-                    msg += `Posso preparar um orçamento especial! 😊\n\n`;
-                    msg += `Fico no aguardo do seu retorno!`;
+                    msg += `Passando para lembrar que está chegando o aniversário de 1 ano do seu ${o.evento.toLowerCase()}! 🎉🥳\n\n`;
+                    msg += `No dia ${Utils.formatDate(o.dataEvento)} do ano passado, celebramos juntos seu ${o.evento.toLowerCase()}.\n`;
+                    msg += `Em ${daysUntil} dia${daysUntil !== 1 ? 's' : ''}, completaremos 1 ano dessa data especial!\n\n`;
+                    msg += `Gostaria de comemorar essa data com uma nova festa ou evento?\n`;
+                    msg += `Posso preparar algo especial para relembrarmos bons momentos! 🎶\n\n`;
+                    msg += `O que você acha?`;
                     
                     window.open(`https://wa.me/55${num}?text=${encodeURIComponent(msg)}`, '_blank');
                     
                     // Salvar contato automaticamente
-                    App.contact.saveAuto(orcamentoId, 'whatsapp', 'Recontato anual - Verificação de data');
+                    App.contact.saveAuto(orcamentoId, 'whatsapp', 'Parabenizado pelo aniversário do evento');
                 }
             },
 
