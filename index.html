@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -826,6 +827,97 @@
             margin-top: 4px;
         }
         
+        /* Modal de cláusulas do PDF */
+        .pdf-clauses-modal {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 0;
+            width: 100%;
+        }
+        
+        .pdf-clauses-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .pdf-clauses-header i {
+            color: var(--danger);
+            font-size: 1.3rem;
+        }
+        
+        .pdf-clauses-header h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+        }
+        
+        .pdf-clauses-body {
+            padding: 14px 20px;
+        }
+        
+        .pdf-clauses-info {
+            background: #eff6ff;
+            border-left: 3px solid var(--primary);
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #1e40af;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #pdf-clausulas-editor {
+            width: 100%;
+            min-height: 220px;
+            max-height: 38vh;
+            resize: vertical;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: var(--dark);
+        }
+        
+        #pdf-clausulas-editor:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+        
+        .pdf-clauses-footer {
+            display: flex;
+            gap: 10px;
+            padding: 14px 20px 20px;
+        }
+        
+        .pdf-clauses-footer button {
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .pdf-clauses-footer button:active { opacity: 0.8; }
+        .pdf-btn-cancel { background: #f1f5f9; color: var(--secondary); }
+        .pdf-btn-generate { background: var(--danger); color: white; }
+
         /* Eventos recorrentes */
         .recurrent-event-badge {
             display: inline-flex;
@@ -1324,6 +1416,33 @@
                 <i class="fas fa-times"></i>
                 Cancelar
             </button>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Cláusulas do PDF -->
+    <div class="modal-overlay" id="overlay-pdf-clauses"></div>
+    <div class="modal-sheet" id="sheet-pdf-clauses">
+        <div class="sheet-handle"></div>
+        <div class="pdf-clauses-modal">
+            <div class="pdf-clauses-header">
+                <i class="fas fa-file-pdf"></i>
+                <h3>Revisar Cláusulas do Orçamento</h3>
+            </div>
+            <div class="pdf-clauses-body">
+                <div class="pdf-clauses-info">
+                    <i class="fas fa-info-circle"></i>
+                    Revise e edite as cláusulas antes de gerar o PDF. Cada linha será uma cláusula.
+                </div>
+                <textarea id="pdf-clausulas-editor" spellcheck="false"></textarea>
+            </div>
+            <div class="pdf-clauses-footer">
+                <button class="pdf-btn-cancel" onclick="UI.closeModals()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="pdf-btn-generate" onclick="App.pdf.confirmarGeracao()">
+                    <i class="fas fa-download"></i> Baixar PDF
+                </button>
+            </div>
         </div>
     </div>
 
@@ -2506,7 +2625,7 @@
                                 <i class="fas fa-calendar-check"></i> Contato
                             </button>
                             <button class="btn-details btn-details-secondary" onclick="App.pdf.generate('${o.id}')">
-                                <i class="fas fa-file-pdf"></i> PDF
+                                <i class="fas fa-file-pdf"></i> Baixar PDF
                             </button>
                         </div>
                     </div>
@@ -3698,15 +3817,16 @@
             },
 
             pdf: {
+                _currentOrcamentoId: null,
+
                 generate: (id) => {
+                    App.pdf._currentOrcamentoId = id;
                     const o = UI.data.orcamentos.find(x => x.id === id);
-                    const c = UI.data.clientes.find(x => x.id === o.clienteId);
-                    const s = Storage.getSettings();
-                    
-                    // Determinar tipo de pacote para cláusulas
+                    if (!o) return;
+
+                    // Determinar tipo de pacote para cláusulas sugeridas
                     let tipoPacote = 'basico';
                     let temEquipamentos = false;
-                    
                     if (o.pacoteSelecionado) {
                         const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
                         if (pacote) {
@@ -3714,337 +3834,306 @@
                             else if (pacote.nome.toLowerCase().includes('completo')) tipoPacote = 'completo';
                         }
                     }
-                    
-                    if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
-                        temEquipamentos = true;
-                    }
-                    
-                    // Gerar cláusulas apropriadas
-                    const clausulas = Utils.getClausulasByType(tipoPacote, temEquipamentos);
-                    
+                    if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) temEquipamentos = true;
+
+                    // Preencher editor de cláusulas com sugestão
+                    const clausulasSugeridas = Utils.getClausulasByType(tipoPacote, temEquipamentos);
+                    document.getElementById('pdf-clausulas-editor').value = clausulasSugeridas;
+
+                    // Abrir modal de cláusulas
+                    UI.openModal('pdf-clauses');
+                },
+
+                confirmarGeracao: () => {
+                    const id = App.pdf._currentOrcamentoId;
+                    const clausulas = document.getElementById('pdf-clausulas-editor').value;
+                    UI.closeModals();
+                    setTimeout(() => App.pdf._executarGeracao(id, clausulas), 200);
+                },
+
+                _executarGeracao: (id, clausulas) => {
+                    const o = UI.data.orcamentos.find(x => x.id === id);
+                    const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                    const s = Storage.getSettings();
+
                     const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF({
-                        orientation: 'portrait',
-                        unit: 'mm',
-                        format: 'a4'
-                    });
-                    
+                    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const pageHeight = doc.internal.pageSize.getHeight();
-                    const margin = { left: 20, right: 20, top: 25, bottom: 25 }; // Margens aumentadas
+                    const margin = { left: 14, right: 14, top: 22, bottom: 18 };
                     const contentWidth = pageWidth - margin.left - margin.right;
-                    let yPos = margin.top;
-                    
-                    const primaryColor = [59, 130, 246];
+                    let y = 0;
+
+                    const primary = [59, 130, 246];
                     const lightGray = [241, 245, 249];
-                    
-                    // Cabeçalho com cor
-                    doc.setFillColor(...primaryColor);
-                    doc.rect(0, 0, pageWidth, 30, 'F'); // Altura aumentada
-                    
-                    // Logo
+                    const darkGray = [71, 85, 105];
+                    const black = [15, 23, 42];
+
+                    // ── CABEÇALHO ──
+                    doc.setFillColor(...primary);
+                    doc.rect(0, 0, pageWidth, 24, 'F');
+
                     if (s.logo) {
-                        try {
-                            doc.addImage(s.logo, 'PNG', margin.left, 8, 18, 18); // Posição ajustada
-                        } catch (e) {
-                            console.log("Erro ao carregar logo:", e);
-                        }
+                        try { doc.addImage(s.logo, 'PNG', margin.left, 4, 15, 15); } catch(e) {}
                     }
-                    
-                    // Nome da empresa
+
                     doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(16);
+                    doc.setFontSize(14);
                     doc.setFont("helvetica", "bold");
-                    doc.text(s.nome.toUpperCase(), margin.left + (s.logo ? 22 : 0), 18); // Posição ajustada
-                    
-                    // Informações de contato
+                    const nomeX = margin.left + (s.logo ? 18 : 0);
+                    doc.text((s.nome || 'DJ').toUpperCase(), nomeX, 12);
+
+                    doc.setFontSize(7);
+                    doc.setFont("helvetica", "normal");
+                    const contactLines = [s.telefone, s.email, s.instagram].filter(Boolean);
+                    contactLines.forEach((line, i) => {
+                        doc.text(line, pageWidth - margin.right, 8 + i * 5, { align: "right" });
+                    });
+
+                    y = 30;
+
+                    // ── TÍTULO ──
+                    doc.setTextColor(...primary);
+                    doc.setFontSize(14);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`ORÇAMENTO Nº ${o.numero}`, pageWidth / 2, y, { align: "center" });
+
+                    // Data de emissão
+                    doc.setFontSize(7);
+                    doc.setTextColor(...darkGray);
+                    doc.setFont("helvetica", "normal");
+                    const hoje = new Date().toLocaleDateString('pt-BR');
+                    doc.text(`Emitido em: ${hoje}`, pageWidth - margin.right, y, { align: "right" });
+
+                    y += 6;
+
+                    // ── CLIENTE ──
+                    doc.setFillColor(...lightGray);
+                    doc.roundedRect(margin.left, y, contentWidth, 14, 2, 2, 'F');
+                    doc.setFontSize(7);
+                    doc.setTextColor(...darkGray);
+                    doc.text("CLIENTE", margin.left + 4, y + 5);
+                    doc.setFontSize(10);
+                    doc.setTextColor(...black);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(c.nome, margin.left + 4, y + 11);
                     doc.setFontSize(8);
                     doc.setFont("helvetica", "normal");
-                    doc.text(s.telefone || "", pageWidth - margin.right, 12, { align: "right" });
-                    doc.text(s.email || "", pageWidth - margin.right, 17, { align: "right" });
-                    doc.text(s.instagram || "", pageWidth - margin.right, 22, { align: "right" });
-                    
-                    yPos = 40; // Mais espaço após cabeçalho
-                    
-                    // Título do orçamento
-                    doc.setTextColor(...primaryColor);
-                    doc.setFontSize(18);
+                    doc.setTextColor(...darkGray);
+                    const tel = Utils.formatPhone(c.telefone) || '';
+                    doc.text(tel, pageWidth - margin.right - 4, y + 11, { align: "right" });
+
+                    y += 18;
+
+                    // ── EVENTO ──
+                    doc.setFontSize(8);
+                    doc.setTextColor(...primary);
                     doc.setFont("helvetica", "bold");
-                    doc.text(`ORÇAMENTO #${o.numero}`, pageWidth / 2, yPos, { align: "center" });
-                    
-                    yPos += 12;
-                    
-                    // Área do cliente
-                    doc.setDrawColor(200, 200, 200);
-                    doc.setFillColor(...lightGray);
-                    doc.roundedRect(margin.left, yPos, contentWidth, 18, 3, 3, 'F'); // Altura aumentada
-                    
-                    doc.setFontSize(9);
-                    doc.setTextColor(100);
-                    doc.text("CLIENTE", margin.left + 8, yPos + 7);
-                    
-                    doc.setFontSize(11);
-                    doc.setTextColor(0);
-                    doc.setFont("helvetica", "bold");
-                    doc.text(c.nome, margin.left + 8, yPos + 14);
-                    
-                    const telefoneFormatado = Utils.formatPhone(c.telefone);
-                    doc.setFontSize(9);
-                    doc.setTextColor(100);
-                    doc.text(telefoneFormatado || "Telefone não informado", margin.left + contentWidth - 8, yPos + 14, { align: "right" });
-                    
-                    yPos += 22; // Mais espaço
-                    
-                    // Detalhes do evento
-                    doc.setFontSize(11);
-                    doc.setTextColor(...primaryColor);
-                    doc.setFont("helvetica", "bold");
-                    doc.text("DETALHES DO EVENTO", margin.left, yPos);
-                    
-                    yPos += 8;
-                    
-                    const drawDetail = (label, value, x, y) => {
-                        doc.setFontSize(8);
-                        doc.setTextColor(100);
+                    doc.text("DETALHES DO EVENTO", margin.left, y);
+                    y += 4;
+                    doc.setDrawColor(229, 231, 235);
+                    doc.setLineWidth(0.3);
+                    doc.line(margin.left, y, margin.left + contentWidth, y);
+                    y += 4;
+
+                    // Grid 3 colunas
+                    const col = contentWidth / 3;
+                    const eventDetails = [
+                        ["TIPO", o.evento || '-'],
+                        ["DATA", Utils.formatDate(o.dataEvento)],
+                        ["HORÁRIO", o.horario || '-']
+                    ];
+                    eventDetails.forEach(([label, val], i) => {
+                        const x = margin.left + i * col;
+                        doc.setFontSize(7);
+                        doc.setTextColor(...darkGray);
+                        doc.setFont("helvetica", "normal");
                         doc.text(label, x, y);
-                        doc.setFontSize(10);
-                        doc.setTextColor(0);
-                        const lines = doc.splitTextToSize(value || "-", 50);
-                        lines.forEach((line, index) => {
-                            doc.text(line, x, y + 5 + (index * 5));
-                        });
-                        return y + 5 + (lines.length * 5);
-                    };
-                    
-                    let detailY = yPos;
-                    detailY = Math.max(
-                        drawDetail("TIPO", o.evento, margin.left, detailY),
-                        drawDetail("DATA", Utils.formatDate(o.dataEvento), margin.left + 60, yPos),
-                        drawDetail("HORÁRIO", o.horario || "-", margin.left + 120, yPos)
-                    );
-                    
-                    detailY += 5;
-                    detailY = drawDetail("LOCAL", o.local || "A definir", margin.left, detailY);
-                    
-                    yPos = detailY + 10;
-                    
-                    // Verificar se precisa de nova página
-                    if (yPos > pageHeight - 60) {
-                        doc.addPage();
-                        yPos = margin.top;
-                    }
-                    
-                    // Serviços contratados
-                    doc.setFontSize(11);
-                    doc.setTextColor(...primaryColor);
+                        doc.setFontSize(9);
+                        doc.setTextColor(...black);
+                        doc.setFont("helvetica", "bold");
+                        const wrappedVal = doc.splitTextToSize(val, col - 4);
+                        doc.text(wrappedVal[0], x, y + 4);
+                    });
+
+                    y += 10;
+                    doc.setFontSize(7);
+                    doc.setTextColor(...darkGray);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("LOCAL", margin.left, y);
+                    doc.setFontSize(9);
+                    doc.setTextColor(...black);
                     doc.setFont("helvetica", "bold");
-                    doc.text("SERVIÇOS CONTRATADOS", margin.left, yPos);
-                    
-                    yPos += 8;
-                    
-                    // Detalhes do pacote
+                    const localLines = doc.splitTextToSize(o.local || 'A definir', contentWidth);
+                    doc.text(localLines[0], margin.left, y + 4);
+                    y += 10;
+
+                    // ── SERVIÇOS ──
+                    doc.setFontSize(8);
+                    doc.setTextColor(...primary);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("SERVIÇOS CONTRATADOS", margin.left, y);
+                    y += 4;
+                    doc.setDrawColor(229, 231, 235);
+                    doc.line(margin.left, y, margin.left + contentWidth, y);
+                    y += 4;
+
                     if (o.pacoteSelecionado) {
                         const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
                         if (pacote) {
-                            doc.setFontSize(10);
-                            doc.setTextColor(0);
+                            doc.setFontSize(8.5);
+                            doc.setTextColor(...black);
                             doc.setFont("helvetica", "bold");
-                            doc.text(`PACOTE: ${pacote.nome}`, margin.left, yPos);
-                            yPos += 6;
-                            
-                            doc.setFontSize(9);
-                            doc.setFont("helvetica", "normal");
-                            const descLines = doc.splitTextToSize(pacote.descricao, contentWidth);
-                            descLines.forEach(line => {
-                                doc.text(line, margin.left, yPos);
-                                yPos += 4;
-                            });
-                            yPos += 2;
+                            doc.text(`Pacote: ${pacote.nome}`, margin.left, y);
+                            y += 4;
+                            if (pacote.descricao) {
+                                doc.setFontSize(7.5);
+                                doc.setFont("helvetica", "normal");
+                                doc.setTextColor(...darkGray);
+                                const dLines = doc.splitTextToSize(pacote.descricao, contentWidth);
+                                const maxLines = Math.min(dLines.length, 2);
+                                dLines.slice(0, maxLines).forEach(l => { doc.text(l, margin.left, y); y += 3.5; });
+                                y += 1;
+                            }
                         }
                     }
-                    
-                    // Detalhes dos equipamentos
+
                     if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
-                        doc.setFontSize(10);
-                        doc.setTextColor(0);
+                        doc.setFontSize(8);
+                        doc.setTextColor(...black);
                         doc.setFont("helvetica", "bold");
-                        doc.text("EQUIPAMENTOS EXTRAS:", margin.left, yPos);
-                        yPos += 6;
-                        
-                        doc.setFontSize(9);
+                        doc.text("Equipamentos Extras:", margin.left, y);
+                        y += 4;
+                        doc.setFontSize(7.5);
                         doc.setFont("helvetica", "normal");
-                        
+                        doc.setTextColor(...darkGray);
                         o.equipamentosSelecionados.forEach(eqId => {
                             const equip = UI.data.equipamentos.find(e => e.id === eqId);
-                            if (equip) {
-                                doc.text(`• ${equip.nome}`, margin.left, yPos);
-                                yPos += 4;
-                            }
+                            if (equip) { doc.text(`• ${equip.nome}`, margin.left + 2, y); y += 3.5; }
                         });
-                        yPos += 2;
+                        y += 1;
                     }
-                    
-                    // Descrição adicional (somente se existir)
+
                     if (o.descricao && o.descricao.trim()) {
-                        doc.setFontSize(10);
-                        doc.setTextColor(0);
-                        doc.setFont("helvetica", "bold");
-                        doc.text("DESCRIÇÃO ADICIONAL:", margin.left, yPos);
-                        yPos += 6;
-                        
-                        doc.setFontSize(9);
+                        doc.setFontSize(7.5);
                         doc.setFont("helvetica", "normal");
-                        const descLines = doc.splitTextToSize(o.descricao, contentWidth);
-                        descLines.forEach(line => {
-                            doc.text(line, margin.left, yPos);
-                            yPos += 4;
-                        });
-                        yPos += 2;
+                        doc.setTextColor(...darkGray);
+                        const dLines = doc.splitTextToSize(o.descricao.trim(), contentWidth);
+                        dLines.slice(0, 2).forEach(l => { doc.text(l, margin.left, y); y += 3.5; });
+                        y += 1;
                     }
-                    
-                    // Verificar se precisa de nova página
-                    if (yPos > pageHeight - 80) {
-                        doc.addPage();
-                        yPos = margin.top;
-                    }
-                    
-                    // Tabela de valores
-                    doc.setDrawColor(200, 200, 200);
-                    doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
-                    
-                    doc.setFillColor(...primaryColor);
-                    doc.rect(margin.left, yPos, contentWidth, 9, 'F'); // Altura aumentada
+
+                    // ── TABELA DE VALORES ──
+                    y += 2;
+                    doc.setFillColor(...primary);
+                    doc.rect(margin.left, y, contentWidth, 7, 'F');
                     doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(10);
+                    doc.setFontSize(8);
                     doc.setFont("helvetica", "bold");
-                    doc.text("DESCRIÇÃO", margin.left + 8, yPos + 6);
-                    doc.text("VALOR", margin.left + contentWidth - 15, yPos + 6, { align: "right" });
-                    
-                    yPos += 9;
-                    
+                    doc.text("DESCRIÇÃO", margin.left + 4, y + 5);
+                    doc.text("VALOR", margin.left + contentWidth - 4, y + 5, { align: "right" });
+                    y += 7;
+
                     doc.setFillColor(255, 255, 255);
-                    doc.rect(margin.left, yPos, contentWidth, 12, 'F'); // Altura aumentada
-                    doc.setTextColor(0);
-                    doc.setFontSize(10);
+                    doc.rect(margin.left, y, contentWidth, 8, 'F');
+                    doc.setTextColor(...black);
+                    doc.setFontSize(8.5);
                     doc.setFont("helvetica", "normal");
-                    
                     let descricaoText = "Serviços contratados";
                     if (o.pacoteSelecionado) {
-                        const pacote = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
-                        if (pacote) {
-                            descricaoText = pacote.nome;
-                        }
+                        const p = UI.data.pacotes.find(p => p.id === o.pacoteSelecionado);
+                        if (p) descricaoText = p.nome;
                     }
-                    
-                    const descLines = doc.splitTextToSize(descricaoText, contentWidth - 60);
-                    
-                    doc.text(descLines[0], margin.left + 8, yPos + 8);
+                    doc.text(descricaoText, margin.left + 4, y + 5.5);
                     doc.setFont("helvetica", "bold");
-                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 8, yPos + 8, { align: "right" });
-                    
-                    for (let i = 1; i < descLines.length; i++) {
-                        yPos += 5;
-                        doc.setFont("helvetica", "normal");
-                        doc.text(descLines[i], margin.left + 8, yPos + 8);
-                    }
-                    
-                    yPos += 12;
-                    
-                    doc.setDrawColor(200, 200, 200);
-                    doc.line(margin.left, yPos, margin.left + contentWidth, yPos);
-                    
-                    doc.setFillColor(...lightGray);
-                    doc.rect(margin.left, yPos, contentWidth, 12, 'F'); // Altura aumentada
-                    doc.setTextColor(...primaryColor);
-                    doc.setFontSize(11);
-                    doc.setFont("helvetica", "bold");
-                    doc.text("TOTAL", margin.left + 8, yPos + 8);
-                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 8, yPos + 8, { align: "right" });
-                    
-                    yPos += 18;
-                    
-                    // Verificar se precisa de nova página para cláusulas
-                    if (yPos > pageHeight - 100) {
-                        doc.addPage();
-                        yPos = margin.top;
-                    }
-                    
-                    // Cláusulas e condições
-                    doc.setFontSize(11);
-                    doc.setTextColor(...primaryColor);
-                    doc.setFont("helvetica", "bold");
-                    doc.text("CONDIÇÕES E CLÁUSULAS", margin.left, yPos);
-                    
-                    yPos += 8;
-                    
-                    const clausulasArray = clausulas.split('\n');
-                    
-                    doc.setFontSize(8); // Tamanho reduzido para caber melhor
-                    doc.setTextColor(0);
-                    doc.setFont("helvetica", "normal");
-                    
-                    clausulasArray.forEach((clausula, index) => {
-                        if (yPos > pageHeight - 30) {
-                            doc.addPage();
-                            yPos = margin.top;
-                        }
-                        
-                        const lines = doc.splitTextToSize(clausula.trim(), contentWidth);
-                        lines.forEach(line => {
-                            doc.text(line, margin.left, yPos);
-                            yPos += 4;
-                        });
-                        yPos += 2;
-                    });
-                    
-                    yPos += 8;
-                    
-                    // Verificar se tem espaço para forma de pagamento
-                    if (yPos < pageHeight - 40) {
-                        doc.setDrawColor(200, 200, 200);
-                        doc.setLineWidth(0.5);
-                        doc.roundedRect(margin.left, yPos, contentWidth, 14, 3, 3); // Altura aumentada
-                        
-                        doc.setFontSize(9);
-                        doc.setTextColor(...primaryColor);
-                        doc.text("FORMA DE PAGAMENTO", margin.left + 8, yPos + 6);
-                        
-                        doc.setFontSize(8);
-                        doc.setTextColor(0);
-                        doc.text(`PIX: ${s.pix || "Informar"}`, margin.left + 8, yPos + 11);
-                        doc.text("Nome: José Alex Peixoto de Assis", margin.left + 100, yPos + 11);
-                        
-                        yPos += 18;
-                    }
-                    
-                    // Assinaturas (sempre na última página)
-                    if (yPos > pageHeight - 30) {
-                        doc.addPage();
-                        yPos = margin.top;
-                    }
-                    
-                    const signatureY = pageHeight - 35; // Mais espaço no fundo
-                    doc.setDrawColor(0);
-                    doc.setLineWidth(0.4);
-                    doc.line(margin.left + 25, signatureY, margin.left + 85, signatureY);
-                    doc.line(margin.left + 115, signatureY, margin.left + 175, signatureY);
-                    
-                    doc.setFontSize(8);
-                    doc.setFont("helvetica", "normal");
-                    doc.text(s.nome, margin.left + 55, signatureY + 6, { align: "center" });
-                    doc.text("Contratante", margin.left + 145, signatureY + 6, { align: "center" });
+                    doc.setTextColor(...primary);
+                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 4, y + 5.5, { align: "right" });
+                    y += 8;
 
-                    // Rodapé
-                    doc.setFontSize(7);
-                    doc.setTextColor(150);
-                    const footerText = `${s.razao} | CNPJ: ${s.cnpj} | ${s.endereco.replace(/\n/g, ' ') || ''}`;
-                    const footerLines = doc.splitTextToSize(footerText, contentWidth);
-                    footerLines.forEach((line, index) => {
-                        doc.text(line, pageWidth / 2, pageHeight - 15 + (index * 4), { align: "center" });
+                    doc.setDrawColor(229, 231, 235);
+                    doc.line(margin.left, y, margin.left + contentWidth, y);
+                    doc.setFillColor(...lightGray);
+                    doc.rect(margin.left, y, contentWidth, 8, 'F');
+                    doc.setFontSize(9);
+                    doc.setTextColor(...primary);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("TOTAL", margin.left + 4, y + 5.5);
+                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 4, y + 5.5, { align: "right" });
+                    y += 11;
+
+                    // ── PAGAMENTO ──
+                    doc.setDrawColor(229, 231, 235);
+                    doc.setLineWidth(0.4);
+                    doc.roundedRect(margin.left, y, contentWidth, 12, 2, 2);
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(...primary);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("FORMA DE PAGAMENTO", margin.left + 4, y + 5);
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(...black);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`PIX: ${s.pix || 'A informar'}`, margin.left + 4, y + 9.5);
+                    doc.text(`Nome: ${s.razao || s.nome || ''}`, margin.left + 70, y + 9.5);
+                    y += 15;
+
+                    // ── CLÁUSULAS ──
+                    doc.setFontSize(8);
+                    doc.setTextColor(...primary);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("CONDIÇÕES E CLÁUSULAS", margin.left, y);
+                    y += 4;
+                    doc.setDrawColor(229, 231, 235);
+                    doc.line(margin.left, y, margin.left + contentWidth, y);
+                    y += 3;
+
+                    doc.setFontSize(6.8);
+                    doc.setTextColor(...darkGray);
+                    doc.setFont("helvetica", "normal");
+
+                    const clausulasArray = clausulas.split('\n').filter(l => l.trim());
+                    const spaceLeft = pageHeight - margin.bottom - 28 - y; // espaço disponível
+                    const lineH = 3.2;
+
+                    // Calcular quantas linhas cabem
+                    let linesUsed = 0;
+                    const clausulasFinal = [];
+                    for (const cl of clausulasArray) {
+                        const wrapped = doc.splitTextToSize(cl.trim(), contentWidth);
+                        const needed = wrapped.length * lineH + 1.5;
+                        if (linesUsed + needed > spaceLeft) break;
+                        clausulasFinal.push({ wrapped, h: needed });
+                        linesUsed += needed;
+                    }
+
+                    clausulasFinal.forEach(({ wrapped }) => {
+                        wrapped.forEach(line => { doc.text(line, margin.left, y); y += lineH; });
+                        y += 1.5;
                     });
-                    
+
+                    // ── ASSINATURAS ──
+                    const sigY = pageHeight - margin.bottom - 14;
+                    doc.setDrawColor(0);
+                    doc.setLineWidth(0.3);
+                    doc.line(margin.left + 8, sigY, margin.left + 72, sigY);
+                    doc.line(margin.left + 98, sigY, margin.left + contentWidth - 8, sigY);
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(...darkGray);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(s.nome || 'Contratado', margin.left + 40, sigY + 4.5, { align: "center" });
+                    doc.text("Contratante", margin.left + 145, sigY + 4.5, { align: "center" });
+
+                    // ── RODAPÉ ──
+                    const footY = pageHeight - margin.bottom - 2;
+                    doc.setFillColor(241, 245, 249);
+                    doc.rect(0, footY - 4, pageWidth, 10, 'F');
+                    doc.setFontSize(6.5);
+                    doc.setTextColor(148, 163, 184);
+                    const footerText = [s.razao, s.cnpj ? `CNPJ: ${s.cnpj}` : '', (s.endereco || '').replace(/\n/g, ' ')].filter(Boolean).join(' | ');
+                    doc.text(footerText, pageWidth / 2, footY + 2, { align: "center" });
+
                     doc.save(`Orcamento_${o.numero}.pdf`);
-                    Utils.toast('PDF baixado com sucesso!');
+                    Utils.toast('PDF gerado com sucesso!');
                 }
             },
 
