@@ -1388,7 +1388,125 @@
         .btn-details-cyan { background:#cffafe; color:#0e7490; }
         .btn-details-secondary { background:#fee2e2; color:#b91c1c; }
 
-        /* ── ACTION SHEET (bottom contextual menu) ── */
+        /* ── NOTIFICATION BELL ── */
+        .bell-btn {
+            background: none; border: none;
+            position: relative; padding: 8px;
+            border-radius: 50%; color: var(--secondary);
+            font-size: 1.2rem; cursor: pointer;
+            transition: 0.2s;
+        }
+        .bell-btn:active { background: #f1f5f9; color: var(--primary); transform: scale(0.95); }
+        .bell-badge {
+            position: absolute; top: 2px; right: 2px;
+            background: var(--danger); color: white;
+            border-radius: 50%; width: 18px; height: 18px;
+            font-size: 0.65rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid white;
+            animation: bellPulse 2s infinite;
+        }
+        @keyframes bellPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        .bell-badge.hidden { display: none; }
+
+        .notif-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(3px);
+            z-index: 150;
+            display: none;
+        }
+        .notif-overlay.active { display: block; }
+
+        .notif-panel {
+            position: fixed;
+            top: var(--header-height);
+            right: 12px;
+            width: min(360px, calc(100vw - 24px));
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            z-index: 151;
+            display: none;
+            max-height: calc(100vh - var(--header-height) - 20px);
+            overflow: hidden;
+            flex-direction: column;
+            animation: notifSlideIn 0.25s cubic-bezier(0.16,1,0.3,1);
+        }
+        .notif-panel.active { display: flex; }
+        @keyframes notifSlideIn {
+            from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .notif-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 16px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .notif-header-title {
+            font-size: 0.95rem; font-weight: 800; color: var(--dark);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .notif-close {
+            background: #f1f5f9; border: none; border-radius: 50%;
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; color: var(--secondary); cursor: pointer;
+        }
+
+        .notif-tabs {
+            display: flex; gap: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .notif-tab {
+            flex: 1; padding: 10px; border: none; background: none;
+            font-size: 0.8rem; font-weight: 600; color: var(--secondary);
+            border-bottom: 2px solid transparent; cursor: pointer;
+            transition: 0.2s;
+        }
+        .notif-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        .notif-body {
+            overflow-y: auto; flex: 1;
+            padding: 10px 12px 14px;
+        }
+
+        .notif-item {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 10px 10px;
+            border-radius: 10px; margin-bottom: 6px;
+            cursor: pointer; transition: background 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .notif-item:active { background: #f8fafc; }
+        .notif-item.danger  { background: #fff5f5; border-left-color: var(--danger); }
+        .notif-item.warning { background: #fffbeb; border-left-color: var(--warning); }
+        .notif-item.info    { background: #eff6ff; border-left-color: var(--primary); }
+        .notif-item.pink    { background: #fdf2f8; border-left-color: #db2777; }
+        .notif-item.green   { background: #f0fdf4; border-left-color: #16a34a; }
+
+        .notif-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; flex-shrink: 0;
+        }
+        .notif-text { flex: 1; min-width: 0; }
+        .notif-text strong { font-size: 0.85rem; font-weight: 700; color: var(--dark); display: block; }
+        .notif-text span   { font-size: 0.76rem; color: var(--secondary); display: block; margin-top: 1px; }
+        .notif-text .notif-time {
+            font-size: 0.7rem; color: var(--secondary);
+            margin-top: 3px; display: flex; align-items: center; gap: 4px;
+        }
+
+        .notif-empty {
+            text-align: center; padding: 30px 16px; color: var(--secondary);
+        }
+        .notif-empty i { font-size: 2rem; opacity: 0.3; margin-bottom: 10px; display: block; }
+        .notif-empty p { font-size: 0.85rem; }
+    
         .action-sheet-overlay {
             position: fixed; inset:0;
             background: rgba(0,0,0,0.45);
@@ -1436,10 +1554,31 @@
             DJ<span>Manager</span>
         </div>
         <div class="header-actions">
+            <button class="bell-btn" id="bell-btn" onclick="Notif.toggle()">
+                <i class="fas fa-bell"></i>
+                <span class="bell-badge hidden" id="bell-badge">0</span>
+            </button>
             <button class="icon-btn" onclick="App.backup.exportData()"><i class="fas fa-cloud-download-alt"></i></button>
             <button class="icon-btn" onclick="UI.openSettings()"><i class="fas fa-cog"></i></button>
         </div>
     </header>
+
+    <!-- Notification Overlay + Panel -->
+    <div class="notif-overlay" id="notif-overlay" onclick="Notif.close()"></div>
+    <div class="notif-panel" id="notif-panel">
+        <div class="notif-header">
+            <div class="notif-header-title"><i class="fas fa-bell" style="color:var(--primary)"></i> Alertas</div>
+            <button class="notif-close" onclick="Notif.close()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="notif-tabs">
+            <button class="notif-tab active" onclick="Notif.switchTab('eventos')" id="ntab-eventos">Eventos</button>
+            <button class="notif-tab" onclick="Notif.switchTab('contatos')" id="ntab-contatos">Contatos</button>
+            <button class="notif-tab" onclick="Notif.switchTab('aniversarios')" id="ntab-aniversarios">Aniversários</button>
+        </div>
+        <div class="notif-body" id="notif-body">
+            <!-- Preenchido dinamicamente -->
+        </div>
+    </div>
 
     <div id="toast" class="toast">
         <i class="fas fa-check-circle"></i> <span>Ação realizada!</span>
@@ -1640,6 +1779,9 @@
         </a>
         <a href="#" class="nav-item" data-target="orcamentos-view" onclick="UI.switchTab(this)">
             <i class="fas fa-file-invoice"></i> <span>Orç.</span>
+        </a>
+        <a href="#" class="nav-item" data-target="pacotes-view" onclick="UI.switchTab(this)">
+            <i class="fas fa-box-open"></i> <span>Pacotes</span>
         </a>
         <a href="#" class="nav-item" data-target="agenda-view" onclick="UI.switchTab(this)">
             <i class="fas fa-calendar-alt"></i> <span>Agenda</span>
@@ -2737,6 +2879,7 @@
                 }
                 
                 UI.renderDashboard();
+                Notif.updateBadge();
                 
                 // Tabs listeners
                 document.querySelectorAll('.bottom-nav .nav-item').forEach(el => {
@@ -2895,6 +3038,9 @@
                 } else {
                     anniversaryList.innerHTML = eventosAnniversary.map(o => UI.createAnniversaryCard(o)).join('');
                 }
+
+                // Atualizar badge do sininho
+                if (typeof Notif !== 'undefined') Notif.updateBadge();
             },
 
             createScheduledContactCard: (o) => {
@@ -6464,6 +6610,199 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                 doc.save(`Contrato_${o.numero}_${c.nome.replace(/\s+/g,'_')}.pdf`);
                 Utils.toast('Contrato gerado com sucesso! 📄', 'success');
                 this._orcamentoId = null;
+            }
+        };
+
+        // ── NOTIFICATION PANEL ──
+        const Notif = {
+            currentTab: 'eventos',
+
+            getAlerts: () => {
+                const today = new Date().toISOString().split('T')[0];
+                const { clientes, orcamentos } = UI.data;
+
+                // Eventos vencidos (follow-up)
+                const vencidos = orcamentos.filter(o =>
+                    o.status === 'pendente' && o.validade && o.validade <= today
+                );
+
+                // Contatos atrasados
+                const contatosAtrasados = orcamentos.filter(o =>
+                    o.dataContato && o.dataContato < today && o.status === 'pendente'
+                );
+
+                // Contatos para hoje
+                const contatosHoje = orcamentos.filter(o =>
+                    o.dataContato && o.dataContato === today && o.status === 'pendente'
+                );
+
+                // Aniversariantes hoje
+                const aniversariantesHoje = clientes.filter(c =>
+                    c.nascimento && Utils.isBirthdayToday(c.nascimento)
+                );
+
+                // Próximos 7 dias
+                const aniversariantesBreve = clientes.filter(c =>
+                    c.nascimento && !Utils.isBirthdayToday(c.nascimento) && Utils.isBirthdayNextWeek(c.nascimento)
+                );
+
+                // Recontato (eventos recorrentes 6 meses antes)
+                const recontatos = orcamentos.filter(o =>
+                    o.status === 'aceito' && o.dataEvento && o.evento &&
+                    Utils.needsRecontact(o.dataEvento, o.evento)
+                );
+
+                return { vencidos, contatosAtrasados, contatosHoje, aniversariantesHoje, aniversariantesBreve, recontatos };
+            },
+
+            getTotalCount: () => {
+                const a = Notif.getAlerts();
+                return a.vencidos.length + a.contatosAtrasados.length + a.contatosHoje.length +
+                       a.aniversariantesHoje.length + a.recontatos.length;
+            },
+
+            updateBadge: () => {
+                const count = Notif.getTotalCount();
+                const badge = document.getElementById('bell-badge');
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            },
+
+            toggle: () => {
+                const panel = document.getElementById('notif-panel');
+                const overlay = document.getElementById('notif-overlay');
+                if (panel.classList.contains('active')) {
+                    Notif.close();
+                } else {
+                    panel.classList.add('active');
+                    overlay.classList.add('active');
+                    Notif.render(Notif.currentTab);
+                }
+            },
+
+            close: () => {
+                document.getElementById('notif-panel').classList.remove('active');
+                document.getElementById('notif-overlay').classList.remove('active');
+            },
+
+            switchTab: (tab) => {
+                Notif.currentTab = tab;
+                document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+                document.getElementById(`ntab-${tab}`).classList.add('active');
+                Notif.render(tab);
+            },
+
+            render: (tab) => {
+                const body = document.getElementById('notif-body');
+                const a = Notif.getAlerts();
+                let html = '';
+
+                if (tab === 'eventos') {
+                    if (a.vencidos.length === 0 && a.recontatos.length === 0) {
+                        html = `<div class="notif-empty"><i class="fas fa-check-circle"></i><p>Nenhum evento precisa de atenção!</p></div>`;
+                    } else {
+                        if (a.vencidos.length > 0) {
+                            html += `<div style="font-size:0.75rem;font-weight:700;color:var(--danger);margin:4px 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Orçamentos Vencidos (${a.vencidos.length})</div>`;
+                            html += a.vencidos.map(o => {
+                                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                                return `<div class="notif-item danger" onclick="Notif.close(); UI.showOrcamentoDetails('${o.id}')">
+                                    <div class="notif-icon" style="background:#fee2e2;color:var(--danger)"><i class="fas fa-exclamation-triangle"></i></div>
+                                    <div class="notif-text">
+                                        <strong>#${o.numero} — ${c.nome}</strong>
+                                        <span>${o.evento} • ${Utils.formatDate(o.dataEvento)}</span>
+                                        <div class="notif-time"><i class="fas fa-clock"></i> Vencido em ${Utils.formatDate(o.validade)}</div>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        }
+                        if (a.recontatos.length > 0) {
+                            html += `<div style="font-size:0.75rem;font-weight:700;color:#16a34a;margin:10px 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Para Recontato (${a.recontatos.length})</div>`;
+                            html += a.recontatos.map(o => {
+                                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                                return `<div class="notif-item green" onclick="Notif.close(); UI.showOrcamentoDetails('${o.id}')">
+                                    <div class="notif-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-calendar-plus"></i></div>
+                                    <div class="notif-text">
+                                        <strong>${c.nome}</strong>
+                                        <span>${o.evento} • ${Utils.formatDate(o.dataEvento)}</span>
+                                        <div class="notif-time"><i class="fas fa-redo"></i> Evento recorrente — hora de recontatar</div>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        }
+                    }
+                } else if (tab === 'contatos') {
+                    if (a.contatosAtrasados.length === 0 && a.contatosHoje.length === 0) {
+                        html = `<div class="notif-empty"><i class="fas fa-calendar-check"></i><p>Nenhum contato pendente!</p></div>`;
+                    } else {
+                        if (a.contatosAtrasados.length > 0) {
+                            html += `<div style="font-size:0.75rem;font-weight:700;color:var(--danger);margin:4px 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Contatos Atrasados (${a.contatosAtrasados.length})</div>`;
+                            html += a.contatosAtrasados.map(o => {
+                                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                                return `<div class="notif-item danger" onclick="Notif.close(); App.contact.open('${o.id}')">
+                                    <div class="notif-icon" style="background:#fee2e2;color:var(--danger)"><i class="fas fa-phone-slash"></i></div>
+                                    <div class="notif-text">
+                                        <strong>${c.nome}</strong>
+                                        <span>#${o.numero} — ${o.evento}</span>
+                                        <div class="notif-time"><i class="fas fa-clock"></i> Era para ${Utils.formatDate(o.dataContato)}</div>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        }
+                        if (a.contatosHoje.length > 0) {
+                            html += `<div style="font-size:0.75rem;font-weight:700;color:var(--warning);margin:${a.contatosAtrasados.length>0?'10px':'4px'} 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Contatos para Hoje (${a.contatosHoje.length})</div>`;
+                            html += a.contatosHoje.map(o => {
+                                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                                return `<div class="notif-item warning" onclick="Notif.close(); App.contact.open('${o.id}')">
+                                    <div class="notif-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-phone"></i></div>
+                                    <div class="notif-text">
+                                        <strong>${c.nome}</strong>
+                                        <span>#${o.numero} — ${o.evento}</span>
+                                        <div class="notif-time"><i class="fas fa-calendar-day"></i> Hoje — ${o.observacoesContato ? o.observacoesContato.substring(0,30)+'...' : 'Sem observações'}</div>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        }
+                    }
+                } else if (tab === 'aniversarios') {
+                    if (a.aniversariantesHoje.length === 0 && a.aniversariantesBreve.length === 0) {
+                        html = `<div class="notif-empty"><i class="fas fa-birthday-cake"></i><p>Nenhum aniversário próximo!</p></div>`;
+                    } else {
+                        if (a.aniversariantesHoje.length > 0) {
+                            html += `<div style="font-size:0.75rem;font-weight:700;color:#db2777;margin:4px 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">🎂 Aniversário HOJE (${a.aniversariantesHoje.length})</div>`;
+                            html += a.aniversariantesHoje.map(c => {
+                                return `<div class="notif-item pink" onclick="Notif.close(); App.whatsapp.openCliente('${c.id}', true)">
+                                    <div class="notif-icon" style="background:#fce7f3;color:#db2777"><i class="fas fa-birthday-cake"></i></div>
+                                    <div class="notif-text">
+                                        <strong>${c.nome}</strong>
+                                        <span>${Utils.formatBirthdate(c.nascimento)}</span>
+                                        <div class="notif-time"><i class="fab fa-whatsapp" style="color:#25D366"></i> Clique para enviar parabéns!</div>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        }
+                        if (a.aniversariantesBreve.length > 0) {
+                            html += `<div style="font-size:0.75rem;font-weight:700;color:#b45309;margin:${a.aniversariantesHoje.length>0?'10px':'4px'} 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Nos próximos 7 dias (${a.aniversariantesBreve.length})</div>`;
+                            html += a.aniversariantesBreve.map(c => {
+                                const nextB = Utils.getNextBirthday(c.nascimento);
+                                const days = Utils.getDaysUntil(nextB);
+                                return `<div class="notif-item warning" onclick="Notif.close(); UI.showClienteDetails('${c.id}')">
+                                    <div class="notif-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-gift"></i></div>
+                                    <div class="notif-text">
+                                        <strong>${c.nome}</strong>
+                                        <span>${Utils.formatBirthdate(c.nascimento)}</span>
+                                        <div class="notif-time"><i class="fas fa-calendar"></i> Em ${days} dia${days!==1?'s':''}</div>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        }
+                    }
+                }
+
+                body.innerHTML = html;
             }
         };
 
