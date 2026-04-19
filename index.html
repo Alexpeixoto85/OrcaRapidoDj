@@ -1302,6 +1302,130 @@
         .date-busy-alert i { color: var(--danger); margin-top: 2px; flex-shrink: 0; }
         .date-busy-alert-title { font-weight: 700; color: #b91c1c; font-size: 0.9rem; margin-bottom: 3px; }
         .date-busy-alert-body { font-size: 0.82rem; color: #7f1d1d; line-height: 1.4; }
+
+        /* ── FORMA CHIP ── */
+        .forma-chip { cursor: pointer; }
+        .forma-chip input[type="radio"] { display: none; }
+        .forma-chip span {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 10px; border: 2px solid var(--border);
+            border-radius: 12px; font-size: 0.85rem; font-weight: 600;
+            color: var(--secondary); background: var(--light);
+            transition: all 0.15s; user-select: none;
+        }
+        .forma-chip input:checked + span {
+            border-color: var(--success); background: #d1fae5; color: #065f46;
+        }
+
+        /* ── RECIBO ITEM CARD ── */
+        .recibo-card {
+            background: var(--surface); border-radius: 14px;
+            border: 1.5px solid var(--border);
+            padding: 14px; margin-bottom: 10px;
+            transition: border-color 0.2s;
+        }
+        .recibo-card-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+        }
+        .recibo-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .recibo-card-title { font-size: 1rem; font-weight: 800; color: var(--dark); }
+        .recibo-card-sub { font-size: 0.78rem; color: var(--secondary); margin-top: 1px; }
+        .recibo-card-actions {
+            display: flex; gap: 8px; margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .recibo-action-btn {
+            flex: 1; padding: 9px 8px; border: none; border-radius: 10px;
+            font-size: 0.82rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            cursor: pointer; transition: opacity 0.15s;
+        }
+        .recibo-action-btn:active { opacity: 0.7; }
+
+        /* ── IMPROVED MOBILE MODAL SHEETS ── */
+        .modal-sheet {
+            padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+        }
+        .modal-sheet .sheet-handle {
+            margin-bottom: 16px;
+        }
+        /* Make all form controls larger touch targets on mobile */
+        .form-control {
+            min-height: 50px;
+            font-size: 1rem !important;
+        }
+        select.form-control { -webkit-appearance: none; }
+        .btn-block {
+            min-height: 52px;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .btn-block:active { opacity: 0.85; transform: scale(0.99); }
+
+        /* ── DETAILS ACTIONS improved ── */
+        .details-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .btn-details {
+            padding: 12px 10px;
+            border: none; border-radius: 12px;
+            font-size: 0.82rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px; cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            min-height: 46px;
+        }
+        .btn-details:active { opacity: 0.8; transform: scale(0.97); }
+        .btn-details-primary { background:#dbeafe; color:#1e40af; }
+        .btn-details-whatsapp { background:#dcfce7; color:#15803d; }
+        .btn-details-cyan { background:#cffafe; color:#0e7490; }
+        .btn-details-secondary { background:#fee2e2; color:#b91c1c; }
+
+        /* ── ACTION SHEET (bottom contextual menu) ── */
+        .action-sheet-overlay {
+            position: fixed; inset:0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(3px);
+            z-index: 300;
+            display: none; align-items: flex-end;
+        }
+        .action-sheet-overlay.active { display: flex; }
+        .action-sheet {
+            width: 100%; background: var(--surface);
+            border-radius: 20px 20px 0 0;
+            padding: 8px 16px calc(20px + env(safe-area-inset-bottom));
+            animation: slideUp 0.28s cubic-bezier(0.16,1,0.3,1);
+        }
+        .action-sheet-handle {
+            width: 36px; height: 4px; background: #cbd5e1;
+            border-radius: 2px; margin: 8px auto 16px;
+        }
+        .action-sheet-title {
+            font-size: 0.78rem; font-weight: 700; color: var(--secondary);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            text-align: center; margin-bottom: 12px;
+        }
+        .action-sheet-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 15px 8px; border-bottom: 1px solid #f8fafc;
+            cursor: pointer; transition: background 0.15s; border-radius: 10px;
+            font-size: 1rem; font-weight: 600; color: var(--dark);
+        }
+        .action-sheet-item:active { background: #f1f5f9; }
+        .action-sheet-item i { width: 20px; text-align: center; }
+        .action-sheet-item.danger { color: var(--danger); }
+        .action-sheet-cancel {
+            margin-top: 8px; padding: 15px; text-align: center;
+            font-size: 1rem; font-weight: 700; color: var(--secondary);
+            cursor: pointer; border-radius: 14px; background: var(--light);
+        }
     </style>
 </head>
 <body>
@@ -2108,16 +2232,63 @@
     </div>
 
 
-    <!-- MODAL: REGISTRAR RECEBIMENTO -->
+    <!-- MODAL: PAINEL DE RECEBIMENTOS -->
     <div class="modal-overlay" id="overlay-recebimento"></div>
-    <div class="modal-sheet" id="sheet-recebimento">
+    <div class="modal-sheet" id="sheet-recebimento" style="padding:0; overflow:hidden; display:flex; flex-direction:column; max-height:92vh;">
+        <!-- Header fixo -->
+        <div style="padding:16px 16px 0; flex-shrink:0;">
+            <div class="sheet-handle"></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                <div>
+                    <div id="rec-title" style="font-size:1.1rem; font-weight:800; color:var(--dark);"></div>
+                    <div id="rec-subtitle" style="font-size:0.78rem; color:var(--secondary); margin-top:2px;"></div>
+                </div>
+                <button onclick="UI.closeModals()" style="background:#f1f5f9;border:none;border-radius:50%;width:36px;height:36px;font-size:1rem;color:var(--secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Barra de progresso -->
+            <div id="rec-progress-box" style="background:var(--light);border-radius:12px;padding:12px 14px;margin:10px 0 0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <span style="font-size:0.78rem;color:var(--secondary);">Recebido</span>
+                    <span id="rec-progress-label" style="font-size:0.9rem;font-weight:800;color:var(--success);"></span>
+                </div>
+                <div style="height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;">
+                    <div id="rec-progress-bar" style="height:100%;background:linear-gradient(90deg,#10b981,#059669);border-radius:99px;transition:width 0.4s;width:0%"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                    <span id="rec-status-badge" style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:99px;"></span>
+                    <span id="rec-restante-label" style="font-size:0.78rem;color:var(--secondary);"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de recibos + botão add (scrollável) -->
+        <div style="flex:1;overflow-y:auto;padding:10px 16px 0;">
+            <div id="rec-lista"></div>
+        </div>
+
+        <!-- Botão fixo no rodapé -->
+        <div style="padding:12px 16px calc(12px + env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid var(--border);background:white;">
+            <button onclick="App.recebimento.openForm()" style="width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#10b981,#059669);color:white;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;">
+                <i class="fas fa-plus"></i> Novo Recebimento
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: FORM DE RECEBIMENTO (ADD/EDIT) -->
+    <div class="modal-overlay" id="overlay-recebimento-form"></div>
+    <div class="modal-sheet" id="sheet-recebimento-form">
         <div class="sheet-handle"></div>
-        <h3 class="section-title" id="title-recebimento" style="margin-bottom:4px;"><i class="fas fa-hand-holding-usd" style="color:var(--success);"></i> Registrar Recebimento</h3>
-        <p id="recebimento-subtitle" style="font-size:0.82rem;color:var(--secondary);margin-bottom:16px;"></p>
-
-        <div id="recebimento-status-box" class="pagamento-status-bar" style="display:none;"></div>
-
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h3 id="rec-form-title" style="font-size:1.05rem;font-weight:800;color:var(--dark);margin:0;"></h3>
+            <button onclick="App.recebimento.closeForm()" style="background:#f1f5f9;border:none;border-radius:50%;width:34px;height:34px;font-size:0.9rem;color:var(--secondary);display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form id="form-recebimento" onsubmit="App.recebimento.save(event)">
+            <input type="hidden" id="rec-id">
             <input type="hidden" id="rec-orcamento-id">
 
             <div class="form-group">
@@ -2125,24 +2296,26 @@
                 <select id="rec-tipo" class="form-control" onchange="App.recebimento.onTipoChange()">
                     <option value="sinal">Sinal / Entrada (50%)</option>
                     <option value="parcial">Valor Parcial</option>
-                    <option value="total">Pagamento Total</option>
+                    <option value="total">Pagamento Total / Restante</option>
                 </select>
+            </div>
+
+            <!-- Chips de forma de pagamento -->
+            <div class="form-group">
+                <label class="form-label">Forma de Pagamento</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="forma-chips">
+                    <label class="forma-chip"><input type="radio" name="rec-forma" value="pix" checked><span><i class="fas fa-qrcode"></i> PIX</span></label>
+                    <label class="forma-chip"><input type="radio" name="rec-forma" value="dinheiro"><span><i class="fas fa-money-bill-wave"></i> Dinheiro</span></label>
+                    <label class="forma-chip"><input type="radio" name="rec-forma" value="cartao_credito"><span><i class="fas fa-credit-card"></i> Crédito</span></label>
+                    <label class="forma-chip"><input type="radio" name="rec-forma" value="cartao_debito"><span><i class="fas fa-credit-card"></i> Débito</span></label>
+                    <label class="forma-chip" style="grid-column:span 2;"><input type="radio" name="rec-forma" value="transferencia"><span><i class="fas fa-exchange-alt"></i> Transferência</span></label>
+                </div>
+                <input type="hidden" id="rec-forma" value="pix">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Valor Recebido (R$)</label>
-                <input type="text" inputmode="numeric" id="rec-valor" class="form-control" placeholder="0,00" required oninput="Utils.maskMoney(this)">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Forma de Pagamento</label>
-                <select id="rec-forma" class="form-control">
-                    <option value="pix">PIX</option>
-                    <option value="dinheiro">Dinheiro</option>
-                    <option value="cartao_credito">Cartão de Crédito</option>
-                    <option value="cartao_debito">Cartão de Débito</option>
-                    <option value="transferencia">Transferência Bancária</option>
-                </select>
+                <input type="text" inputmode="numeric" id="rec-valor" class="form-control" style="font-size:1.3rem;font-weight:800;text-align:center;color:var(--success);" placeholder="0,00" required oninput="Utils.maskMoney(this)">
             </div>
 
             <div class="form-group">
@@ -2155,10 +2328,12 @@
                 <input type="text" id="rec-obs" class="form-control" placeholder="Ex: Sinal confirmado via PIX">
             </div>
 
-            <button type="submit" class="btn-block" style="background:linear-gradient(135deg,#10b981,#059669);">
-                <i class="fas fa-check-circle"></i> Confirmar Recebimento e Gerar Recibo
-            </button>
-            <button type="button" class="btn-block" style="background:var(--light);color:var(--secondary);margin-top:8px;" onclick="UI.closeModals()">Cancelar</button>
+            <div style="display:flex;gap:10px;margin-top:4px;">
+                <button type="button" onclick="App.recebimento.closeForm()" style="flex:1;padding:15px;border:1px solid var(--border);border-radius:14px;background:white;color:var(--secondary);font-size:0.95rem;font-weight:600;">Cancelar</button>
+                <button type="submit" style="flex:2;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#10b981,#059669);color:white;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-check"></i> <span id="rec-form-btn-label">Salvar e Gerar Recibo</span>
+                </button>
+            </div>
         </form>
     </div>
 
@@ -5053,6 +5228,7 @@
                         orcamentos: UI.data.orcamentos,
                         pacotes: UI.data.pacotes,
                         equipamentos: UI.data.equipamentos,
+                        recebimentos: UI.data.recebimentos,
                         settings: Storage.getSettings()
                     };
                     const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
@@ -5074,6 +5250,7 @@
                             if(data.orcamentos) Storage.set('orcamentos', data.orcamentos);
                             if(data.pacotes) Storage.set('pacotes', data.pacotes);
                             if(data.equipamentos) Storage.set('equipamentos', data.equipamentos);
+                            if(data.recebimentos) Storage.set('recebimentos', data.recebimentos);
                             if(data.settings) Storage.saveSettings(data.settings);
                             location.reload();
                         } catch(err) {
@@ -5222,94 +5399,183 @@
 
 
         // ============================================================
-        // RECEBIMENTOS — Registrar pagamentos parciais/integrais
+        // RECEBIMENTOS — Registrar, editar, excluir, gerar recibo
         // ============================================================
         App.recebimento = {
+            _orcId: null,
+
+            // Abre o painel principal de recebimentos de um orçamento
             open(orcamentoId) {
+                this._orcId = orcamentoId;
                 const o = UI.data.orcamentos.find(x => x.id === orcamentoId);
-                const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                const c = UI.data.clientes.find(x => x.id === o?.clienteId);
                 if (!o || !c) return;
 
-                document.getElementById('rec-orcamento-id').value = orcamentoId;
-                document.getElementById('rec-data').value = Utils.getToday();
-                document.getElementById('rec-tipo').value = 'sinal';
-                document.getElementById('rec-obs').value = '';
-
-                // Calcular já pago
-                const recebimentos = UI.data.recebimentos.filter(r => r.orcamentoId === orcamentoId);
-                const totalPago = recebimentos.reduce((a, r) => a + r.valor, 0);
-                const totalDev  = o.valor - totalPago;
-
-                // Preencher valor sugerido
-                const valorInput = document.getElementById('rec-valor');
-                const sinal = Math.round(o.valor * 0.5 * 100);
-                valorInput.value = sinal.toString();
-                Utils.maskMoney(valorInput);
-
-                // Subtítulo
-                document.getElementById('title-recebimento').innerHTML =
-                    `<i class="fas fa-hand-holding-usd" style="color:var(--success);"></i> Recebimento — ${c.nome}`;
-                document.getElementById('recebimento-subtitle').textContent =
+                document.getElementById('rec-title').textContent = `💰 ${c.nome}`;
+                document.getElementById('rec-subtitle').textContent =
                     `Orç. #${o.numero} • ${o.evento} • ${Utils.formatDate(o.dataEvento)}`;
 
-                // Status bar
-                const statusBox = document.getElementById('recebimento-status-box');
-                if (recebimentos.length > 0) {
-                    const pct = Math.min(100, Math.round((totalPago / o.valor) * 100));
-                    const parcelasHtml = recebimentos.map(r =>
-                        `<div class="pagamento-parcela-item">
-                            <i class="fas fa-check-circle parcela-icon pago"></i>
-                            <span class="parcela-tipo">${this._formaLabel(r.forma)}</span>
-                            <span class="parcela-valor">${Utils.formatCurrency(r.valor)}</span>
-                            <span class="parcela-data">${Utils.formatDate(r.data)}</span>
-                        </div>`
-                    ).join('');
-                    statusBox.innerHTML = `
-                        <div class="pagamento-progress-label">
-                            <span>Já recebido</span>
-                            <strong>${Utils.formatCurrency(totalPago)} de ${Utils.formatCurrency(o.valor)}</strong>
-                        </div>
-                        <div class="pagamento-bar"><div class="pagamento-bar-fill" style="width:${pct}%"></div></div>
-                        <div class="pagamento-parcelas">${parcelasHtml}</div>
-                    `;
-                    statusBox.style.display = 'block';
-
-                    // Ajustar valor sugerido para o restante
-                    const restante = Math.max(0, Math.round(totalDev * 100));
-                    valorInput.value = restante.toString();
-                    Utils.maskMoney(valorInput);
-                    document.getElementById('rec-tipo').value = totalDev <= 0 ? 'total' : 'parcial';
-                } else {
-                    statusBox.style.display = 'none';
-                }
-
+                this._renderPanel(o);
                 UI.openModal('recebimento');
             },
 
+            _renderPanel(o) {
+                if (!o) o = UI.data.orcamentos.find(x => x.id === this._orcId);
+                const recs = (UI.data.recebimentos || []).filter(r => r.orcamentoId === o.id);
+                const totalPago = recs.reduce((a, r) => a + r.valor, 0);
+                const pct = o.valor > 0 ? Math.min(100, Math.round((totalPago / o.valor) * 100)) : 0;
+                const quitado = totalPago >= o.valor;
+                const restante = Math.max(0, o.valor - totalPago);
+
+                // Progress bar
+                document.getElementById('rec-progress-bar').style.width = pct + '%';
+                document.getElementById('rec-progress-label').textContent =
+                    Utils.formatCurrency(totalPago) + ' de ' + Utils.formatCurrency(o.valor);
+                document.getElementById('rec-restante-label').textContent =
+                    quitado ? '' : `Falta: ${Utils.formatCurrency(restante)}`;
+
+                const badge = document.getElementById('rec-status-badge');
+                if (quitado) {
+                    badge.textContent = '✓ QUITADO';
+                    badge.style.cssText = 'font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#d1fae5;color:#065f46;';
+                } else if (totalPago > 0) {
+                    badge.textContent = `${pct}% pago`;
+                    badge.style.cssText = 'font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#fef3c7;color:#92400e;';
+                } else {
+                    badge.textContent = 'Nenhum recebimento';
+                    badge.style.cssText = 'font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#fee2e2;color:#b91c1c;';
+                }
+
+                // Lista de recibos
+                const lista = document.getElementById('rec-lista');
+                if (recs.length === 0) {
+                    lista.innerHTML = `<div style="text-align:center;padding:28px 16px;color:var(--secondary);">
+                        <i class="fas fa-receipt" style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;display:block;"></i>
+                        <p style="font-weight:600;">Nenhum recebimento registrado</p>
+                        <p style="font-size:0.82rem;margin-top:4px;">Toque em "Novo Recebimento" para começar</p>
+                    </div>`;
+                } else {
+                    lista.innerHTML = recs.map(r => this._recCard(r, o)).join('');
+                }
+            },
+
+            _recCard(r, o) {
+                const formaIcons = { pix:'qrcode', dinheiro:'money-bill-wave',
+                    cartao_credito:'credit-card', cartao_debito:'credit-card', transferencia:'exchange-alt' };
+                const formaCores = { pix:'#dbeafe,#1d4ed8', dinheiro:'#d1fae5,#065f46',
+                    cartao_credito:'#f3e8ff,#6d28d9', cartao_debito:'#fef3c7,#92400e', transferencia:'#cffafe,#0e7490' };
+                const [bg, cor] = (formaCores[r.forma] || '#f1f5f9,#475569').split(',');
+                return `<div class="recibo-card">
+                    <div class="recibo-card-header">
+                        <div class="recibo-icon" style="background:${bg};color:${cor};">
+                            <i class="fas fa-${formaIcons[r.forma]||'money-bill'}"></i>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="recibo-card-title">${Utils.formatCurrency(r.valor)}</div>
+                            <div class="recibo-card-sub">${this._formaLabel(r.forma)} • ${Utils.formatDate(r.data)}</div>
+                            ${r.obs ? `<div class="recibo-card-sub" style="font-style:italic;">"${r.obs}"</div>` : ''}
+                        </div>
+                        <span style="font-size:0.7rem;font-weight:700;padding:4px 8px;border-radius:8px;background:${bg};color:${cor};white-space:nowrap;">
+                            ${r.tipo === 'sinal' ? 'Sinal' : r.tipo === 'total' ? 'Quitação' : 'Parcial'}
+                        </span>
+                    </div>
+                    <div class="recibo-card-actions">
+                        <button class="recibo-action-btn" style="background:#dbeafe;color:#1d4ed8;" onclick="App.recebimento.reprint('${r.id}')">
+                            <i class="fas fa-file-pdf"></i> Recibo PDF
+                        </button>
+                        <button class="recibo-action-btn" style="background:#fef3c7;color:#92400e;" onclick="App.recebimento.openEdit('${r.id}')">
+                            <i class="fas fa-pen"></i> Editar
+                        </button>
+                        <button class="recibo-action-btn" style="background:#fee2e2;color:#b91c1c;" onclick="App.recebimento.confirmDelete('${r.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>`;
+            },
+
+            // Abre o form para NOVO recebimento
+            openForm() {
+                const o = UI.data.orcamentos.find(x => x.id === this._orcId);
+                if (!o) return;
+                const recs = (UI.data.recebimentos || []).filter(r => r.orcamentoId === o.id);
+                const totalPago = recs.reduce((a, r) => a + r.valor, 0);
+                const restante = Math.max(0, o.valor - totalPago);
+
+                document.getElementById('rec-id').value = '';
+                document.getElementById('rec-orcamento-id').value = o.id;
+                document.getElementById('rec-data').value = Utils.getToday();
+                document.getElementById('rec-obs').value = '';
+                document.getElementById('rec-tipo').value = recs.length === 0 ? 'sinal' : 'parcial';
+                document.getElementById('rec-form-title').textContent = '➕ Novo Recebimento';
+                document.getElementById('rec-form-btn-label').textContent = 'Salvar e Gerar Recibo';
+
+                // Resetar chips
+                document.querySelectorAll('#forma-chips input[type="radio"]').forEach(r => { r.checked = r.value === 'pix'; });
+                document.getElementById('rec-forma').value = 'pix';
+
+                // Valor sugerido
+                const valorInput = document.getElementById('rec-valor');
+                const sugerido = recs.length === 0 ? Math.round(o.valor * 0.5 * 100) : Math.round(restante * 100);
+                valorInput.value = sugerido.toString();
+                Utils.maskMoney(valorInput);
+
+                UI.openModal('recebimento-form');
+            },
+
+            // Abre o form para EDITAR recebimento
+            openEdit(recId) {
+                const r = (UI.data.recebimentos || []).find(x => x.id === recId);
+                if (!r) return;
+                const o = UI.data.orcamentos.find(x => x.id === r.orcamentoId);
+
+                document.getElementById('rec-id').value = r.id;
+                document.getElementById('rec-orcamento-id').value = r.orcamentoId;
+                document.getElementById('rec-tipo').value = r.tipo || 'parcial';
+                document.getElementById('rec-data').value = r.data;
+                document.getElementById('rec-obs').value = r.obs || '';
+                document.getElementById('rec-form-title').textContent = '✏️ Editar Recebimento';
+                document.getElementById('rec-form-btn-label').textContent = 'Salvar Alterações';
+
+                // Chips
+                document.querySelectorAll('#forma-chips input[type="radio"]').forEach(radio => {
+                    radio.checked = radio.value === r.forma;
+                });
+                document.getElementById('rec-forma').value = r.forma;
+
+                // Valor
+                const valorInput = document.getElementById('rec-valor');
+                valorInput.value = Math.round(r.valor * 100).toString();
+                Utils.maskMoney(valorInput);
+
+                UI.openModal('recebimento-form');
+            },
+
+            closeForm() {
+                UI.closeModals();
+                // Reabrir painel de recebimentos
+                setTimeout(() => UI.openModal('recebimento'), 150);
+            },
+
             onTipoChange() {
-                const tipo = document.getElementById('rec-tipo').value;
-                const orcId = document.getElementById('rec-orcamento-id').value;
+                const tipo   = document.getElementById('rec-tipo').value;
+                const orcId  = document.getElementById('rec-orcamento-id').value;
+                const recIdEd = document.getElementById('rec-id').value;
                 const o = UI.data.orcamentos.find(x => x.id === orcId);
                 if (!o) return;
-                const recebimentos = UI.data.recebimentos.filter(r => r.orcamentoId === orcId);
-                const totalPago = recebimentos.reduce((a, r) => a + r.valor, 0);
+                const recs = (UI.data.recebimentos || []).filter(r => r.orcamentoId === orcId && r.id !== recIdEd);
+                const totalPago = recs.reduce((a, r) => a + r.valor, 0);
                 const valorInput = document.getElementById('rec-valor');
                 if (tipo === 'sinal') {
                     valorInput.value = Math.round(o.valor * 0.5 * 100).toString();
                 } else if (tipo === 'total') {
-                    valorInput.value = Math.round(Math.max(0, (o.valor - totalPago)) * 100).toString();
+                    valorInput.value = Math.round(Math.max(0, o.valor - totalPago) * 100).toString();
                 }
                 Utils.maskMoney(valorInput);
             },
 
-            _formaLabel(forma) {
-                const m = { pix:'PIX', dinheiro:'Dinheiro', cartao_credito:'Cartão Créd.',
-                             cartao_debito:'Cartão Déb.', transferencia:'Transferência' };
-                return m[forma] || forma;
-            },
-
             save(e) {
                 e.preventDefault();
+                const recId  = document.getElementById('rec-id').value;
                 const orcId  = document.getElementById('rec-orcamento-id').value;
                 const valor  = Utils.parseCurrency(document.getElementById('rec-valor').value);
                 const forma  = document.getElementById('rec-forma').value;
@@ -5323,42 +5589,93 @@
                 const c = UI.data.clientes.find(x => x.id === o.clienteId);
                 const s = Storage.getSettings();
 
-                const rec = {
-                    id: Utils.id(),
-                    orcamentoId: orcId,
-                    valor, forma, data, obs, tipo,
-                    criadoEm: new Date().toISOString()
-                };
+                if (!UI.data.recebimentos) UI.data.recebimentos = [];
 
-                UI.data.recebimentos.push(rec);
+                let rec;
+                const isEdit = !!recId;
+
+                if (isEdit) {
+                    // UPDATE
+                    const idx = UI.data.recebimentos.findIndex(r => r.id === recId);
+                    if (idx >= 0) {
+                        UI.data.recebimentos[idx] = { ...UI.data.recebimentos[idx], valor, forma, data, obs, tipo };
+                        rec = UI.data.recebimentos[idx];
+                    }
+                } else {
+                    // CREATE
+                    rec = { id: Utils.id(), orcamentoId: orcId, valor, forma, data, obs, tipo, criadoEm: new Date().toISOString() };
+                    UI.data.recebimentos.push(rec);
+                    // Agendar evento automaticamente no primeiro recebimento
+                    const orcIdx = UI.data.orcamentos.findIndex(x => x.id === orcId);
+                    if (orcIdx >= 0 && !UI.data.orcamentos[orcIdx].eventoAgendado) {
+                        UI.data.orcamentos[orcIdx].eventoAgendado = true;
+                        UI.data.orcamentos[orcIdx].dataAgendamento = Utils.getToday();
+                        Storage.set('orcamentos', UI.data.orcamentos);
+                    }
+                }
+
                 Storage.set('recebimentos', UI.data.recebimentos);
 
-                // Verificar se está totalmente pago
                 const totalPago = UI.data.recebimentos
                     .filter(r => r.orcamentoId === orcId)
                     .reduce((a, r) => a + r.valor, 0);
                 const quitado = totalPago >= o.valor;
 
-                UI.closeModals();
-                Utils.toast(quitado ? 'Pagamento quitado! Recibo gerado ✅' : 'Recebimento registrado! Recibo gerado 📄');
-
-                // Gerar recibo PDF
-                setTimeout(() => this._gerarRecibo(rec, o, c, s, totalPago, quitado), 300);
-
-                // Agendar evento automaticamente se ainda não está agendado
-                const jaAgendado = o.eventoAgendado;
-                if (!jaAgendado) {
-                    const idx = UI.data.orcamentos.findIndex(x => x.id === orcId);
-                    if (idx >= 0) {
-                        UI.data.orcamentos[idx].eventoAgendado = true;
-                        UI.data.orcamentos[idx].dataAgendamento = Utils.getToday();
-                        Storage.set('orcamentos', UI.data.orcamentos);
-                    }
-                    Utils.toast('Evento agendado automaticamente! 📅', 'success');
-                }
-
+                Utils.toast(isEdit ? 'Recebimento atualizado! 📄' : (quitado ? '✅ Pagamento quitado! Recibo gerado' : '📄 Recebimento salvo! Recibo gerado'));
                 UI.renderDashboard();
                 UI.renderFinanceiro();
+
+                // Fechar form e voltar ao painel
+                UI.closeModals();
+                setTimeout(() => {
+                    this._orcId = orcId;
+                    UI.openModal('recebimento');
+                    this._renderPanel(o);
+                    // Gerar recibo PDF
+                    setTimeout(() => this._gerarRecibo(rec, o, c, s, totalPago, quitado), 200);
+                }, 200);
+            },
+
+            confirmDelete(recId) {
+                ActionSheet.open('Excluir Recebimento?', [
+                    {
+                        icon: 'trash', label: 'Excluir e restaurar valor', cls: 'danger',
+                        action: () => this.deleteRec(recId)
+                    }
+                ]);
+            },
+
+            deleteRec(recId) {
+                if (!UI.data.recebimentos) return;
+                const idx = UI.data.recebimentos.findIndex(r => r.id === recId);
+                if (idx < 0) return;
+                UI.data.recebimentos.splice(idx, 1);
+                Storage.set('recebimentos', UI.data.recebimentos);
+                Utils.toast('Recebimento excluído. Saldo restaurado.', 'success');
+                const o = UI.data.orcamentos.find(x => x.id === this._orcId);
+                this._renderPanel(o);
+                UI.renderDashboard();
+                UI.renderFinanceiro();
+            },
+
+            // Reimprimir recibo de um recebimento existente
+            reprint(recId) {
+                const r = (UI.data.recebimentos || []).find(x => x.id === recId);
+                if (!r) return;
+                const o = UI.data.orcamentos.find(x => x.id === r.orcamentoId);
+                const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                const s = Storage.getSettings();
+                const totalPago = UI.data.recebimentos
+                    .filter(x => x.orcamentoId === r.orcamentoId)
+                    .reduce((a, x) => a + x.valor, 0);
+                const quitado = totalPago >= o.valor;
+                this._gerarRecibo(r, o, c, s, totalPago, quitado);
+            },
+
+            _formaLabel(forma) {
+                const m = { pix:'PIX', dinheiro:'Dinheiro', cartao_credito:'Cartão de Crédito',
+                             cartao_debito:'Cartão de Débito', transferencia:'Transferência' };
+                return m[forma] || forma;
             },
 
             _gerarRecibo(rec, o, c, s, totalPago, quitado) {
@@ -5377,6 +5694,9 @@
                 const dark  = [15, 23, 42];
                 const white = [255, 255, 255];
 
+                // Número do recibo baseado no ID
+                const recNum = rec.id.substring(0, 6).toUpperCase();
+
                 // ── CABEÇALHO ──
                 doc.setFillColor(...blue);
                 doc.rect(0, 0, W, 26, 'F');
@@ -5390,25 +5710,26 @@
                 doc.text('RECIBO DE PAGAMENTO', lx, 18);
                 doc.setTextColor(...white); doc.setFontSize(7);
                 const hoje = new Date().toLocaleDateString('pt-BR');
-                doc.text(`Recibo Nº ${o.numero}-${Utils.id().substring(0,4).toUpperCase()}`, W-mr, 11, {align:'right'});
+                doc.text(`Recibo Nº ${o.numero}-${recNum}`, W-mr, 11, {align:'right'});
                 doc.text(`Emitido: ${hoje}`, W-mr, 16, {align:'right'});
+                if (s.telefone) doc.text(s.telefone, W-mr, 21, {align:'right'});
                 y = 32;
 
-                // ── TÍTULO RECIBO ──
+                // ── TÍTULO ──
                 doc.setFillColor(...blue2);
                 doc.rect(ml, y, cw, 8, 'F');
                 doc.setTextColor(...white); doc.setFontSize(10); doc.setFont('helvetica','bold');
                 doc.text('RECIBO DE PAGAMENTO', ml + cw/2, y + 5.5, {align:'center'});
                 y += 12;
 
-                // ── QUEM RECEBEU / QUEM PAGOU ──
+                // ── PARTES ──
                 const hw = (cw - 4) / 2;
                 doc.setFillColor(...lgray);
                 doc.roundedRect(ml, y, hw, 22, 2, 2, 'F');
                 doc.setTextColor(...blue2); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
                 doc.text('RECEBIDO POR', ml+3, y+5);
                 doc.setTextColor(...dark); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
-                doc.text(s.razao||s.nome||'', ml+3, y+11);
+                doc.text((s.razao||s.nome||'').substring(0,32), ml+3, y+11);
                 doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...gray);
                 if(s.cnpj) doc.text(`CNPJ: ${s.cnpj}`, ml+3, y+16);
                 if(s.telefone) doc.text(s.telefone, ml+3, y+20.5);
@@ -5418,13 +5739,13 @@
                 doc.setTextColor(...blue2); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
                 doc.text('PAGO POR', ml+hw+7, y+5);
                 doc.setTextColor(...dark); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
-                doc.text(c.nome, ml+hw+7, y+11);
+                doc.text(c.nome.substring(0,30), ml+hw+7, y+11);
                 doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...gray);
                 doc.text(Utils.formatPhone(c.telefone)||c.telefone, ml+hw+7, y+16);
-                if(c.email) doc.text(c.email, ml+hw+7, y+20.5);
+                if(c.email) doc.text(c.email.substring(0,30), ml+hw+7, y+20.5);
                 y += 26;
 
-                // ── DETALHES DO EVENTO ──
+                // ── EVENTO ──
                 doc.setFillColor(...blue2);
                 doc.rect(ml, y, cw, 6, 'F');
                 doc.setTextColor(...white); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
@@ -5443,50 +5764,43 @@
                 });
                 y += 18;
 
-                // ── VALORES ──
+                // ── TABELA DE VALORES ──
                 doc.setFillColor(...blue2);
                 doc.rect(ml, y, cw, 6, 'F');
                 doc.setTextColor(...white); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
                 doc.text('VALORES', ml+3, y+4.2);
                 y += 6;
 
-                // Tabela
+                const prevPago = totalPago - rec.valor;
                 const rows = [
                     ['Valor Total do Contrato', Utils.formatCurrency(o.valor), dark, false],
-                    ['Valor Pago Anteriormente', Utils.formatCurrency(totalPago - rec.valor), gray, false],
-                    ['VALOR RECEBIDO AGORA', Utils.formatCurrency(rec.valor), blue2, true],
+                    ['Pago Anteriormente', Utils.formatCurrency(Math.max(0, prevPago)), gray, false],
+                    ['VALOR RECEBIDO NESTE RECIBO', Utils.formatCurrency(rec.valor), blue2, true],
                     ['Saldo Restante', Utils.formatCurrency(Math.max(0, o.valor - totalPago)), quitado ? green : [239,68,68], false],
                 ];
                 rows.forEach(([label, val, color, bold], i) => {
                     const rowH = bold ? 10 : 8;
-                    if (bold) {
-                        doc.setFillColor(239,246,255);
-                    } else {
-                        doc.setFillColor(i%2===0 ? 255:248,i%2===0 ? 255:250,i%2===0 ? 255:252);
-                    }
+                    doc.setFillColor(bold ? 239 : (i%2===0?255:248), bold ? 246 : (i%2===0?255:250), bold ? 255 : (i%2===0?255:252));
                     doc.rect(ml, y, cw, rowH, 'F');
                     doc.setDrawColor(229,231,235); doc.setLineWidth(0.2);
                     doc.line(ml, y+rowH, ml+cw, y+rowH);
-                    doc.setFontSize(bold ? 9 : 8);
-                    doc.setFont('helvetica', bold ? 'bold' : 'normal');
-                    doc.setTextColor(...dark);
-                    doc.text(label, ml+4, y+rowH-2.5);
-                    doc.setFont('helvetica','bold');
-                    doc.setTextColor(...color);
+                    doc.setFontSize(bold?9:8); doc.setFont('helvetica', bold?'bold':'normal');
+                    doc.setTextColor(...dark); doc.text(label, ml+4, y+rowH-2.5);
+                    doc.setFont('helvetica','bold'); doc.setTextColor(...color);
                     doc.text(val, ml+cw-4, y+rowH-2.5, {align:'right'});
                     y += rowH;
                 });
-
-                // Badge QUITADO ou PARCIAL
                 y += 4;
+
+                // Badge status
                 if (quitado) {
                     doc.setFillColor(...green);
-                    doc.roundedRect(ml+cw/2-20, y, 40, 10, 3, 3, 'F');
+                    doc.roundedRect(ml+cw/2-22, y, 44, 10, 3, 3, 'F');
                     doc.setTextColor(...white); doc.setFontSize(9); doc.setFont('helvetica','bold');
                     doc.text('✓ PAGAMENTO QUITADO', ml+cw/2, y+6.5, {align:'center'});
                 } else {
                     doc.setFillColor(255, 237, 213);
-                    doc.roundedRect(ml+cw/2-22, y, 44, 10, 3, 3, 'F');
+                    doc.roundedRect(ml+cw/2-20, y, 40, 10, 3, 3, 'F');
                     doc.setTextColor(194,65,12); doc.setFontSize(9); doc.setFont('helvetica','bold');
                     doc.text('PAGAMENTO PARCIAL', ml+cw/2, y+6.5, {align:'center'});
                 }
@@ -5496,34 +5810,36 @@
                 doc.setFillColor(...lgray);
                 doc.roundedRect(ml, y, cw, 10, 2, 2, 'F');
                 doc.setFontSize(7.5); doc.setTextColor(...blue2); doc.setFont('helvetica','bold');
-                doc.text('FORMA DE PAGAMENTO:', ml+4, y+6);
+                doc.text('FORMA DE PAGAMENTO:', ml+4, y+6.5);
                 doc.setTextColor(...dark); doc.setFont('helvetica','normal');
-                doc.text(this._formaLabel(rec.forma) + (rec.obs ? ` — ${rec.obs}` : ''), ml+52, y+6);
+                const obsText = this._formaLabel(rec.forma) + (rec.obs ? ` — ${rec.obs}` : '');
+                doc.text(obsText.substring(0,50), ml+55, y+6.5);
                 y += 14;
 
-                // ── ASSINATURAS ──
-                const sigY = H - 40;
+                // ── ASSINATURA ──
+                const sigY = H - 42;
+                const cidade = s.endereco ? (s.endereco.split(',').pop()?.trim()||'') : '';
                 doc.setFontSize(7.5); doc.setTextColor(...gray); doc.setFont('helvetica','normal');
-                doc.text(`${s.endereco ? s.endereco.split(',').filter(p=>p.trim()).pop()?.trim()||'' : ''}, ${new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}`, ml, sigY);
-                const sigW = 70;
+                doc.text(`${cidade ? cidade+', ':'' }${new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}`, ml, sigY);
+                const sigW = 68;
                 doc.setDrawColor(...dark); doc.setLineWidth(0.3);
-                doc.line(ml+5, sigY+14, ml+sigW-5, sigY+14);
-                doc.line(W-mr-sigW+5, sigY+14, W-mr-5, sigY+14);
+                doc.line(ml+4, sigY+14, ml+sigW, sigY+14);
+                doc.line(W-mr-sigW, sigY+14, W-mr-4, sigY+14);
                 doc.setFontSize(7); doc.setTextColor(...dark); doc.setFont('helvetica','bold');
-                doc.text(s.razao||s.nome||'', ml+sigW/2, sigY+18.5, {align:'center'});
-                doc.text(c.nome, W-mr-sigW/2, sigY+18.5, {align:'center'});
+                doc.text((s.razao||s.nome||'').substring(0,28), ml+sigW/2+4, sigY+18.5, {align:'center'});
+                doc.text(c.nome.substring(0,28), W-mr-sigW/2, sigY+18.5, {align:'center'});
                 doc.setFont('helvetica','normal'); doc.setTextColor(...gray); doc.setFontSize(6.5);
-                doc.text('RECEBEDOR', ml+sigW/2, sigY+22.5, {align:'center'});
+                doc.text('RECEBEDOR', ml+sigW/2+4, sigY+22.5, {align:'center'});
                 doc.text('PAGANTE', W-mr-sigW/2, sigY+22.5, {align:'center'});
 
                 // ── RODAPÉ ──
                 doc.setFillColor(...blue);
                 doc.rect(0, H-10, W, 10, 'F');
                 doc.setFontSize(6); doc.setTextColor(147,197,253); doc.setFont('helvetica','normal');
-                const footParts = [s.razao, s.cnpj?`CNPJ: ${s.cnpj}`:'', s.email, s.telefone].filter(Boolean);
-                doc.text(footParts.join('  |  '), W/2, H-4.5, {align:'center'});
+                const fp = [s.razao, s.cnpj?`CNPJ: ${s.cnpj}`:'', s.email, s.telefone].filter(Boolean);
+                doc.text(fp.join('  |  '), W/2, H-4.5, {align:'center'});
 
-                doc.save(`Recibo_${o.numero}_${c.nome.replace(/\s+/g,'_')}.pdf`);
+                doc.save(`Recibo_${o.numero}_${recNum}_${c.nome.replace(/\s+/g,'_')}.pdf`);
             }
         };
 
@@ -5658,6 +5974,31 @@
                         </div>
                     </div>`;
                 }).join('');
+            }
+        };
+
+        // ============================================================
+        // ACTION SHEET — Bottom contextual menu
+        // ============================================================
+        const ActionSheet = {
+            open(title, items) {
+                document.getElementById('action-sheet-title').textContent = title;
+                const container = document.getElementById('action-sheet-items');
+                container.innerHTML = items.map((item, i) => `
+                    <div class="action-sheet-item ${item.cls||''}" onclick="ActionSheet._trigger(${i})">
+                        <i class="fas fa-${item.icon}"></i>
+                        <span>${item.label}</span>
+                    </div>
+                `).join('');
+                this._items = items;
+                document.getElementById('action-sheet-overlay').classList.add('active');
+            },
+            _trigger(i) {
+                this.close();
+                setTimeout(() => this._items[i].action(), 150);
+            },
+            close() {
+                document.getElementById('action-sheet-overlay').classList.remove('active');
             }
         };
 
@@ -6121,6 +6462,12 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                 if(e.target === overlay) UI.closeModals();
             });
         });
+        // Sync forma-chip radio buttons to hidden input
+        document.querySelectorAll('#forma-chips input[type="radio"]').forEach(r => {
+            r.addEventListener('change', () => {
+                document.getElementById('rec-forma').value = r.value;
+            });
+        });
 
         // Listener para mostrar/ocultar campo de resultado do contato
         document.getElementById('contact-status').addEventListener('change', function() {
@@ -6129,5 +6476,15 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
 
         document.addEventListener('DOMContentLoaded', UI.init);
     </script>
+
+    <!-- ACTION SHEET: Ações do Recibo -->
+    <div class="action-sheet-overlay" id="action-sheet-overlay" onclick="if(event.target===this) ActionSheet.close()">
+        <div class="action-sheet">
+            <div class="action-sheet-handle"></div>
+            <div class="action-sheet-title" id="action-sheet-title">Opções</div>
+            <div id="action-sheet-items"></div>
+            <div class="action-sheet-cancel" onclick="ActionSheet.close()">Cancelar</div>
+        </div>
+    </div>
 </body>
 </html>
