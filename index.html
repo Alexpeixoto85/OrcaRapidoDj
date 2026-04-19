@@ -1758,7 +1758,16 @@
                     <div class="stat-value" id="fin-media-mensal" style="font-size: 1.1rem">R$ 0</div>
                     <div class="stat-label">Média Mensal</div>
                 </div>
+                </div>
+
+            <div class="section-title" style="margin-top:8px;">Recibos Emitidos</div>
+            <div class="list-card" id="fin-recibo-card" style="border-left:4px solid var(--success);">
+                <div style="text-align:center;padding:20px;color:var(--secondary);">
+                    <i class="fas fa-receipt" style="font-size:2rem;margin-bottom:8px;display:block;"></i>
+                    Nenhum recibo emitido ainda
+                </div>
             </div>
+        </div>
         </div>
         
         <div id="pacotes-view" class="view">
@@ -2078,6 +2087,17 @@
                     <option value="ativo">Ativo</option>
                     <option value="inativo">Inativo</option>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-camera" style="color:var(--primary);"></i> Fotos do Pacote (opcional)</label>
+                <div id="p-fotos-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+                <label for="p-fotos-input" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:2px dashed var(--border);border-radius:12px;cursor:pointer;color:var(--primary);font-weight:600;background:#f8fafc;transition:border-color 0.2s;">
+                    <i class="fas fa-plus-circle"></i> Adicionar Foto
+                </label>
+                <input type="file" id="p-fotos-input" accept="image/*" multiple style="display:none;" onchange="App.pacote.previewFotos(this)">
+                <input type="hidden" id="p-fotos-data">
+                <div style="font-size:0.78rem;color:var(--secondary);margin-top:5px;">Selecione uma ou mais imagens para exibir no card do pacote.</div>
             </div>
 
             <button type="submit" class="btn-block">Salvar</button>
@@ -3427,6 +3447,10 @@
                         } else {
                             content += filteredPacotes.map(p => `
                                 <div class="list-card" onclick="App.pacote.edit('${p.id}')">
+                                    ${p.fotos && p.fotos.length > 0 ? `
+                                    <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px;">
+                                        ${p.fotos.map(src => `<img src="${src}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border);">`).join('')}
+                                    </div>` : ''}
                                     <div class="card-header">
                                         <div class="card-title">${p.nome}</div>
                                         <span class="tag ${p.tipo === 'pacote' ? 'tag-contact' : 'tag-scheduled'}">${p.tipo === 'pacote' ? 'PACOTE' : 'EQUIP.'}</span>
@@ -3451,6 +3475,10 @@
                         } else {
                             content += filteredEquip.map(e => `
                                 <div class="list-card" onclick="App.pacote.edit('${e.id}')">
+                                    ${e.fotos && e.fotos.length > 0 ? `
+                                    <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px;">
+                                        ${e.fotos.map(src => `<img src="${src}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border);">`).join('')}
+                                    </div>` : ''}
                                     <div class="card-header">
                                         <div class="card-title">${e.nome}</div>
                                         <span class="tag tag-scheduled">EQUIP.</span>
@@ -3762,18 +3790,9 @@
             },
 
             renderFinanceiro: () => {
-                const aceito = UI.data.orcamentos
-                    .filter(o => o.status === 'aceito')
-                    .reduce((acc, o) => acc + o.valor, 0);
-                
-                const pendente = UI.data.orcamentos
-                    .filter(o => o.status === 'pendente')
-                    .reduce((acc, o) => acc + o.valor, 0);
-                
-                const recusado = UI.data.orcamentos
-                    .filter(o => o.status === 'recusado')
-                    .reduce((acc, o) => acc + o.valor, 0);
-                
+                const aceito = UI.data.orcamentos.filter(o => o.status === 'aceito').reduce((acc, o) => acc + o.valor, 0);
+                const pendente = UI.data.orcamentos.filter(o => o.status === 'pendente').reduce((acc, o) => acc + o.valor, 0);
+                const recusado = UI.data.orcamentos.filter(o => o.status === 'recusado').reduce((acc, o) => acc + o.valor, 0);
                 const potencialTotal = aceito + pendente;
                 const mediaMensal = Utils.calcularMediaMensal(UI.data.orcamentos);
 
@@ -3782,7 +3801,58 @@
                 document.getElementById('fin-pendente').innerText = Utils.formatCurrency(pendente);
                 document.getElementById('fin-recusado').innerText = Utils.formatCurrency(recusado);
                 document.getElementById('fin-media-mensal').innerText = Utils.formatCurrency(mediaMensal);
-                
+
+                // Card de somatorio de recibos
+                const recibos = UI.data.recebimentos || [];
+                const totalRecibos = recibos.reduce((acc, r) => acc + r.valor, 0);
+                const orcamentosComRecibo = new Set(recibos.map(r => r.orcamentoId)).size;
+                const recibosQuitados = UI.data.orcamentos.filter(o => o.status === 'aceito').filter(o => {
+                    const totalPago = recibos.filter(r => r.orcamentoId === o.id).reduce((a, r) => a + r.valor, 0);
+                    return totalPago >= o.valor && o.valor > 0;
+                }).length;
+                const aReceber = Math.max(0, aceito - totalRecibos);
+                const formaMap = { pix:'PIX', dinheiro:'Dinheiro', cartao_credito:'Credito', cartao_debito:'Debito', transferencia:'Transf.' };
+
+                const reciboCard = document.getElementById('fin-recibo-card');
+                if (reciboCard) {
+                    const ultimos = recibos.slice(-3).reverse();
+                    reciboCard.innerHTML =
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+                            '<div style="font-size:0.85rem;font-weight:700;color:var(--secondary);text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-receipt" style="color:var(--success);margin-right:6px;"></i>Somatorio de Recibos</div>' +
+                            '<span style="font-size:0.7rem;background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:99px;font-weight:700;">' + recibos.length + ' recibo' + (recibos.length !== 1 ? 's' : '') + '</span>' +
+                        '</div>' +
+                        '<div style="font-size:2rem;font-weight:800;color:var(--success);margin-bottom:2px;">' + Utils.formatCurrency(totalRecibos) + '</div>' +
+                        '<div style="font-size:0.8rem;color:var(--secondary);margin-bottom:14px;">Total efetivamente recebido</div>' +
+                        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">' +
+                            '<div style="background:#f0fdf4;border-radius:10px;padding:10px;text-align:center;">' +
+                                '<div style="font-size:1.2rem;font-weight:800;color:var(--success);">' + recibosQuitados + '</div>' +
+                                '<div style="font-size:0.7rem;color:#065f46;font-weight:600;">Quitados</div>' +
+                            '</div>' +
+                            '<div style="background:#eff6ff;border-radius:10px;padding:10px;text-align:center;">' +
+                                '<div style="font-size:1.2rem;font-weight:800;color:var(--primary);">' + orcamentosComRecibo + '</div>' +
+                                '<div style="font-size:0.7rem;color:#1e40af;font-weight:600;">Com Recibo</div>' +
+                            '</div>' +
+                            '<div style="background:' + (aReceber > 0 ? '#fff7ed' : '#f0fdf4') + ';border-radius:10px;padding:10px;text-align:center;">' +
+                                '<div style="font-size:0.85rem;font-weight:800;color:' + (aReceber > 0 ? '#c2410c' : 'var(--success)') + ';">' + Utils.formatCurrency(aReceber) + '</div>' +
+                                '<div style="font-size:0.7rem;color:' + (aReceber > 0 ? '#9a3412' : '#065f46') + ';font-weight:600;">A Receber</div>' +
+                            '</div>' +
+                        '</div>' +
+                        (ultimos.length > 0
+                            ? '<div style="border-top:1px solid #f1f5f9;padding-top:10px;">' +
+                                '<div style="font-size:0.72rem;font-weight:700;color:var(--secondary);margin-bottom:6px;text-transform:uppercase;">Ultimos Recibos</div>' +
+                                ultimos.map(function(r) {
+                                    var o2 = UI.data.orcamentos.find(function(x){ return x.id === r.orcamentoId; });
+                                    var c2 = o2 ? UI.data.clientes.find(function(x){ return x.id === o2.clienteId; }) : null;
+                                    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f8fafc;">' +
+                                        '<div><div style="font-weight:600;font-size:0.82rem;color:var(--dark);">' + (c2 ? c2.nome.split(' ')[0] : 'Cliente') + '</div>' +
+                                        '<div style="font-size:0.72rem;color:var(--secondary);">' + Utils.formatDate(r.data) + ' &bull; ' + (formaMap[r.forma] || r.forma) + '</div></div>' +
+                                        '<div style="font-weight:800;color:var(--success);font-size:0.9rem;">' + Utils.formatCurrency(r.valor) + '</div>' +
+                                    '</div>';
+                                }).join('') +
+                              '</div>'
+                            : '');
+                }
+
                 UI.renderChart();
             },
 
@@ -4175,6 +4245,8 @@
                 document.getElementById('form-pacote').reset();
                 document.getElementById('p-id').value = '';
                 document.getElementById('title-pacote').innerText = 'Novo Pacote/Equipamento';
+                App.pacote._fotosBuffer = [];
+                App.pacote._renderFotosPreview();
                 UI.openModal('pacote');
             },
 
@@ -4634,6 +4706,38 @@
             },
             
             pacote: {
+                _fotosBuffer: [],   // armazena base64 das fotos novas
+
+                previewFotos: async (input) => {
+                    const files = Array.from(input.files);
+                    const previews = [];
+                    for (const f of files) {
+                        const b64 = await Utils.readImage(f);
+                        previews.push(b64);
+                    }
+                    // Adiciona às já existentes
+                    const existentes = App.pacote._fotosBuffer || [];
+                    App.pacote._fotosBuffer = [...existentes, ...previews];
+                    App.pacote._renderFotosPreview();
+                    input.value = '';
+                },
+
+                _renderFotosPreview: () => {
+                    const container = document.getElementById('p-fotos-preview');
+                    if (!container) return;
+                    container.innerHTML = App.pacote._fotosBuffer.map((src, i) =>
+                        '<div style="position:relative;width:72px;height:72px;">' +
+                            '<img src="' + src + '" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:2px solid var(--border);">' +
+                            '<button type="button" onclick="App.pacote._removePhoto(' + i + ')" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--danger);color:white;font-size:0.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="fas fa-times"></i></button>' +
+                        '</div>'
+                    ).join('');
+                },
+
+                _removePhoto: (index) => {
+                    App.pacote._fotosBuffer.splice(index, 1);
+                    App.pacote._renderFotosPreview();
+                },
+
                 save: (e) => {
                     e.preventDefault();
                     const id = document.getElementById('p-id').value || Utils.id();
@@ -4643,6 +4747,7 @@
                     const valor = Utils.parseCurrency(document.getElementById('p-valor').value);
                     const duracao = document.getElementById('p-duracao').value ? parseInt(document.getElementById('p-duracao').value) : null;
                     const status = document.getElementById('p-status').value;
+                    const fotos = App.pacote._fotosBuffer && App.pacote._fotosBuffer.length > 0 ? [...App.pacote._fotosBuffer] : undefined;
 
                     const pacote = {
                         id,
@@ -4652,6 +4757,7 @@
                         valor,
                         duracao,
                         status,
+                        fotos: fotos || [],
                         dataCriacao: new Date().toISOString()
                     };
                     
@@ -4698,6 +4804,10 @@
                     
                     document.getElementById('p-duracao').value = item.duracao || '';
                     document.getElementById('p-status').value = item.status || 'ativo';
+                    
+                    // Carregar fotos existentes
+                    App.pacote._fotosBuffer = item.fotos ? [...item.fotos] : [];
+                    App.pacote._renderFotosPreview();
                     
                     document.getElementById('title-pacote').innerText = `Editar ${tipo === 'pacote' ? 'Pacote' : 'Equipamento'}`;
                     UI.openModal('pacote');
@@ -6051,10 +6161,12 @@
                 const daysInMonth = new Date(y, m+1, 0).getDate();
                 const today = new Date();
 
-                // Map events by day — só inclui na agenda se tiver pelo menos 1 recebimento (ou for pendente)
+                // Map events by day — só inclui na agenda se tiver pelo menos 1 recebimento (ou for pendente). Recusados são ignorados.
                 const eventMap = {};
                 UI.data.orcamentos.forEach(o => {
                     if (!o.dataEvento) return;
+                    // Orçamentos recusados nunca aparecem na agenda
+                    if (o.status === 'recusado') return;
                     // Orçamentos fechados só entram na agenda se tiverem recebimento registrado
                     if (o.status === 'aceito') {
                         const temRecebimento = (UI.data.recebimentos || []).some(r => r.orcamentoId === o.id);
@@ -6117,6 +6229,8 @@
                 const events = UI.data.orcamentos
                     .filter(o => {
                         if (!o.dataEvento) return false;
+                        // Recusados nunca aparecem na agenda
+                        if (o.status === 'recusado') return false;
                         // Fechados só aparecem na agenda se tiverem recebimento
                         if (o.status === 'aceito') {
                             const temRecebimento = (UI.data.recebimentos || []).some(r => r.orcamentoId === o.id);
