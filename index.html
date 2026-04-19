@@ -5251,6 +5251,10 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                 y += 18;
 
                 // ── SERVIÇOS + VALOR ──
+                // Calcular altura dinâmica do box conforme presença de desconto
+                const temDesconto = o.descontoValor > 0;
+                const boxSvcH = temDesconto ? 28 : 22;
+
                 doc.setFillColor(...blue2);
                 doc.rect(ml, y, cw, 6, 'F');
                 doc.setTextColor(...white);
@@ -5260,9 +5264,11 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                 y += 6;
 
                 doc.setFillColor(255, 255, 255);
-                doc.rect(ml, y, cw, 16, 'FD');
+                doc.setDrawColor(229, 231, 235);
+                doc.setLineWidth(0.3);
+                doc.rect(ml, y, cw, boxSvcH, 'FD');
 
-                // Serviços (col esquerda 60%)
+                // Col esquerda: Serviço (60% largura)
                 let servicoTexto = 'Serviços de DJ';
                 if (o.pacoteSelecionado) {
                     const p = UI.data.pacotes.find(x => x.id === o.pacoteSelecionado);
@@ -5280,55 +5286,80 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                 doc.setTextColor(...gray);
                 doc.setFont('helvetica', 'normal');
                 doc.text('DESCRIÇÃO DO SERVIÇO', ml + 3, y + 5);
-                doc.setFontSize(8);
+                doc.setFontSize(8.5);
                 doc.setTextColor(...dark);
                 doc.setFont('helvetica', 'bold');
-                const svcLines = doc.splitTextToSize(servicoTexto, cw * 0.58);
-                doc.text(svcLines[0], ml + 3, y + 10.5);
-                if (svcLines[1]) { doc.setFontSize(7); doc.text(svcLines[1], ml + 3, y + 14.5); }
+                const svcLines = doc.splitTextToSize(servicoTexto, cw * 0.55);
+                doc.text(svcLines[0], ml + 3, y + 11);
+                if (svcLines[1]) {
+                    doc.setFontSize(7.5);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(...gray);
+                    doc.text(svcLines[1], ml + 3, y + 16);
+                }
 
-                // Valor (col direita 40%)
-                const vx = ml + cw * 0.62;
+                // Linha separadora vertical
+                const vx = ml + cw * 0.60;
+                doc.setDrawColor(229, 231, 235);
+                doc.line(vx, y + 2, vx, y + boxSvcH - 2);
+
+                // Col direita: Valor
+                const vxPad = vx + 4;
                 doc.setFontSize(6.5);
                 doc.setTextColor(...gray);
                 doc.setFont('helvetica', 'normal');
-                doc.text('VALOR TOTAL', vx, y + 5);
+                doc.text('VALOR TOTAL', vxPad, y + 5);
 
-                if (o.descontoValor > 0) {
-                    // valor bruto riscado
-                    doc.setFontSize(7);
+                if (temDesconto) {
+                    // Linha 1: valor bruto riscado + badge desconto
+                    const brutoStr = Utils.formatCurrency(o.valorBruto || o.valor);
+                    doc.setFontSize(7.5);
                     doc.setTextColor(...gray);
                     doc.setFont('helvetica', 'normal');
-                    const brutoStr = Utils.formatCurrency(o.valorBruto || o.valor);
-                    doc.text(brutoStr, vx, y + 10);
-                    doc.setLineWidth(0.3);
-                    doc.setDrawColor(...gray);
+                    doc.text(brutoStr, vxPad, y + 11);
                     const brutoW = doc.getTextWidth(brutoStr);
-                    doc.line(vx, y + 9.2, vx + brutoW, y + 9.2);
+                    doc.setLineWidth(0.4);
+                    doc.setDrawColor(...gray);
+                    doc.line(vxPad, y + 10.3, vxPad + brutoW, y + 10.3);
 
-                    doc.setFontSize(7);
-                    doc.setTextColor(...green);
-                    const pctStr = o.descontoTipo === 'percentual' ? `${o.descontoValorInput}% off` : `- ${Utils.formatCurrency(o.descontoValor)}`;
-                    doc.text(pctStr, vx + brutoW + 2, y + 10);
+                    // Badge de desconto
+                    const pctStr = o.descontoTipo === 'percentual'
+                        ? `${o.descontoValorInput}% OFF`
+                        : `- ${Utils.formatCurrency(o.descontoValor)}`;
+                    doc.setFontSize(6.5);
+                    doc.setTextColor(...white);
+                    doc.setFont('helvetica', 'bold');
+                    const badgeX = vxPad + brutoW + 3;
+                    const badgeW = doc.getTextWidth(pctStr) + 4;
+                    doc.setFillColor(...green);
+                    doc.roundedRect(badgeX, y + 7.5, badgeW, 4.5, 1, 1, 'F');
+                    doc.text(pctStr, badgeX + 2, y + 10.8);
 
-                    doc.setFontSize(11);
+                    // Linha 2: valor final em destaque
+                    doc.setFontSize(13);
                     doc.setTextColor(...blue2);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(Utils.formatCurrency(o.valor), vx, y + 15.5);
+                    doc.text(Utils.formatCurrency(o.valor), vxPad, y + 19);
+
+                    // Linha 3: PIX abaixo do valor
+                    doc.setFontSize(6);
+                    doc.setTextColor(...gray);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`PIX: ${s.pix || 'a informar'}`, vxPad, y + 24);
                 } else {
-                    doc.setFontSize(12);
+                    // Sem desconto: valor grande + PIX abaixo
+                    doc.setFontSize(13);
                     doc.setTextColor(...blue2);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(Utils.formatCurrency(o.valor), vx, y + 13);
+                    doc.text(Utils.formatCurrency(o.valor), vxPad, y + 14);
+
+                    doc.setFontSize(6);
+                    doc.setTextColor(...gray);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`PIX: ${s.pix || 'a informar'}`, vxPad, y + 19);
                 }
 
-                // PIX
-                doc.setFontSize(6);
-                doc.setTextColor(...gray);
-                doc.setFont('helvetica', 'normal');
-                doc.text(`PIX: ${s.pix || 'a informar'} | ${s.razao || s.nome || ''}`, vx, y + 15.5 + (o.descontoValor > 0 ? 0 : 2));
-
-                y += 20;
+                y += boxSvcH + 4;
 
                 // ── CLÁUSULAS ──
                 doc.setFillColor(...blue2);
