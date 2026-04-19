@@ -1569,43 +1569,79 @@
 
         /* ── ASSINATURA DIGITAL ── */
         .signature-container {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 14px;
             overflow: hidden;
             position: relative;
             background: #f8fafc;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
         }
         .signature-container.has-sig {
+            border-color: var(--primary);
+            border-style: solid;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
+        }
+        .signature-container:active {
             border-color: var(--primary);
             border-style: solid;
         }
         #signature-canvas {
             display: block;
             width: 100%;
-            height: 140px;
+            height: 160px;
             cursor: crosshair;
             touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         .signature-placeholder {
             position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #cbd5e1;
-            text-align: center;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
             pointer-events: none;
-            font-size: 0.85rem;
+            gap: 6px;
         }
-        .signature-placeholder i { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+        .signature-placeholder i { font-size: 1.6rem; }
+        .signature-placeholder span { font-size: 0.8rem; font-weight: 500; }
+        .signature-placeholder small { font-size: 0.7rem; color: #cbd5e1; }
+        .sig-info-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 0 2px;
+        }
+        .sig-info-label {
+            font-size: 0.72rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .sig-status-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        .sig-status-dot.active { background: var(--success); }
         .sig-actions {
-            display: flex; gap: 8px; margin-bottom: 10px;
+            display: flex; gap: 8px; margin-top: 8px;
         }
         .sig-btn {
-            flex: 1; padding: 9px 8px; border: none; border-radius: 10px;
+            flex: 1; padding: 10px 8px; border: none; border-radius: 10px;
             font-size: 0.82rem; font-weight: 700;
             display: flex; align-items: center; justify-content: center; gap: 6px;
-            cursor: pointer;
+            cursor: pointer; transition: opacity 0.15s, transform 0.1s;
         }
+        .sig-btn:active { opacity: 0.8; transform: scale(0.97); }
         .sig-btn-clear { background: #fee2e2; color: var(--danger); }
         .sig-btn-upload { background: #dbeafe; color: var(--primary); }
     </style>
@@ -2654,12 +2690,22 @@
             <!-- ASSINATURA DO DJ -->
             <div class="form-group">
                 <label class="form-label"><i class="fas fa-signature" style="color:var(--primary)"></i> Minha Assinatura Digital</label>
-                <p style="font-size:0.78rem;color:var(--secondary);margin-bottom:8px;">Sua assinatura será incluída automaticamente nos orçamentos e contratos. O cliente assina posteriormente.</p>
+                <p style="font-size:0.78rem;color:var(--secondary);margin-bottom:10px;line-height:1.5;">Assine abaixo com o dedo ou stylus. Será incluída automaticamente em todos os documentos — o cliente assina depois.</p>
+                
+                <div class="sig-info-bar">
+                    <span class="sig-info-label">
+                        <span class="sig-status-dot" id="sig-status-dot"></span>
+                        <span id="sig-status-label">Nenhuma assinatura</span>
+                    </span>
+                    <span style="font-size:0.72rem;color:#94a3b8;">Use o dedo ou mouse</span>
+                </div>
+
                 <div class="signature-container" id="sig-container">
                     <canvas id="signature-canvas"></canvas>
                     <div class="signature-placeholder" id="sig-placeholder">
                         <i class="fas fa-pen-nib"></i>
-                        Desenhe sua assinatura aqui
+                        <span>Assine aqui</span>
+                        <small>Deslize para desenhar</small>
                     </div>
                 </div>
                 <div class="sig-actions">
@@ -2667,7 +2713,7 @@
                         <i class="fas fa-eraser"></i> Limpar
                     </button>
                     <button type="button" class="sig-btn sig-btn-upload" onclick="document.getElementById('sig-upload').click()">
-                        <i class="fas fa-upload"></i> Carregar imagem
+                        <i class="fas fa-image"></i> Importar imagem
                     </button>
                 </div>
                 <input type="file" id="sig-upload" accept="image/*" style="display:none;" onchange="Signature.loadFromFile(this)">
@@ -6403,115 +6449,283 @@
         };
 
         // ============================================================
-        // ============================================================
-        // SIGNATURE PAD — Assinatura Digital do DJ
+        // SIGNATURE PAD — Assinatura Digital Profissional
+        // Técnicas: Bezier suavizado, pressão simulada por velocidade,
+        // interpolação de pontos, RAF rendering, DPR correto
         // ============================================================
         const Signature = {
             canvas: null,
             ctx: null,
             drawing: false,
-            lastX: 0,
-            lastY: 0,
             hasContent: false,
+            points: [],          // buffer de pontos do traço atual
+            lastWidth: 2,        // espessura do traço anterior
+            _raf: null,
+            _pendingDraw: false,
+
+            // ── Config de estilo ──
+            MIN_WIDTH: 1.0,
+            MAX_WIDTH: 3.5,
+            SMOOTHING: 0.15,     // fator de suavização Catmull-Rom
+            INK_COLOR: '#0f172a',
+            VELOCITY_FILTER: 0.7,// peso do filtro de velocidade
+            _velX: 0,
+            _velY: 0,
+            _lastTime: 0,
 
             init(existingData) {
                 const canvas = document.getElementById('signature-canvas');
                 if (!canvas) return;
                 this.canvas = canvas;
-                this.ctx = canvas.getContext('2d');
-
-                // Set canvas real size
-                const dpr = window.devicePixelRatio || 1;
-                const rect = canvas.getBoundingClientRect();
-                const w = canvas.offsetWidth || 300;
-                canvas.width = w * dpr;
-                canvas.height = 140 * dpr;
-                this.ctx.scale(dpr, dpr);
-
-                // Style
-                this.ctx.strokeStyle = '#1e293b';
-                this.ctx.lineWidth = 2;
-                this.ctx.lineCap = 'round';
-                this.ctx.lineJoin = 'round';
-
-                // Clear
-                this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+                this.ctx = canvas.getContext('2d', { willReadFrequently: false });
+                this._resize();
                 this.hasContent = false;
+                this.points = [];
+                this.lastWidth = 2;
 
-                // Load existing
                 if (existingData) {
                     const img = new Image();
                     img.onload = () => {
-                        this.ctx.drawImage(img, 0, 0, w, 140);
+                        const dpr = window.devicePixelRatio || 1;
+                        const w = canvas.width / dpr;
+                        const h = canvas.height / dpr;
+                        this.ctx.drawImage(img, 0, 0, w, h);
                         this.hasContent = true;
                         this._updateUI();
                     };
                     img.src = existingData;
                 }
+
                 this._updateUI();
                 this._bindEvents();
             },
 
+            _resize() {
+                const canvas = this.canvas;
+                const dpr = window.devicePixelRatio || 1;
+                // Preservar conteúdo se existir
+                let saved = null;
+                if (this.hasContent) {
+                    saved = canvas.toDataURL();
+                }
+                const w = canvas.parentElement.clientWidth || 320;
+                const h = 160;
+                canvas.width = Math.round(w * dpr);
+                canvas.height = Math.round(h * dpr);
+                canvas.style.width = w + 'px';
+                canvas.style.height = h + 'px';
+                this.ctx.scale(dpr, dpr);
+                this._applyCtxStyle();
+                // Restaurar conteúdo
+                if (saved) {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.ctx.drawImage(img, 0, 0, w, h);
+                    };
+                    img.src = saved;
+                }
+                // Linha de base decorativa
+                this._drawBaseline();
+            },
+
+            _drawBaseline() {
+                const ctx = this.ctx;
+                const w = this.canvas.width / (window.devicePixelRatio || 1);
+                const h = this.canvas.height / (window.devicePixelRatio || 1);
+                const baseY = h * 0.72;
+                ctx.save();
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 6]);
+                ctx.beginPath();
+                ctx.moveTo(16, baseY);
+                ctx.lineTo(w - 16, baseY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.restore();
+            },
+
+            _applyCtxStyle() {
+                const ctx = this.ctx;
+                ctx.strokeStyle = this.INK_COLOR;
+                ctx.fillStyle = this.INK_COLOR;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.lineWidth = 2;
+            },
+
+            _getPos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const src = e.touches ? e.touches[0] : e;
+                return {
+                    x: (src.clientX - rect.left),
+                    y: (src.clientY - rect.top),
+                    t: Date.now()
+                };
+            },
+
+            // Calcula espessura baseada em velocidade do traço
+            _calcWidth(p1, p2) {
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const dt = Math.max(p2.t - p1.t, 1);
+                const vel = Math.sqrt(dx*dx + dy*dy) / dt;
+                // velocidade alta → traço fino (caneta levantada), baixa → traço grosso (pressionado)
+                const w = this.MAX_WIDTH - (vel * 18);
+                const clamped = Math.max(this.MIN_WIDTH, Math.min(this.MAX_WIDTH, w));
+                // Suavizar transição de espessura
+                return this.lastWidth * 0.6 + clamped * 0.4;
+            },
+
+            // Desenha traço com espessura variável entre dois pontos
+            _drawStroke(p1, p2) {
+                const ctx = this.ctx;
+                const w1 = this.lastWidth;
+                const w2 = this._calcWidth(p1, p2);
+                const steps = Math.max(Math.ceil(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 2), 1);
+                for (let i = 0; i <= steps; i++) {
+                    const t = i / steps;
+                    const x = p1.x + (p2.x - p1.x) * t;
+                    const y = p1.y + (p2.y - p1.y) * t;
+                    const w = w1 + (w2 - w1) * t;
+                    ctx.beginPath();
+                    ctx.arc(x, y, w / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                this.lastWidth = w2;
+            },
+
+            // Suavização Catmull-Rom: desenha curva passando por pontos reais
+            _drawCatmullRom() {
+                const pts = this.points;
+                if (pts.length < 2) return;
+                const ctx = this.ctx;
+
+                for (let i = 0; i < pts.length - 1; i++) {
+                    const p0 = pts[Math.max(i - 1, 0)];
+                    const p1 = pts[i];
+                    const p2 = pts[i + 1];
+                    const p3 = pts[Math.min(i + 2, pts.length - 1)];
+
+                    // Pontos de controle Catmull-Rom → Bezier cúbico
+                    const cp1x = p1.x + (p2.x - p0.x) * this.SMOOTHING;
+                    const cp1y = p1.y + (p2.y - p0.y) * this.SMOOTHING;
+                    const cp2x = p2.x - (p3.x - p1.x) * this.SMOOTHING;
+                    const cp2y = p2.y - (p3.y - p1.y) * this.SMOOTHING;
+
+                    const w = this._calcWidth(p1, p2);
+                    ctx.beginPath();
+                    ctx.lineWidth = w;
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+                    ctx.stroke();
+                    this.lastWidth = w;
+                }
+            },
+
             _bindEvents() {
                 const c = this.canvas;
-                if (c._sigBound) return;
-                c._sigBound = true;
+                if (c._sigBound) {
+                    c._sigBound = false;
+                    ['mousedown','mousemove','mouseup','mouseleave',
+                     'touchstart','touchmove','touchend','touchcancel'].forEach(ev => {
+                        c.replaceWith(c.cloneNode(true));
+                    });
+                    this.canvas = document.getElementById('signature-canvas');
+                    this.ctx = this.canvas.getContext('2d');
+                    this._applyCtxStyle();
+                }
+                const canvas = this.canvas;
 
-                const getPos = (e) => {
-                    const rect = c.getBoundingClientRect();
-                    const src = e.touches ? e.touches[0] : e;
-                    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
-                };
-
-                const start = (e) => {
+                const onStart = (e) => {
                     e.preventDefault();
                     this.drawing = true;
-                    const p = getPos(e);
-                    this.lastX = p.x; this.lastY = p.y;
+                    this.points = [];
+                    this.lastWidth = 2;
+                    const p = this._getPos(e);
+                    this.points.push(p);
+                    // Ponto inicial (dot)
                     this.ctx.beginPath();
-                    this.ctx.moveTo(p.x, p.y);
+                    this.ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
+                    this.ctx.fill();
                 };
-                const move = (e) => {
+
+                const onMove = (e) => {
                     if (!this.drawing) return;
                     e.preventDefault();
-                    const p = getPos(e);
-                    this.ctx.lineTo(p.x, p.y);
-                    this.ctx.stroke();
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(p.x, p.y);
-                    this.lastX = p.x; this.lastY = p.y;
-                    this.hasContent = true;
-                    this._updateUI();
-                };
-                const end = () => { this.drawing = false; };
+                    const p = this._getPos(e);
+                    const last = this.points[this.points.length - 1];
+                    // Filtrar pontos muito próximos (menos ruído)
+                    const dist = Math.hypot(p.x - last.x, p.y - last.y);
+                    if (dist < 1.5) return;
+                    this.points.push(p);
 
-                c.addEventListener('mousedown', start);
-                c.addEventListener('mousemove', move);
-                c.addEventListener('mouseup', end);
-                c.addEventListener('mouseleave', end);
-                c.addEventListener('touchstart', start, { passive: false });
-                c.addEventListener('touchmove', move, { passive: false });
-                c.addEventListener('touchend', end);
+                    if (!this._pendingDraw) {
+                        this._pendingDraw = true;
+                        this._raf = requestAnimationFrame(() => {
+                            this._drawCatmullRom();
+                            // Manter só os últimos 4 pontos para próxima iteração
+                            if (this.points.length > 4) {
+                                this.points = this.points.slice(-4);
+                            }
+                            this._pendingDraw = false;
+                        });
+                    }
+
+                    if (!this.hasContent) {
+                        this.hasContent = true;
+                        this._updateUI();
+                    }
+                };
+
+                const onEnd = (e) => {
+                    if (!this.drawing) return;
+                    this.drawing = false;
+                    // Garantir que o último ponto seja desenhado
+                    this._drawCatmullRom();
+                    this.points = [];
+                };
+
+                canvas.addEventListener('mousedown', onStart);
+                canvas.addEventListener('mousemove', onMove);
+                canvas.addEventListener('mouseup', onEnd);
+                canvas.addEventListener('mouseleave', onEnd);
+                canvas.addEventListener('touchstart', onStart, { passive: false });
+                canvas.addEventListener('touchmove', onMove, { passive: false });
+                canvas.addEventListener('touchend', onEnd, { passive: false });
+                canvas.addEventListener('touchcancel', onEnd, { passive: false });
+                canvas._sigBound = true;
             },
 
             _updateUI() {
                 const placeholder = document.getElementById('sig-placeholder');
                 const container = document.getElementById('sig-container');
-                if (placeholder) placeholder.style.display = this.hasContent ? 'none' : 'block';
-                if (container) container.classList.toggle('has-sig', this.hasContent);
+                const dot = document.getElementById('sig-status-dot');
+                const label = document.getElementById('sig-status-label');
+                if (placeholder) placeholder.style.display = this.hasContent ? 'none' : 'flex';
+                if (container) {
+                    container.classList.toggle('has-sig', this.hasContent);
+                    container.style.background = this.hasContent ? '#fff' : '#f8fafc';
+                }
+                if (dot) dot.classList.toggle('active', this.hasContent);
+                if (label) label.textContent = this.hasContent ? 'Assinatura salva ✓' : 'Nenhuma assinatura';
             },
 
             clear() {
-                if (!this.ctx) return;
+                if (!this.canvas) return;
                 const dpr = window.devicePixelRatio || 1;
                 this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
                 this.hasContent = false;
+                this.points = [];
+                this.lastWidth = 2;
+                this._drawBaseline();
                 this._updateUI();
                 document.getElementById('s-assinatura-data').value = '';
             },
 
             getDataURL() {
                 if (!this.canvas || !this.hasContent) return null;
+                // Exportar sem fundo (transparente) para o PDF
                 return this.canvas.toDataURL('image/png');
             },
 
@@ -6522,11 +6736,11 @@
                     const img = new Image();
                     img.onload = () => {
                         const dpr = window.devicePixelRatio || 1;
-                        const w = this.canvas.offsetWidth;
-                        const h = 140;
+                        const w = this.canvas.width / dpr;
+                        const h = this.canvas.height / dpr;
                         this.ctx.clearRect(0, 0, w, h);
-                        // Fit image maintaining aspect ratio
-                        const scale = Math.min(w / img.width, h / img.height);
+                        // Fit mantendo proporção, centralizado
+                        const scale = Math.min((w - 32) / img.width, (h - 24) / img.height);
                         const dw = img.width * scale;
                         const dh = img.height * scale;
                         const dx = (w - dw) / 2;
