@@ -2777,11 +2777,87 @@
                 setTimeout(() => t.classList.remove('show'), 3000);
             },
             readImage: (file) => {
+                // Lê a imagem e normaliza orientação EXIF via canvas
+                // Isso corrige fotos tiradas de celular que ficam viradas no PDF
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onload = (e) => {
+                        const raw = e.target.result;
+                        const img = new Image();
+                        img.onload = () => {
+                            // Ler EXIF orientation
+                            Utils._getExifOrientation(raw).then(orientation => {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                const w = img.naturalWidth;
+                                const h = img.naturalHeight;
+                                // Para orientações que trocam eixos (5,6,7,8) inverter largura/altura
+                                const swap = orientation >= 5 && orientation <= 8;
+                                canvas.width  = swap ? h : w;
+                                canvas.height = swap ? w : h;
+                                ctx.save();
+                                // Aplicar transformação EXIF
+                                switch(orientation) {
+                                    case 2: ctx.transform(-1,0,0,1,w,0); break;
+                                    case 3: ctx.transform(-1,0,0,-1,w,h); break;
+                                    case 4: ctx.transform(1,0,0,-1,0,h); break;
+                                    case 5: ctx.transform(0,1,1,0,0,0); break;
+                                    case 6: ctx.transform(0,1,-1,0,h,0); break;
+                                    case 7: ctx.transform(0,-1,-1,0,h,w); break;
+                                    case 8: ctx.transform(0,-1,1,0,0,w); break;
+                                    default: break; // orientação 1 = normal
+                                }
+                                ctx.drawImage(img, 0, 0);
+                                ctx.restore();
+                                resolve(canvas.toDataURL('image/jpeg', 0.92));
+                            });
+                        };
+                        img.onerror = reject;
+                        img.src = raw;
+                    };
                     reader.onerror = reject;
                     reader.readAsDataURL(file);
+                });
+            },
+
+            // Lê orientação EXIF de uma imagem base64/blob
+            _getExifOrientation: (src) => {
+                return new Promise(resolve => {
+                    try {
+                        // Converter base64 em ArrayBuffer para ler bytes EXIF
+                        const b64 = src.split(',')[1];
+                        if (!b64) return resolve(1);
+                        const bin = atob(b64);
+                        const buf = new ArrayBuffer(bin.length);
+                        const view = new DataView(buf);
+                        for (let i = 0; i < bin.length; i++) view.setUint8(i, bin.charCodeAt(i));
+                        // Verificar se é JPEG
+                        if (view.getUint16(0, false) !== 0xFFD8) return resolve(1);
+                        let offset = 2;
+                        while (offset < view.byteLength) {
+                            const marker = view.getUint16(offset, false);
+                            offset += 2;
+                            if (marker === 0xFFE1) {
+                                // APP1 / EXIF
+                                if (view.getUint32(offset + 2, false) !== 0x45786966) { resolve(1); return; }
+                                const little = view.getUint16(offset + 8, false) === 0x4949;
+                                const ifdOffset = view.getUint32(offset + 12, little) + offset + 8;
+                                const tags = view.getUint16(ifdOffset, little);
+                                for (let t = 0; t < tags; t++) {
+                                    if (view.getUint16(ifdOffset + 2 + t * 12, little) === 0x0112) {
+                                        resolve(view.getUint16(ifdOffset + 2 + t * 12 + 8, little));
+                                        return;
+                                    }
+                                }
+                                resolve(1); return;
+                            } else if ((marker & 0xFF00) !== 0xFF00) {
+                                break;
+                            } else {
+                                offset += view.getUint16(offset, false);
+                            }
+                        }
+                        resolve(1);
+                    } catch(e) { resolve(1); }
                 });
             },
             calcularMediaMensal: (orcamentos) => {
@@ -5460,18 +5536,30 @@
                                 dLines.slice(0, maxLines).forEach(l => { doc.text(l, margin.left, y); y += 3.5; });
                                 y += 1;
                             }
-                            // Fotos do pacote no PDF
+                            // Fotos do pacote no PDF — grade com até 4 por linha, sem limite de quantidade
                             if (pacote.fotos && pacote.fotos.length > 0) {
-                                const fotoSize = 22;
-                                const fotoGap = 4;
-                                const fotosParaMostrar = pacote.fotos.slice(0, 4);
-                                fotosParaMostrar.forEach((src, idx) => {
+                                const fotosAll = pacote.fotos;
+                                const fotoCols = 4;
+                                const fotoGap = 3;
+                                const fotoSize = (contentWidth - fotoGap * (fotoCols - 1)) / fotoCols;
+                                let fotoX = 0, fotoY = y;
+                                fotosAll.forEach((src, idx) => {
+                                    const col = idx % fotoCols;
+                                    const row = Math.floor(idx / fotoCols);
+                                    const fx = margin.left + col * (fotoSize + fotoGap);
+                                    const fy = y + row * (fotoSize + fotoGap);
                                     try {
-                                        const fx = margin.left + idx * (fotoSize + fotoGap);
-                                        doc.addImage(src, 'JPEG', fx, y, fotoSize, fotoSize);
+                                        // Detectar formato real da imagem
+                                        const fmt = src.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+                                        doc.addImage(src, fmt, fx, fy, fotoSize, fotoSize);
+                                        // Borda sutil ao redor da foto
+                                        doc.setDrawColor(229, 231, 235);
+                                        doc.setLineWidth(0.2);
+                                        doc.rect(fx, fy, fotoSize, fotoSize);
                                     } catch(e) {}
                                 });
-                                y += fotoSize + 3;
+                                const totalRows = Math.ceil(fotosAll.length / fotoCols);
+                                y += totalRows * (fotoSize + fotoGap) + 2;
                             }
                         }
                     }
@@ -5617,10 +5705,22 @@
                     doc.setFont("helvetica", "normal");
                     doc.text("Contratante", margin.left + 145, sigY + 4.5, { align: "center" });
 
-                    // Assinatura do DJ (imagem se existir, senão linha)
+                    // Assinatura do DJ — preserva proporção original
                     if (s.assinatura) {
                         try {
-                            doc.addImage(s.assinatura, 'PNG', margin.left + 8, sigY - 12, 64, 12);
+                            const sigImg = new Image();
+                            sigImg.src = s.assinatura;
+                            // Calcular dimensões preservando aspect ratio
+                            const sigMaxW = 64;
+                            const sigMaxH = 18;
+                            const natW = sigImg.naturalWidth || sigImg.width || 400;
+                            const natH = sigImg.naturalHeight || sigImg.height || 150;
+                            const ratio = natW / natH;
+                            let sigW2 = sigMaxW;
+                            let sigH2 = sigMaxW / ratio;
+                            if (sigH2 > sigMaxH) { sigH2 = sigMaxH; sigW2 = sigMaxH * ratio; }
+                            const sigX = margin.left + 8 + (sigMaxW - sigW2) / 2;
+                            doc.addImage(s.assinatura, 'PNG', sigX, sigY - sigH2 - 1, sigW2, sigH2);
                         } catch(e) {
                             doc.line(margin.left + 8, sigY, margin.left + 72, sigY);
                         }
@@ -6247,10 +6347,18 @@
                 doc.setDrawColor(...dark); doc.setLineWidth(0.3);
                 // Linha do pagante (cliente assina depois)
                 doc.line(W-mr-sigWR, sigY+14, W-mr-4, sigY+14);
-                // Assinatura do recebedor (DJ)
+                // Assinatura do recebedor (DJ) com proporção real
                 if (s.assinatura) {
                     try {
-                        doc.addImage(s.assinatura, 'PNG', ml+4, sigY+4, sigWR-4, 10);
+                        const _ri = new Image(); _ri.src = s.assinatura;
+                        const _rmW = sigWR - 8, _rmH = 12;
+                        const _rnw = _ri.naturalWidth || _ri.width || 400;
+                        const _rnh = _ri.naturalHeight || _ri.height || 150;
+                        const _rr = _rnw / _rnh;
+                        let _rsw = _rmW, _rsh = _rmW / _rr;
+                        if (_rsh > _rmH) { _rsh = _rmH; _rsw = _rmH * _rr; }
+                        const _rsx = ml + 4 + (_rmW - _rsw) / 2;
+                        doc.addImage(s.assinatura, 'PNG', _rsx, sigY + 2, _rsw, _rsh);
                     } catch(e) {
                         doc.line(ml+4, sigY+14, ml+sigWR, sigY+14);
                     }
@@ -7173,10 +7281,20 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                 // Linha do cliente em branco (para assinar depois)
                 doc.line(sig2x, y, sig2x + sigW - 20, y);
 
-                // Assinatura do DJ: imagem se houver, senão linha
+                // Assinatura do DJ: imagem com proporção real preservada
                 if (s.assinatura) {
                     try {
-                        doc.addImage(s.assinatura, 'PNG', sig1x, y - 10, sigW - 20, 10);
+                        const _si = new Image();
+                        _si.src = s.assinatura;
+                        const _maxW = sigW - 20;
+                        const _maxH = 18;
+                        const _nw = _si.naturalWidth || _si.width || 400;
+                        const _nh = _si.naturalHeight || _si.height || 150;
+                        const _r = _nw / _nh;
+                        let _sw = _maxW, _sh = _maxW / _r;
+                        if (_sh > _maxH) { _sh = _maxH; _sw = _maxH * _r; }
+                        const _sx = sig1x + (_maxW - _sw) / 2;
+                        doc.addImage(s.assinatura, 'PNG', _sx, y - _sh - 1, _sw, _sh);
                     } catch(e) {
                         doc.line(sig1x, y, sig1x + sigW - 20, y);
                     }
