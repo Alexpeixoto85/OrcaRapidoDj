@@ -1188,6 +1188,120 @@
             color: #0369a1;
             margin-left: 8px;
         }
+
+        /* ── AGENDA VIEW ── */
+        .agenda-month-header {
+            font-size: 1rem; font-weight: 800; color: var(--dark);
+            margin: 20px 0 10px; display: flex; align-items: center;
+            justify-content: space-between;
+        }
+        .agenda-month-nav { display: flex; gap: 8px; }
+        .agenda-month-btn {
+            background: var(--light); border: none; border-radius: 8px;
+            width: 32px; height: 32px; display: flex; align-items: center;
+            justify-content: center; color: var(--secondary); cursor: pointer;
+            font-size: 0.9rem; transition: background 0.2s;
+        }
+        .agenda-month-btn:active { background: var(--border); }
+
+        .agenda-calendar {
+            background: var(--surface); border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 20px;
+        }
+        .agenda-calendar-header {
+            display: grid; grid-template-columns: repeat(7,1fr);
+            background: var(--primary);
+        }
+        .agenda-cal-dow {
+            text-align: center; padding: 8px 2px; font-size: 0.7rem;
+            font-weight: 700; color: rgba(255,255,255,0.8); text-transform: uppercase;
+        }
+        .agenda-calendar-body { display: grid; grid-template-columns: repeat(7,1fr); }
+        .agenda-cal-day {
+            min-height: 42px; padding: 4px 3px 3px;
+            border-right: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;
+            position: relative; cursor: pointer; transition: background 0.15s;
+        }
+        .agenda-cal-day:hover { background: #f8fafc; }
+        .agenda-cal-day.empty { background: #fafafa; cursor: default; }
+        .agenda-cal-day.today .day-num {
+            background: var(--primary); color: white; border-radius: 50%;
+            width: 22px; height: 22px; display: flex; align-items: center;
+            justify-content: center; font-weight: 700;
+        }
+        .agenda-cal-day.has-event { background: #eff6ff; }
+        .agenda-cal-day.has-event-closed { background: #dcfce7; }
+        .day-num { font-size: 0.75rem; font-weight: 600; color: var(--dark); margin-bottom: 2px; }
+        .day-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            display: inline-block; margin: 1px;
+        }
+        .day-dot.closed { background: #10b981; }
+        .day-dot.pending { background: #f59e0b; }
+
+        .agenda-events-list { margin-bottom: 24px; }
+        .agenda-event-card {
+            background: var(--surface); border-radius: var(--radius-md);
+            padding: 14px 16px; margin-bottom: 10px;
+            box-shadow: var(--shadow-sm); display: flex; gap: 12px;
+            align-items: flex-start; cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .agenda-event-card:active { transform: scale(0.98); }
+        .agenda-event-date-badge {
+            min-width: 44px; height: 50px; background: var(--primary);
+            border-radius: 10px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: white;
+            flex-shrink: 0;
+        }
+        .agenda-event-date-badge .day { font-size: 1.2rem; font-weight: 800; line-height: 1; }
+        .agenda-event-date-badge .mon { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; }
+        .agenda-event-info { flex: 1; }
+        .agenda-event-title { font-size: 0.95rem; font-weight: 700; color: var(--dark); }
+        .agenda-event-sub { font-size: 0.8rem; color: var(--secondary); margin-top: 2px; }
+        .agenda-event-valor { font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-top: 4px; }
+
+        /* ── RECEBIMENTOS ── */
+        .pagamento-status-bar {
+            background: var(--surface); border-radius: var(--radius-md);
+            padding: 14px 16px; margin-bottom: 14px; box-shadow: var(--shadow-sm);
+        }
+        .pagamento-progress-label {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .pagamento-progress-label span { font-size: 0.82rem; color: var(--secondary); }
+        .pagamento-progress-label strong { font-size: 1rem; font-weight: 800; color: var(--success); }
+        .pagamento-bar {
+            height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden;
+        }
+        .pagamento-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 99px; transition: width 0.4s;
+        }
+        .pagamento-parcelas { margin-top: 10px; }
+        .pagamento-parcela-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;
+        }
+        .pagamento-parcela-item:last-child { border-bottom: none; }
+        .parcela-icon { font-size: 0.9rem; }
+        .parcela-icon.pago { color: var(--success); }
+        .parcela-icon.pendente { color: var(--warning); }
+        .parcela-valor { font-weight: 700; color: var(--dark); }
+        .parcela-data { color: var(--secondary); margin-left: auto; font-size: 0.78rem; }
+        .parcela-tipo { color: var(--secondary); font-size: 0.78rem; }
+
+        /* Alerta data ocupada no form */
+        .date-busy-alert {
+            background: #fef2f2; border: 1.5px solid #fca5a5;
+            border-radius: 10px; padding: 12px 14px; margin: 8px 0;
+            display: none; align-items: flex-start; gap: 10px;
+        }
+        .date-busy-alert.show { display: flex; }
+        .date-busy-alert i { color: var(--danger); margin-top: 2px; flex-shrink: 0; }
+        .date-busy-alert-title { font-weight: 700; color: #b91c1c; font-size: 0.9rem; margin-bottom: 3px; }
+        .date-busy-alert-body { font-size: 0.82rem; color: #7f1d1d; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -1370,6 +1484,23 @@
             </div>
             <div id="pacotes-list"></div>
         </div>
+
+        <div id="agenda-view" class="view">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                <div class="section-title" style="margin:0;">Agenda de Eventos</div>
+            </div>
+            <div class="agenda-month-header">
+                <span id="agenda-month-label">—</span>
+                <div class="agenda-month-nav">
+                    <button class="agenda-month-btn" onclick="AgendaView.prevMonth()"><i class="fas fa-chevron-left"></i></button>
+                    <button class="agenda-month-btn" onclick="AgendaView.goToday()"><i class="fas fa-circle" style="font-size:0.5rem;"></i></button>
+                    <button class="agenda-month-btn" onclick="AgendaView.nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="agenda-calendar" id="agenda-calendar-grid"></div>
+            <div class="section-title" style="margin-top:8px;">Eventos do Mês</div>
+            <div class="agenda-events-list" id="agenda-events-list"></div>
+        </div>
     </main>
 
     <button class="fab" onclick="UI.openNewOrcamento()" id="main-fab">
@@ -1386,11 +1517,11 @@
         <a href="#" class="nav-item" data-target="orcamentos-view" onclick="UI.switchTab(this)">
             <i class="fas fa-file-invoice"></i> <span>Orç.</span>
         </a>
+        <a href="#" class="nav-item" data-target="agenda-view" onclick="UI.switchTab(this)">
+            <i class="fas fa-calendar-alt"></i> <span>Agenda</span>
+        </a>
         <a href="#" class="nav-item" data-target="financeiro-view" onclick="UI.switchTab(this)">
             <i class="fas fa-chart-pie"></i> <span>Finanças</span>
-        </a>
-        <a href="#" class="nav-item" data-target="pacotes-view" onclick="UI.switchTab(this)">
-            <i class="fas fa-box-open"></i> <span>Pacotes</span>
         </a>
     </nav>
 
@@ -1470,6 +1601,14 @@
 
             <div id="duplicate-date-warning" style="display: none;">
                 <!-- Alerta de data duplicada será inserido aqui -->
+            </div>
+
+            <div id="date-busy-alert" class="date-busy-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <div class="date-busy-alert-title">⚠️ Data já tem evento fechado!</div>
+                    <div class="date-busy-alert-body" id="date-busy-alert-body"></div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -1968,6 +2107,61 @@
         </div>
     </div>
 
+
+    <!-- MODAL: REGISTRAR RECEBIMENTO -->
+    <div class="modal-overlay" id="overlay-recebimento"></div>
+    <div class="modal-sheet" id="sheet-recebimento">
+        <div class="sheet-handle"></div>
+        <h3 class="section-title" id="title-recebimento" style="margin-bottom:4px;"><i class="fas fa-hand-holding-usd" style="color:var(--success);"></i> Registrar Recebimento</h3>
+        <p id="recebimento-subtitle" style="font-size:0.82rem;color:var(--secondary);margin-bottom:16px;"></p>
+
+        <div id="recebimento-status-box" class="pagamento-status-bar" style="display:none;"></div>
+
+        <form id="form-recebimento" onsubmit="App.recebimento.save(event)">
+            <input type="hidden" id="rec-orcamento-id">
+
+            <div class="form-group">
+                <label class="form-label">Tipo de Pagamento</label>
+                <select id="rec-tipo" class="form-control" onchange="App.recebimento.onTipoChange()">
+                    <option value="sinal">Sinal / Entrada (50%)</option>
+                    <option value="parcial">Valor Parcial</option>
+                    <option value="total">Pagamento Total</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Valor Recebido (R$)</label>
+                <input type="text" inputmode="numeric" id="rec-valor" class="form-control" placeholder="0,00" required oninput="Utils.maskMoney(this)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Forma de Pagamento</label>
+                <select id="rec-forma" class="form-control">
+                    <option value="pix">PIX</option>
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="cartao_credito">Cartão de Crédito</option>
+                    <option value="cartao_debito">Cartão de Débito</option>
+                    <option value="transferencia">Transferência Bancária</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Data do Recebimento</label>
+                <input type="date" id="rec-data" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Observação (opcional)</label>
+                <input type="text" id="rec-obs" class="form-control" placeholder="Ex: Sinal confirmado via PIX">
+            </div>
+
+            <button type="submit" class="btn-block" style="background:linear-gradient(135deg,#10b981,#059669);">
+                <i class="fas fa-check-circle"></i> Confirmar Recebimento e Gerar Recibo
+            </button>
+            <button type="button" class="btn-block" style="background:var(--light);color:var(--secondary);margin-top:8px;" onclick="UI.closeModals()">Cancelar</button>
+        </form>
+    </div>
+
     <!-- MODAL: PROMPT DE CONTRATO -->
     <div class="modal-overlay" id="overlay-contract-prompt">
         <div class="contract-prompt-modal">
@@ -2343,7 +2537,7 @@
 
         // --- UI MANAGER ---
         const UI = {
-            data: { clientes: [], orcamentos: [], pacotes: [], equipamentos: [] },
+            data: { clientes: [], orcamentos: [], pacotes: [], equipamentos: [], recebimentos: [] },
             chartInstance: null,
             showingRejected: false,
             currentFilter: 'all',
@@ -2354,6 +2548,7 @@
                 UI.data.orcamentos = Storage.get('orcamentos');
                 UI.data.pacotes = Storage.get('pacotes');
                 UI.data.equipamentos = Storage.get('equipamentos');
+                UI.data.recebimentos = Storage.get('recebimentos');
                 
                 // Inicializar com arrays vazios para pacotes e equipamentos
                 if (UI.data.pacotes.length === 0) {
@@ -2393,6 +2588,8 @@
                 } else if (target === 'pacotes-view') {
                     fab.style.display = 'flex';
                     fab.onclick = UI.openNewPacote;
+                } else if (target === 'agenda-view') {
+                    fab.style.display = 'none';
                 } else {
                     fab.style.display = 'none';
                 }
@@ -2401,6 +2598,7 @@
                 if(target === 'orcamentos-view') UI.renderOrcamentos();
                 if(target === 'financeiro-view') UI.renderFinanceiro();
                 if(target === 'pacotes-view') UI.renderPacotes();
+                if(target === 'agenda-view') AgendaView.render();
             },
 
             navigate: (tabName) => {
@@ -3205,6 +3403,9 @@
                             <button class="btn-details" style="background:#dbeafe;color:#1d4ed8;border:none;padding:10px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="UI.closeModals(); setTimeout(()=>{ContractModal._orcamentoId='${o.id}'; ContractModal.openEditor();}, 200)">
                                 <i class="fas fa-file-contract"></i> Contrato PDF
                             </button>
+                            <button class="btn-details" style="background:#d1fae5;color:#065f46;border:none;padding:10px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="UI.closeModals(); setTimeout(()=>App.recebimento.open('${o.id}'), 200)">
+                                <i class="fas fa-hand-holding-usd"></i> Recebimento
+                            </button>
                             ` : ''}
                         </div>
                     </div>
@@ -3724,26 +3925,43 @@
                     if (!dataEvento) return;
                     
                     const orcamentoId = document.getElementById('o-id').value;
-                    const existingOrcamentos = UI.data.orcamentos.filter(o => 
-                        o.dataEvento === dataEvento && 
-                        o.id !== orcamentoId && 
-                        (o.status === 'aceito' || o.status === 'pendente')
+
+                    // Orçamentos fechados (aceitos) na mesma data — alerta vermelho forte
+                    const fechados = UI.data.orcamentos.filter(o =>
+                        o.dataEvento === dataEvento && o.id !== orcamentoId && o.status === 'aceito'
                     );
-                    
+                    // Orçamentos pendentes na mesma data — aviso amarelo
+                    const pendentes = UI.data.orcamentos.filter(o =>
+                        o.dataEvento === dataEvento && o.id !== orcamentoId && o.status === 'pendente'
+                    );
+
+                    // Alerta vermelho (fechado)
+                    const busyAlert = document.getElementById('date-busy-alert');
+                    const busyBody  = document.getElementById('date-busy-alert-body');
+                    if (fechados.length > 0) {
+                        let lines = fechados.map(o => {
+                            const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                            return `• Orç. #${o.numero} — ${c.nome} (${o.evento})`;
+                        }).join('<br>');
+                        busyBody.innerHTML = 'Já existe evento <strong>FECHADO</strong> nesta data:<br>' + lines;
+                        busyAlert.classList.add('show');
+                    } else {
+                        busyAlert.classList.remove('show');
+                    }
+
+                    // Aviso amarelo (pendente)
                     const warningDiv = document.getElementById('duplicate-date-warning');
-                    
-                    if (existingOrcamentos.length > 0) {
+                    const allConflicts = [...fechados, ...pendentes];
+                    if (allConflicts.length > 0) {
                         let warningHtml = `<div class="duplicate-date-warning">
                             <i class="fas fa-exclamation-triangle"></i>
                             <div>
                                 <div class="warning-title">Atenção: Data já ocupada!</div>
                                 <div class="warning-details">`;
-                        
-                        existingOrcamentos.forEach(o => {
+                        allConflicts.forEach(o => {
                             const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
-                            warningHtml += `• Orçamento #${o.numero} para ${c.nome} (${o.evento})<br>`;
+                            warningHtml += `• Orçamento #${o.numero} para ${c.nome} (${o.evento}) — <strong>${o.status === 'aceito' ? 'FECHADO' : 'Pendente'}</strong><br>`;
                         });
-                        
                         warningHtml += `</div></div></div>`;
                         warningDiv.innerHTML = warningHtml;
                         warningDiv.style.display = 'block';
@@ -5001,6 +5219,447 @@
 
         // Substituir o método whatsapp.confirmOpen para usar o novo modal
         // (será sobrescrito após o App ser definido, via patch abaixo)
+
+
+        // ============================================================
+        // RECEBIMENTOS — Registrar pagamentos parciais/integrais
+        // ============================================================
+        App.recebimento = {
+            open(orcamentoId) {
+                const o = UI.data.orcamentos.find(x => x.id === orcamentoId);
+                const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                if (!o || !c) return;
+
+                document.getElementById('rec-orcamento-id').value = orcamentoId;
+                document.getElementById('rec-data').value = Utils.getToday();
+                document.getElementById('rec-tipo').value = 'sinal';
+                document.getElementById('rec-obs').value = '';
+
+                // Calcular já pago
+                const recebimentos = UI.data.recebimentos.filter(r => r.orcamentoId === orcamentoId);
+                const totalPago = recebimentos.reduce((a, r) => a + r.valor, 0);
+                const totalDev  = o.valor - totalPago;
+
+                // Preencher valor sugerido
+                const valorInput = document.getElementById('rec-valor');
+                const sinal = Math.round(o.valor * 0.5 * 100);
+                valorInput.value = sinal.toString();
+                Utils.maskMoney(valorInput);
+
+                // Subtítulo
+                document.getElementById('title-recebimento').innerHTML =
+                    `<i class="fas fa-hand-holding-usd" style="color:var(--success);"></i> Recebimento — ${c.nome}`;
+                document.getElementById('recebimento-subtitle').textContent =
+                    `Orç. #${o.numero} • ${o.evento} • ${Utils.formatDate(o.dataEvento)}`;
+
+                // Status bar
+                const statusBox = document.getElementById('recebimento-status-box');
+                if (recebimentos.length > 0) {
+                    const pct = Math.min(100, Math.round((totalPago / o.valor) * 100));
+                    const parcelasHtml = recebimentos.map(r =>
+                        `<div class="pagamento-parcela-item">
+                            <i class="fas fa-check-circle parcela-icon pago"></i>
+                            <span class="parcela-tipo">${this._formaLabel(r.forma)}</span>
+                            <span class="parcela-valor">${Utils.formatCurrency(r.valor)}</span>
+                            <span class="parcela-data">${Utils.formatDate(r.data)}</span>
+                        </div>`
+                    ).join('');
+                    statusBox.innerHTML = `
+                        <div class="pagamento-progress-label">
+                            <span>Já recebido</span>
+                            <strong>${Utils.formatCurrency(totalPago)} de ${Utils.formatCurrency(o.valor)}</strong>
+                        </div>
+                        <div class="pagamento-bar"><div class="pagamento-bar-fill" style="width:${pct}%"></div></div>
+                        <div class="pagamento-parcelas">${parcelasHtml}</div>
+                    `;
+                    statusBox.style.display = 'block';
+
+                    // Ajustar valor sugerido para o restante
+                    const restante = Math.max(0, Math.round(totalDev * 100));
+                    valorInput.value = restante.toString();
+                    Utils.maskMoney(valorInput);
+                    document.getElementById('rec-tipo').value = totalDev <= 0 ? 'total' : 'parcial';
+                } else {
+                    statusBox.style.display = 'none';
+                }
+
+                UI.openModal('recebimento');
+            },
+
+            onTipoChange() {
+                const tipo = document.getElementById('rec-tipo').value;
+                const orcId = document.getElementById('rec-orcamento-id').value;
+                const o = UI.data.orcamentos.find(x => x.id === orcId);
+                if (!o) return;
+                const recebimentos = UI.data.recebimentos.filter(r => r.orcamentoId === orcId);
+                const totalPago = recebimentos.reduce((a, r) => a + r.valor, 0);
+                const valorInput = document.getElementById('rec-valor');
+                if (tipo === 'sinal') {
+                    valorInput.value = Math.round(o.valor * 0.5 * 100).toString();
+                } else if (tipo === 'total') {
+                    valorInput.value = Math.round(Math.max(0, (o.valor - totalPago)) * 100).toString();
+                }
+                Utils.maskMoney(valorInput);
+            },
+
+            _formaLabel(forma) {
+                const m = { pix:'PIX', dinheiro:'Dinheiro', cartao_credito:'Cartão Créd.',
+                             cartao_debito:'Cartão Déb.', transferencia:'Transferência' };
+                return m[forma] || forma;
+            },
+
+            save(e) {
+                e.preventDefault();
+                const orcId  = document.getElementById('rec-orcamento-id').value;
+                const valor  = Utils.parseCurrency(document.getElementById('rec-valor').value);
+                const forma  = document.getElementById('rec-forma').value;
+                const data   = document.getElementById('rec-data').value;
+                const obs    = document.getElementById('rec-obs').value;
+                const tipo   = document.getElementById('rec-tipo').value;
+
+                if (!valor || valor <= 0) { Utils.toast('Informe um valor válido', 'error'); return; }
+
+                const o = UI.data.orcamentos.find(x => x.id === orcId);
+                const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                const s = Storage.getSettings();
+
+                const rec = {
+                    id: Utils.id(),
+                    orcamentoId: orcId,
+                    valor, forma, data, obs, tipo,
+                    criadoEm: new Date().toISOString()
+                };
+
+                UI.data.recebimentos.push(rec);
+                Storage.set('recebimentos', UI.data.recebimentos);
+
+                // Verificar se está totalmente pago
+                const totalPago = UI.data.recebimentos
+                    .filter(r => r.orcamentoId === orcId)
+                    .reduce((a, r) => a + r.valor, 0);
+                const quitado = totalPago >= o.valor;
+
+                UI.closeModals();
+                Utils.toast(quitado ? 'Pagamento quitado! Recibo gerado ✅' : 'Recebimento registrado! Recibo gerado 📄');
+
+                // Gerar recibo PDF
+                setTimeout(() => this._gerarRecibo(rec, o, c, s, totalPago, quitado), 300);
+
+                // Agendar evento automaticamente se ainda não está agendado
+                const jaAgendado = o.eventoAgendado;
+                if (!jaAgendado) {
+                    const idx = UI.data.orcamentos.findIndex(x => x.id === orcId);
+                    if (idx >= 0) {
+                        UI.data.orcamentos[idx].eventoAgendado = true;
+                        UI.data.orcamentos[idx].dataAgendamento = Utils.getToday();
+                        Storage.set('orcamentos', UI.data.orcamentos);
+                    }
+                    Utils.toast('Evento agendado automaticamente! 📅', 'success');
+                }
+
+                UI.renderDashboard();
+                UI.renderFinanceiro();
+            },
+
+            _gerarRecibo(rec, o, c, s, totalPago, quitado) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                const W = doc.internal.pageSize.getWidth();
+                const H = doc.internal.pageSize.getHeight();
+                const ml = 18, mr = 18, cw = W - ml - mr;
+                let y = 0;
+
+                const blue  = [29, 78, 216];
+                const blue2 = [59, 130, 246];
+                const green = [5, 150, 105];
+                const gray  = [71, 85, 105];
+                const lgray = [241, 245, 249];
+                const dark  = [15, 23, 42];
+                const white = [255, 255, 255];
+
+                // ── CABEÇALHO ──
+                doc.setFillColor(...blue);
+                doc.rect(0, 0, W, 26, 'F');
+                if (s.logo) { try { doc.addImage(s.logo,'PNG', ml, 5, 13, 13); } catch(e){} }
+                const lx = s.logo ? ml + 17 : ml;
+                doc.setTextColor(...white);
+                doc.setFontSize(14); doc.setFont('helvetica','bold');
+                doc.text((s.nome||'DJ').toUpperCase(), lx, 12);
+                doc.setFontSize(7); doc.setFont('helvetica','normal');
+                doc.setTextColor(147, 197, 253);
+                doc.text('RECIBO DE PAGAMENTO', lx, 18);
+                doc.setTextColor(...white); doc.setFontSize(7);
+                const hoje = new Date().toLocaleDateString('pt-BR');
+                doc.text(`Recibo Nº ${o.numero}-${Utils.id().substring(0,4).toUpperCase()}`, W-mr, 11, {align:'right'});
+                doc.text(`Emitido: ${hoje}`, W-mr, 16, {align:'right'});
+                y = 32;
+
+                // ── TÍTULO RECIBO ──
+                doc.setFillColor(...blue2);
+                doc.rect(ml, y, cw, 8, 'F');
+                doc.setTextColor(...white); doc.setFontSize(10); doc.setFont('helvetica','bold');
+                doc.text('RECIBO DE PAGAMENTO', ml + cw/2, y + 5.5, {align:'center'});
+                y += 12;
+
+                // ── QUEM RECEBEU / QUEM PAGOU ──
+                const hw = (cw - 4) / 2;
+                doc.setFillColor(...lgray);
+                doc.roundedRect(ml, y, hw, 22, 2, 2, 'F');
+                doc.setTextColor(...blue2); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+                doc.text('RECEBIDO POR', ml+3, y+5);
+                doc.setTextColor(...dark); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
+                doc.text(s.razao||s.nome||'', ml+3, y+11);
+                doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...gray);
+                if(s.cnpj) doc.text(`CNPJ: ${s.cnpj}`, ml+3, y+16);
+                if(s.telefone) doc.text(s.telefone, ml+3, y+20.5);
+
+                doc.setFillColor(...lgray);
+                doc.roundedRect(ml+hw+4, y, hw, 22, 2, 2, 'F');
+                doc.setTextColor(...blue2); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+                doc.text('PAGO POR', ml+hw+7, y+5);
+                doc.setTextColor(...dark); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
+                doc.text(c.nome, ml+hw+7, y+11);
+                doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...gray);
+                doc.text(Utils.formatPhone(c.telefone)||c.telefone, ml+hw+7, y+16);
+                if(c.email) doc.text(c.email, ml+hw+7, y+20.5);
+                y += 26;
+
+                // ── DETALHES DO EVENTO ──
+                doc.setFillColor(...blue2);
+                doc.rect(ml, y, cw, 6, 'F');
+                doc.setTextColor(...white); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+                doc.text('REFERENTE AO EVENTO', ml+3, y+4.2);
+                y += 6;
+                doc.setFillColor(...white); doc.setDrawColor(229,231,235); doc.setLineWidth(0.3);
+                doc.rect(ml, y, cw, 14, 'FD');
+                const evF = [['EVENTO',o.evento||'-'],['DATA',Utils.formatDate(o.dataEvento)],['HORÁRIO',o.horario||'-'],['LOCAL',o.local||'-']];
+                const cW4 = cw/4;
+                evF.forEach(([lbl,val],i)=>{
+                    const ex=ml+i*cW4+3;
+                    doc.setFontSize(6.5); doc.setTextColor(...gray); doc.setFont('helvetica','normal');
+                    doc.text(lbl, ex, y+5);
+                    doc.setFontSize(7.5); doc.setTextColor(...dark); doc.setFont('helvetica','bold');
+                    const v=doc.splitTextToSize(val,cW4-6); doc.text(v[0], ex, y+10.5);
+                });
+                y += 18;
+
+                // ── VALORES ──
+                doc.setFillColor(...blue2);
+                doc.rect(ml, y, cw, 6, 'F');
+                doc.setTextColor(...white); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+                doc.text('VALORES', ml+3, y+4.2);
+                y += 6;
+
+                // Tabela
+                const rows = [
+                    ['Valor Total do Contrato', Utils.formatCurrency(o.valor), dark, false],
+                    ['Valor Pago Anteriormente', Utils.formatCurrency(totalPago - rec.valor), gray, false],
+                    ['VALOR RECEBIDO AGORA', Utils.formatCurrency(rec.valor), blue2, true],
+                    ['Saldo Restante', Utils.formatCurrency(Math.max(0, o.valor - totalPago)), quitado ? green : [239,68,68], false],
+                ];
+                rows.forEach(([label, val, color, bold], i) => {
+                    const rowH = bold ? 10 : 8;
+                    if (bold) {
+                        doc.setFillColor(239,246,255);
+                    } else {
+                        doc.setFillColor(i%2===0 ? 255:248,i%2===0 ? 255:250,i%2===0 ? 255:252);
+                    }
+                    doc.rect(ml, y, cw, rowH, 'F');
+                    doc.setDrawColor(229,231,235); doc.setLineWidth(0.2);
+                    doc.line(ml, y+rowH, ml+cw, y+rowH);
+                    doc.setFontSize(bold ? 9 : 8);
+                    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+                    doc.setTextColor(...dark);
+                    doc.text(label, ml+4, y+rowH-2.5);
+                    doc.setFont('helvetica','bold');
+                    doc.setTextColor(...color);
+                    doc.text(val, ml+cw-4, y+rowH-2.5, {align:'right'});
+                    y += rowH;
+                });
+
+                // Badge QUITADO ou PARCIAL
+                y += 4;
+                if (quitado) {
+                    doc.setFillColor(...green);
+                    doc.roundedRect(ml+cw/2-20, y, 40, 10, 3, 3, 'F');
+                    doc.setTextColor(...white); doc.setFontSize(9); doc.setFont('helvetica','bold');
+                    doc.text('✓ PAGAMENTO QUITADO', ml+cw/2, y+6.5, {align:'center'});
+                } else {
+                    doc.setFillColor(255, 237, 213);
+                    doc.roundedRect(ml+cw/2-22, y, 44, 10, 3, 3, 'F');
+                    doc.setTextColor(194,65,12); doc.setFontSize(9); doc.setFont('helvetica','bold');
+                    doc.text('PAGAMENTO PARCIAL', ml+cw/2, y+6.5, {align:'center'});
+                }
+                y += 14;
+
+                // ── FORMA DE PAGAMENTO ──
+                doc.setFillColor(...lgray);
+                doc.roundedRect(ml, y, cw, 10, 2, 2, 'F');
+                doc.setFontSize(7.5); doc.setTextColor(...blue2); doc.setFont('helvetica','bold');
+                doc.text('FORMA DE PAGAMENTO:', ml+4, y+6);
+                doc.setTextColor(...dark); doc.setFont('helvetica','normal');
+                doc.text(this._formaLabel(rec.forma) + (rec.obs ? ` — ${rec.obs}` : ''), ml+52, y+6);
+                y += 14;
+
+                // ── ASSINATURAS ──
+                const sigY = H - 40;
+                doc.setFontSize(7.5); doc.setTextColor(...gray); doc.setFont('helvetica','normal');
+                doc.text(`${s.endereco ? s.endereco.split(',').filter(p=>p.trim()).pop()?.trim()||'' : ''}, ${new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}`, ml, sigY);
+                const sigW = 70;
+                doc.setDrawColor(...dark); doc.setLineWidth(0.3);
+                doc.line(ml+5, sigY+14, ml+sigW-5, sigY+14);
+                doc.line(W-mr-sigW+5, sigY+14, W-mr-5, sigY+14);
+                doc.setFontSize(7); doc.setTextColor(...dark); doc.setFont('helvetica','bold');
+                doc.text(s.razao||s.nome||'', ml+sigW/2, sigY+18.5, {align:'center'});
+                doc.text(c.nome, W-mr-sigW/2, sigY+18.5, {align:'center'});
+                doc.setFont('helvetica','normal'); doc.setTextColor(...gray); doc.setFontSize(6.5);
+                doc.text('RECEBEDOR', ml+sigW/2, sigY+22.5, {align:'center'});
+                doc.text('PAGANTE', W-mr-sigW/2, sigY+22.5, {align:'center'});
+
+                // ── RODAPÉ ──
+                doc.setFillColor(...blue);
+                doc.rect(0, H-10, W, 10, 'F');
+                doc.setFontSize(6); doc.setTextColor(147,197,253); doc.setFont('helvetica','normal');
+                const footParts = [s.razao, s.cnpj?`CNPJ: ${s.cnpj}`:'', s.email, s.telefone].filter(Boolean);
+                doc.text(footParts.join('  |  '), W/2, H-4.5, {align:'center'});
+
+                doc.save(`Recibo_${o.numero}_${c.nome.replace(/\s+/g,'_')}.pdf`);
+            }
+        };
+
+        // ============================================================
+        // AGENDA VIEW — Calendário de eventos
+        // ============================================================
+        const AgendaView = {
+            currentYear: new Date().getFullYear(),
+            currentMonth: new Date().getMonth(),
+
+            render() {
+                this._renderCalendar();
+                this._renderList();
+            },
+
+            goToday() {
+                this.currentYear  = new Date().getFullYear();
+                this.currentMonth = new Date().getMonth();
+                this.render();
+            },
+            prevMonth() {
+                if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
+                else this.currentMonth--;
+                this.render();
+            },
+            nextMonth() {
+                if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; }
+                else this.currentMonth++;
+                this.render();
+            },
+
+            _renderCalendar() {
+                const y = this.currentYear, m = this.currentMonth;
+                const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+                document.getElementById('agenda-month-label').textContent = `${months[m]} ${y}`;
+
+                const firstDay = new Date(y, m, 1).getDay();
+                const daysInMonth = new Date(y, m+1, 0).getDate();
+                const today = new Date();
+
+                // Map events by day
+                const eventMap = {};
+                UI.data.orcamentos.forEach(o => {
+                    if (!o.dataEvento) return;
+                    const d = new Date(o.dataEvento + 'T12:00:00');
+                    if (d.getFullYear() === y && d.getMonth() === m) {
+                        const day = d.getDate();
+                        if (!eventMap[day]) eventMap[day] = [];
+                        eventMap[day].push(o);
+                    }
+                });
+
+                const dows = ['D','S','T','Q','Q','S','S'];
+                let html = '<div class="agenda-calendar-header">' +
+                    dows.map(d => `<div class="agenda-cal-dow">${d}</div>`).join('') +
+                    '</div><div class="agenda-calendar-body">';
+
+                // Empty leading cells
+                for (let i = 0; i < firstDay; i++) {
+                    html += '<div class="agenda-cal-day empty"></div>';
+                }
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
+                    const events = eventMap[d] || [];
+                    const hasClosed = events.some(o => o.status === 'aceito');
+                    const hasPending = events.some(o => o.status === 'pendente');
+                    let cls = 'agenda-cal-day';
+                    if (isToday) cls += ' today';
+                    if (hasClosed) cls += ' has-event-closed';
+                    else if (hasPending) cls += ' has-event';
+                    const dots = events.slice(0,3).map(o =>
+                        `<span class="day-dot ${o.status==='aceito'?'closed':'pending'}"></span>`
+                    ).join('');
+                    html += `<div class="${cls}" onclick="AgendaView.selectDay(${d})">
+                        <div class="day-num">${d}</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:1px;">${dots}</div>
+                    </div>`;
+                }
+                html += '</div>';
+                document.getElementById('agenda-calendar-grid').innerHTML = html;
+            },
+
+            selectDay(day) {
+                const y = this.currentYear, m = this.currentMonth;
+                const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const events = UI.data.orcamentos.filter(o => o.dataEvento === dateStr);
+                if (events.length === 0) return;
+                if (events.length === 1) {
+                    UI.showOrcamentoDetails(events[0].id);
+                } else {
+                    // Multiple events - show first
+                    UI.showOrcamentoDetails(events[0].id);
+                }
+            },
+
+            _renderList() {
+                const y = this.currentYear, m = this.currentMonth;
+                const events = UI.data.orcamentos
+                    .filter(o => {
+                        if (!o.dataEvento) return false;
+                        const d = new Date(o.dataEvento + 'T12:00:00');
+                        return d.getFullYear() === y && d.getMonth() === m;
+                    })
+                    .sort((a,b) => a.dataEvento.localeCompare(b.dataEvento));
+
+                const container = document.getElementById('agenda-events-list');
+                if (events.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-times"></i><p>Nenhum evento este mês.</p></div>`;
+                    return;
+                }
+
+                const months3 = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+                container.innerHTML = events.map(o => {
+                    const c = UI.data.clientes.find(x => x.id === o.clienteId) || { nome: '-' };
+                    const d = new Date(o.dataEvento + 'T12:00:00');
+                    const recebimentos = UI.data.recebimentos.filter(r => r.orcamentoId === o.id);
+                    const totalPago = recebimentos.reduce((a,r) => a+r.valor, 0);
+                    const statusColor = o.status==='aceito' ? 'var(--success)' : o.status==='pendente' ? 'var(--warning)' : 'var(--danger)';
+                    const statusLabel = o.status==='aceito'?'Fechado':o.status==='pendente'?'Pendente':'Recusado';
+                    const pagoLabel = o.status==='aceito' ? (totalPago >= o.valor ? ' • <span style="color:var(--success)">✓ Quitado</span>' : totalPago > 0 ? ` • <span style="color:var(--warning)">Pago ${Utils.formatCurrency(totalPago)}</span>` : ' • <span style="color:var(--danger)">Não recebido</span>') : '';
+                    return `<div class="agenda-event-card" onclick="UI.showOrcamentoDetails('${o.id}')">
+                        <div class="agenda-event-date-badge" style="background:${statusColor}">
+                            <span class="day">${String(d.getDate()).padStart(2,'0')}</span>
+                            <span class="mon">${months3[d.getMonth()]}</span>
+                        </div>
+                        <div class="agenda-event-info">
+                            <div class="agenda-event-title">${o.evento} — ${c.nome}</div>
+                            <div class="agenda-event-sub">${o.horario||'Horário a definir'} • ${o.local||'Local a definir'} • <span style="color:${statusColor};font-weight:600;">${statusLabel}</span></div>
+                            <div class="agenda-event-valor">${Utils.formatCurrency(o.valor)}${pagoLabel}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        };
 
         // ============================================================
         // CONTRACT MODAL — Geração de Contrato em PDF
