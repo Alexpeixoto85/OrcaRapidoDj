@@ -3310,8 +3310,10 @@
                 const settings = Storage.getSettings();
                 
                 let statusBadge = '';
+                const _temReceb = (UI.data.recebimentos || []).some(r => r.orcamentoId === o.id);
                 if(o.status === 'pendente') statusBadge = `<span class="badge badge-warning">PENDENTE</span>`;
-                if(o.status === 'aceito') statusBadge = `<span class="badge badge-primary">FECHADO</span>`;
+                if(o.status === 'aceito' && _temReceb) statusBadge = `<span class="badge badge-primary">FECHADO ✓ AGENDADO</span>`;
+                if(o.status === 'aceito' && !_temReceb) statusBadge = `<span class="badge badge-primary">FECHADO</span>`;
                 if(o.status === 'recusado') statusBadge = `<span class="badge badge-danger">RECUSADO</span>`;
                 
                 // Verificar se é evento recorrente
@@ -5881,10 +5883,15 @@
                 const daysInMonth = new Date(y, m+1, 0).getDate();
                 const today = new Date();
 
-                // Map events by day
+                // Map events by day — só inclui na agenda se tiver pelo menos 1 recebimento (ou for pendente)
                 const eventMap = {};
                 UI.data.orcamentos.forEach(o => {
                     if (!o.dataEvento) return;
+                    // Orçamentos fechados só entram na agenda se tiverem recebimento registrado
+                    if (o.status === 'aceito') {
+                        const temRecebimento = (UI.data.recebimentos || []).some(r => r.orcamentoId === o.id);
+                        if (!temRecebimento) return;
+                    }
                     const d = new Date(o.dataEvento + 'T12:00:00');
                     if (d.getFullYear() === y && d.getMonth() === m) {
                         const day = d.getDate();
@@ -5942,6 +5949,11 @@
                 const events = UI.data.orcamentos
                     .filter(o => {
                         if (!o.dataEvento) return false;
+                        // Fechados só aparecem na agenda se tiverem recebimento
+                        if (o.status === 'aceito') {
+                            const temRecebimento = (UI.data.recebimentos || []).some(r => r.orcamentoId === o.id);
+                            if (!temRecebimento) return false;
+                        }
                         const d = new Date(o.dataEvento + 'T12:00:00');
                         return d.getFullYear() === y && d.getMonth() === m;
                     })
