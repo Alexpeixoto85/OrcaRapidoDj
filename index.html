@@ -675,6 +675,78 @@
             color: #78350f;
         }
         
+        /* ── MODAL CONTRATO PROMPT ── */
+        #overlay-contract-prompt {
+            justify-content: center;
+            align-items: center;
+        }
+        .contract-prompt-modal {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px 24px;
+            max-width: 380px;
+            width: 92%;
+            margin: auto;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .contract-prompt-icon {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: white;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 20px rgba(59,130,246,0.4);
+        }
+        .contract-prompt-title {
+            font-size: 1.25rem; font-weight: 800; color: var(--dark); margin-bottom: 8px;
+        }
+        .contract-prompt-desc {
+            color: var(--secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 24px;
+        }
+        .contract-prompt-actions { display: flex; flex-direction: column; gap: 10px; }
+        .contract-prompt-btn {
+            padding: 14px 20px; border-radius: 12px; border: none;
+            font-size: 0.95rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .contract-prompt-btn:active { transform: scale(0.97); }
+        .contract-prompt-btn.primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+        }
+        .contract-prompt-btn.secondary {
+            background: #f1f5f9; color: var(--secondary);
+        }
+
+        /* ── MODAL CONTRATO EDITOR ── */
+        .contract-editor-sheet {
+            max-height: 92vh;
+        }
+        .contract-section-label {
+            font-size: 0.75rem; font-weight: 700; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+        }
+        .contract-info-box {
+            background: #f8fafc; border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 14px;
+            font-size: 0.85rem; color: var(--dark);
+            margin-bottom: 14px; line-height: 1.6;
+        }
+        .contract-info-box strong { color: var(--primary); }
+        .contract-clauses-area {
+            width: 100%; min-height: 180px; resize: vertical;
+            padding: 12px 14px; border: 1px solid var(--border);
+            border-radius: 10px; font-size: 0.82rem;
+            font-family: 'Inter', sans-serif; line-height: 1.55;
+            background: #f8fafc; color: var(--dark);
+        }
+        .contract-clauses-area:focus { border-color: var(--primary); outline: none; background: white; }
+
         /* Filtros de status */
         .filter-buttons {
             display: flex;
@@ -1433,6 +1505,23 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label" style="color: var(--success);"><i class="fas fa-tag"></i> Desconto</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="o-desconto-tipo" class="form-control" style="width: 110px; flex-shrink: 0;" onchange="App.orcamento.calcularValorTotal()">
+                        <option value="reais">R$ Fixo</option>
+                        <option value="percentual">% Porcent.</option>
+                    </select>
+                    <input type="text" inputmode="numeric" id="o-desconto-valor" class="form-control" placeholder="0,00" oninput="App.orcamento.onDescontoInput(this)">
+                </div>
+                <div style="font-size: 0.8rem; color: var(--secondary); margin-top: 4px;" id="o-desconto-info">Deixe em branco para sem desconto</div>
+            </div>
+
+            <div class="form-group" id="o-valor-final-group" style="display:none;">
+                <label class="form-label" style="color: var(--primary); font-size: 1rem;"><i class="fas fa-check-circle"></i> Valor com Desconto</label>
+                <div id="o-valor-final-display" style="font-size: 1.5rem; font-weight: 800; color: var(--primary); padding: 10px 14px; background: #dbeafe; border-radius: 12px;"></div>
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">Status</label>
                 <select id="o-status" class="form-control">
                     <option value="pendente">Pendente</option>
@@ -1877,6 +1966,41 @@
                 <i class="fab fa-whatsapp"></i> Enviar esta mensagem
             </button>
         </div>
+    </div>
+
+    <!-- MODAL: PROMPT DE CONTRATO -->
+    <div class="modal-overlay" id="overlay-contract-prompt">
+        <div class="contract-prompt-modal">
+            <div class="contract-prompt-icon"><i class="fas fa-file-contract"></i></div>
+            <div class="contract-prompt-title">Negócio Fechado! 🎉</div>
+            <div class="contract-prompt-desc">O orçamento foi marcado como <strong>Fechado</strong>.<br>Deseja gerar o contrato agora?</div>
+            <div class="contract-prompt-actions">
+                <button class="contract-prompt-btn primary" onclick="ContractModal.openEditor()">
+                    <i class="fas fa-file-contract"></i> Sim, gerar contrato
+                </button>
+                <button class="contract-prompt-btn secondary" onclick="ContractModal.dismissPrompt()">
+                    Agora não
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITOR DE CONTRATO -->
+    <div class="modal-overlay" id="overlay-contract-editor"></div>
+    <div class="modal-sheet contract-editor-sheet" id="sheet-contract-editor">
+        <div class="sheet-handle"></div>
+        <h3 class="section-title" style="margin-bottom:4px;"><i class="fas fa-file-contract" style="color:var(--primary);"></i> Gerar Contrato</h3>
+        <p style="font-size:0.82rem;color:var(--secondary);margin-bottom:16px;">Revise as informações e as cláusulas antes de gerar o PDF.</p>
+        <div id="contract-preview-info"></div>
+        <div class="form-group">
+            <div class="contract-section-label"><i class="fas fa-gavel"></i> Cláusulas do Contrato</div>
+            <textarea id="contract-clausulas" class="contract-clauses-area" rows="10"></textarea>
+            <div style="font-size:0.75rem;color:var(--secondary);margin-top:5px;">Edite as cláusulas conforme necessário antes de gerar.</div>
+        </div>
+        <button class="btn-block" onclick="ContractModal.generate()" style="background: linear-gradient(135deg,#3b82f6,#1d4ed8); margin-top:4px;">
+            <i class="fas fa-download"></i> Baixar Contrato PDF
+        </button>
+        <button type="button" class="btn-block" style="background:var(--light);color:var(--secondary);margin-top:8px;" onclick="UI.closeModals()">Cancelar</button>
     </div>
 
     <div class="modal-overlay" id="overlay-settings"></div>
@@ -3025,10 +3149,27 @@
                         <div class="details-section">
                             <div class="details-section-title"><i class="fas fa-money-bill-wave"></i> FINANCEIRO</div>
                             <div class="details-info-grid">
+                                ${o.descontoValor > 0 ? `
+                                <div class="info-item">
+                                    <div class="info-label">Valor Bruto</div>
+                                    <div class="info-value" style="text-decoration: line-through; color: var(--secondary);">${Utils.formatCurrency(o.valorBruto || o.valor)}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Desconto</div>
+                                    <div class="info-value" style="color: var(--success);">- ${Utils.formatCurrency(o.descontoValor)}
+                                        ${o.descontoTipo === 'percentual' ? ` (${o.descontoValorInput}%)` : ` (${((o.descontoValor/(o.valorBruto||o.valor))*100).toFixed(1)}%)`}
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Valor Final</div>
+                                    <div class="info-value" style="color: var(--primary); font-size: 1.2rem;">${Utils.formatCurrency(o.valor)}</div>
+                                </div>
+                                ` : `
                                 <div class="info-item">
                                     <div class="info-label">Valor Total</div>
                                     <div class="info-value" style="color: var(--primary); font-size: 1.2rem;">${Utils.formatCurrency(o.valor)}</div>
                                 </div>
+                                `}
                                 <div class="info-item">
                                     <div class="info-label">Status</div>
                                     <div class="info-value">${o.status === 'pendente' ? 'Pendente' : o.status === 'aceito' ? 'Aceito' : 'Recusado'}</div>
@@ -3058,8 +3199,13 @@
                                 <i class="fas fa-calendar-check"></i> Contato
                             </button>
                             <button class="btn-details btn-details-secondary" onclick="App.pdf.generate('${o.id}')">
-                                <i class="fas fa-file-pdf"></i> Baixar PDF
+                                <i class="fas fa-file-pdf"></i> Orçamento PDF
                             </button>
+                            ${o.status === 'aceito' ? `
+                            <button class="btn-details" style="background:#dbeafe;color:#1d4ed8;border:none;padding:10px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="UI.closeModals(); setTimeout(()=>{ContractModal._orcamentoId='${o.id}'; ContractModal.openEditor();}, 200)">
+                                <i class="fas fa-file-contract"></i> Contrato PDF
+                            </button>
+                            ` : ''}
                         </div>
                     </div>
                     <button class="btn-block" style="background: var(--light); color: var(--secondary); margin-top: 8px;" onclick="UI.closeModals()">Fechar</button>
@@ -3470,6 +3616,11 @@
                 App.orcamento.selectedPacote = null;
                 App.orcamento.selectedEquipamentos = [];
                 document.getElementById('o-valor').value = '0,00';
+                document.getElementById('o-desconto-tipo').value = 'reais';
+                document.getElementById('o-desconto-valor').value = '';
+                document.getElementById('o-desconto-info').textContent = 'Deixe em branco para sem desconto';
+                document.getElementById('o-desconto-info').style.color = 'var(--secondary)';
+                document.getElementById('o-valor-final-group').style.display = 'none';
                 
                 UI.openModal('orcamento');
             },
@@ -3642,23 +3793,72 @@
                     // Valor do pacote
                     if (App.orcamento.selectedPacote) {
                         const pacote = UI.data.pacotes.find(p => p.id === App.orcamento.selectedPacote);
-                        if (pacote) {
-                            total += pacote.valor;
-                        }
+                        if (pacote) total += pacote.valor;
                     }
                     
                     // Valor dos equipamentos
                     App.orcamento.selectedEquipamentos.forEach(eqId => {
                         const equip = UI.data.equipamentos.find(e => e.id === eqId);
-                        if (equip) {
-                            total += equip.valor;
-                        }
+                        if (equip) total += equip.valor;
                     });
                     
-                    // Atualizar campo de valor
+                    // Atualizar campo de valor bruto
                     const valorInput = document.getElementById('o-valor');
                     valorInput.value = (total * 100).toFixed(0);
                     Utils.maskMoney(valorInput);
+
+                    // Aplicar desconto
+                    App.orcamento.atualizarDesconto(total);
+                },
+
+                onDescontoInput: (el) => {
+                    Utils.maskMoney(el);
+                    const bruto = Utils.parseCurrency(document.getElementById('o-valor').value);
+                    App.orcamento.atualizarDesconto(bruto);
+                },
+
+                atualizarDesconto: (bruto) => {
+                    const tipo = document.getElementById('o-desconto-tipo').value;
+                    const descontoRaw = Utils.parseCurrency(document.getElementById('o-desconto-valor').value || '0');
+                    const infoEl = document.getElementById('o-desconto-info');
+                    const finalGroup = document.getElementById('o-valor-final-group');
+                    const finalDisplay = document.getElementById('o-valor-final-display');
+
+                    if (!descontoRaw || descontoRaw <= 0) {
+                        infoEl.textContent = 'Deixe em branco para sem desconto';
+                        infoEl.style.color = 'var(--secondary)';
+                        finalGroup.style.display = 'none';
+                        return;
+                    }
+
+                    let desconto = 0;
+                    if (tipo === 'percentual') {
+                        if (descontoRaw > 100) {
+                            infoEl.textContent = '⚠️ Percentual não pode ser maior que 100%';
+                            infoEl.style.color = 'var(--danger)';
+                            finalGroup.style.display = 'none';
+                            return;
+                        }
+                        desconto = bruto * (descontoRaw / 100);
+                    } else {
+                        desconto = descontoRaw;
+                    }
+
+                    if (desconto >= bruto) {
+                        infoEl.textContent = '⚠️ Desconto não pode ser maior ou igual ao valor total';
+                        infoEl.style.color = 'var(--danger)';
+                        finalGroup.style.display = 'none';
+                        return;
+                    }
+
+                    const final = bruto - desconto;
+                    const pct = ((desconto / bruto) * 100).toFixed(1);
+                    infoEl.textContent = tipo === 'percentual'
+                        ? `Desconto: ${Utils.formatCurrency(desconto)} (${descontoRaw}%)`
+                        : `Desconto: ${Utils.formatCurrency(desconto)} (${pct}%)`;
+                    infoEl.style.color = 'var(--success)';
+                    finalGroup.style.display = 'block';
+                    finalDisplay.textContent = Utils.formatCurrency(final);
                 },
                 
                 save: (e) => {
@@ -3678,6 +3878,19 @@
                         numero = existing.numero;
                     }
 
+                    // Calcular desconto e valor final
+                    const valorBruto = Utils.parseCurrency(document.getElementById('o-valor').value);
+                    const descontoTipo = document.getElementById('o-desconto-tipo').value;
+                    const descontoValorRaw = Utils.parseCurrency(document.getElementById('o-desconto-valor').value || '0');
+                    let descontoValor = 0;
+                    if (descontoValorRaw > 0) {
+                        descontoValor = descontoTipo === 'percentual'
+                            ? valorBruto * (descontoValorRaw / 100)
+                            : descontoValorRaw;
+                        if (descontoValor >= valorBruto) descontoValor = 0;
+                    }
+                    const valorFinal = valorBruto - descontoValor;
+
                     const orcamento = {
                         id,
                         numero,
@@ -3686,7 +3899,11 @@
                         dataEvento: document.getElementById('o-data').value,
                         local: document.getElementById('o-local').value,
                         horario: document.getElementById('o-horario').value,
-                        valor: Utils.parseCurrency(document.getElementById('o-valor').value),
+                        valor: valorFinal,
+                        valorBruto: valorBruto,
+                        descontoTipo: descontoTipo,
+                        descontoValorInput: descontoValorRaw,
+                        descontoValor: descontoValor,
                         status: document.getElementById('o-status').value,
                         validade: document.getElementById('o-validade').value,
                         dataContato: document.getElementById('o-data-contato').value || null,
@@ -3707,6 +3924,10 @@
                     UI.renderDashboard();
                     UI.renderOrcamentos();
                     UI.renderFinanceiro();
+                    // Prompt de contrato ao salvar como fechado
+                    if (orcamento.status === 'aceito') {
+                        setTimeout(() => ContractModal.showPrompt(orcamento.id), 500);
+                    }
                 },
                 
                 // NOVO: Método para mudar status diretamente
@@ -3734,6 +3955,11 @@
                         UI.renderDashboard();
                         UI.renderOrcamentos();
                         UI.renderFinanceiro();
+
+                        // Prompt de contrato ao fechar
+                        if (status === 'aceito') {
+                            setTimeout(() => ContractModal.showPrompt(id), 400);
+                        }
                     }
                 },
                 
@@ -3755,8 +3981,22 @@
                     document.getElementById('o-horario').value = o.horario || '';
                     
                     const valInput = document.getElementById('o-valor');
-                    valInput.value = (o.valor * 100).toFixed(0);
+                    // Restaurar valor bruto (antes do desconto) para recalcular corretamente
+                    const brutoParaEditar = o.valorBruto || o.valor;
+                    valInput.value = (brutoParaEditar * 100).toFixed(0);
                     Utils.maskMoney(valInput);
+
+                    // Restaurar campos de desconto
+                    const descontoTipoEl = document.getElementById('o-desconto-tipo');
+                    const descontoValorEl = document.getElementById('o-desconto-valor');
+                    descontoTipoEl.value = o.descontoTipo || 'reais';
+                    if (o.descontoValorInput && o.descontoValorInput > 0) {
+                        descontoValorEl.value = (o.descontoValorInput * 100).toFixed(0);
+                        Utils.maskMoney(descontoValorEl);
+                    } else {
+                        descontoValorEl.value = '';
+                    }
+                    App.orcamento.atualizarDesconto(brutoParaEditar);
                     
                     document.getElementById('o-status').value = o.status;
                     document.getElementById('o-validade').value = o.validade;
@@ -4480,9 +4720,27 @@
                     }
                     doc.text(descricaoText, margin.left + 4, y + 5.5);
                     doc.setFont("helvetica", "bold");
-                    doc.setTextColor(...primary);
-                    doc.text(Utils.formatCurrency(o.valor), margin.left + contentWidth - 4, y + 5.5, { align: "right" });
+                    doc.setTextColor(...darkGray);
+                    // Mostrar valor bruto riscado se houver desconto
+                    const valorBrutoPDF = o.valorBruto || o.valor;
+                    doc.text(Utils.formatCurrency(valorBrutoPDF), margin.left + contentWidth - 4, y + 5.5, { align: "right" });
                     y += 8;
+
+                    // Linha de desconto (se existir)
+                    if (o.descontoValor > 0) {
+                        doc.setFillColor(240, 253, 244); // verde claro
+                        doc.rect(margin.left, y, contentWidth, 8, 'F');
+                        doc.setFontSize(8.5);
+                        doc.setFont("helvetica", "normal");
+                        doc.setTextColor(5, 150, 105); // verde
+                        const pctStr = o.descontoTipo === 'percentual'
+                            ? ` (${o.descontoValorInput}%)`
+                            : ` (${((o.descontoValor / valorBrutoPDF) * 100).toFixed(1)}%)`;
+                        doc.text(`Desconto${pctStr}`, margin.left + 4, y + 5.5);
+                        doc.setFont("helvetica", "bold");
+                        doc.text(`- ${Utils.formatCurrency(o.descontoValor)}`, margin.left + contentWidth - 4, y + 5.5, { align: "right" });
+                        y += 8;
+                    }
 
                     doc.setDrawColor(229, 231, 235);
                     doc.line(margin.left, y, margin.left + contentWidth, y);
@@ -4744,8 +5002,431 @@
         // Substituir o método whatsapp.confirmOpen para usar o novo modal
         // (será sobrescrito após o App ser definido, via patch abaixo)
 
+        // ============================================================
+        // CONTRACT MODAL — Geração de Contrato em PDF
+        // ============================================================
+        const ContractModal = {
+            _orcamentoId: null,
+
+            showPrompt(id) {
+                this._orcamentoId = id;
+                UI.closeModals();
+                const overlay = document.getElementById('overlay-contract-prompt');
+                overlay.classList.add('active');
+            },
+
+            dismissPrompt() {
+                const overlay = document.getElementById('overlay-contract-prompt');
+                overlay.classList.remove('active');
+                this._orcamentoId = null;
+            },
+
+            openEditor() {
+                const id = this._orcamentoId;
+                const overlay = document.getElementById('overlay-contract-prompt');
+                overlay.classList.remove('active');
+
+                const o = UI.data.orcamentos.find(x => x.id === id);
+                const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                const s = Storage.getSettings();
+                if (!o || !c) return;
+
+                // Pacote e equipamentos
+                let pacoteNome = 'Serviços de DJ';
+                if (o.pacoteSelecionado) {
+                    const p = UI.data.pacotes.find(x => x.id === o.pacoteSelecionado);
+                    if (p) pacoteNome = p.nome;
+                }
+                let equipLista = '';
+                if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
+                    const nomes = o.equipamentosSelecionados.map(eqId => {
+                        const e = UI.data.equipamentos.find(x => x.id === eqId);
+                        return e ? e.nome : '';
+                    }).filter(Boolean);
+                    if (nomes.length) equipLista = ' + ' + nomes.join(', ');
+                }
+
+                const valorFinal = Utils.formatCurrency(o.valor);
+                const dataEvento = Utils.formatDate(o.dataEvento);
+                const hoje = new Date().toLocaleDateString('pt-BR');
+                const djNome = s.razao || s.nome || 'Contratado';
+                const djDoc  = s.cnpj ? `CNPJ: ${s.cnpj}` : '';
+
+                // Resumo no editor
+                document.getElementById('contract-preview-info').innerHTML = `
+                    <div class="contract-info-box">
+                        <div class="contract-section-label"><i class="fas fa-info-circle"></i> Dados do Contrato</div>
+                        <strong>Contratante:</strong> ${c.nome} &nbsp;|&nbsp; <strong>Tel:</strong> ${c.telefone}<br>
+                        <strong>Evento:</strong> ${o.evento} &nbsp;|&nbsp; <strong>Data:</strong> ${dataEvento} &nbsp;|&nbsp; <strong>Horário:</strong> ${o.horario || 'A definir'}<br>
+                        <strong>Local:</strong> ${o.local || 'A definir'}<br>
+                        <strong>Serviço:</strong> ${pacoteNome}${equipLista}<br>
+                        <strong>Valor:</strong> ${valorFinal}${o.descontoValor > 0 ? ` <span style="color:var(--success)">(desconto de ${Utils.formatCurrency(o.descontoValor)} aplicado)</span>` : ''}
+                    </div>
+                `;
+
+                // Cláusulas padrão
+                document.getElementById('contract-clausulas').value = this._getClausulas(o, c, s, pacoteNome + equipLista, valorFinal, dataEvento, hoje, djNome, djDoc);
+
+                UI.openModal('contract-editor');
+            },
+
+            _getClausulas(o, c, s, servicoDesc, valorFinal, dataEvento, hoje, djNome, djDoc) {
+                const antecipacao = o.descontoValor > 0
+                    ? `${Utils.formatCurrency(o.valor)} (já com desconto de ${Utils.formatCurrency(o.descontoValor)} concedido)`
+                    : valorFinal;
+
+                return `1. OBJETO
+O presente contrato tem como objeto a prestação de serviços de sonorização e entretenimento musical (DJ) para o evento "${o.evento}", a realizar-se em ${dataEvento}, no horário de ${o.horario || 'a definir'}, no local: ${o.local || 'a definir'}.
+
+2. SERVIÇOS CONTRATADOS
+Serão prestados os seguintes serviços: ${servicoDesc}${o.descricao ? '. ' + o.descricao.trim() : ''}.
+
+3. VALOR E PAGAMENTO
+O valor total acordado é de ${antecipacao}. O pagamento deverá ser realizado via PIX (${s.pix || 'chave a informar'}) em nome de ${s.razao || s.nome || ''}. Caso acordado, sinal de 50% antecipado para confirmação da data.
+
+4. RESERVA DE DATA
+A data do evento será reservada exclusivamente ao CONTRATANTE após confirmação do sinal. O CONTRATADO não poderá aceitar outro evento na mesma data após a reserva.
+
+5. CANCELAMENTO
+Em caso de cancelamento pelo CONTRATANTE com menos de 15 dias de antecedência, o sinal não será devolvido. Cancelamentos com mais de 15 dias permitem renegociação. Caso o cancelamento ocorra por força maior (comprovada), as partes acordarão nova data sem ônus.
+
+6. OBRIGAÇÕES DO CONTRATADO
+Comparecer ao local com equipamentos em perfeito funcionamento; Apresentar repertório adequado ao evento; Cumprir o horário contratado; Tratar contratante e convidados com respeito e profissionalismo.
+
+7. OBRIGAÇÕES DO CONTRATANTE
+Garantir espaço físico adequado para montagem dos equipamentos; Fornecer acesso à energia elétrica (tomadas 110V ou 220V); Efetuar o pagamento nas condições acordadas; Informar alterações de endereço ou horário com no mínimo 72 horas de antecedência.
+
+8. DANOS E RESPONSABILIDADES
+O CONTRATANTE se responsabiliza por danos causados aos equipamentos do CONTRATADO por terceiros durante o evento. O CONTRATADO não se responsabiliza por falhas decorrentes de infraestrutura elétrica inadequada.
+
+9. FORO
+As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop().trim() : 'sua cidade'} para dirimir eventuais conflitos oriundos deste contrato.`;
+            },
+
+            generate() {
+                const id = this._orcamentoId;
+                const o = UI.data.orcamentos.find(x => x.id === id);
+                const c = UI.data.clientes.find(x => x.id === o.clienteId);
+                const s = Storage.getSettings();
+                const clausulas = document.getElementById('contract-clausulas').value;
+                if (!o || !c) return;
+
+                UI.closeModals();
+                setTimeout(() => this._buildPDF(o, c, s, clausulas), 200);
+            },
+
+            _buildPDF(o, c, s, clausulas) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                const W = doc.internal.pageSize.getWidth();
+                const H = doc.internal.pageSize.getHeight();
+                const ml = 14, mr = 14, mt = 0, mb = 14;
+                const cw = W - ml - mr;
+                let y = 0;
+
+                const blue   = [29, 78, 216];
+                const blue2  = [59, 130, 246];
+                const gray   = [71, 85, 105];
+                const lgray  = [241, 245, 249];
+                const dark   = [15, 23, 42];
+                const white  = [255, 255, 255];
+                const green  = [5, 150, 105];
+
+                // ── CABEÇALHO AZUL ESCURO ──
+                doc.setFillColor(...blue);
+                doc.rect(0, 0, W, 28, 'F');
+
+                // Logo
+                if (s.logo) {
+                    try { doc.addImage(s.logo, 'PNG', ml, 5, 14, 14); } catch(e) {}
+                }
+                const logoOffset = s.logo ? 18 : 0;
+
+                // Nome DJ
+                doc.setTextColor(...white);
+                doc.setFontSize(15);
+                doc.setFont('helvetica', 'bold');
+                doc.text((s.nome || 'DJ').toUpperCase(), ml + logoOffset, 13);
+
+                // Subtítulo
+                doc.setFontSize(7.5);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(147, 197, 253);
+                doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', ml + logoOffset, 19);
+
+                // Número contrato + data direita
+                const hoje = new Date().toLocaleDateString('pt-BR');
+                doc.setFontSize(7);
+                doc.setTextColor(...white);
+                doc.text(`Contrato Nº ${o.numero}`, W - mr, 11, { align: 'right' });
+                doc.text(`Emitido: ${hoje}`, W - mr, 16, { align: 'right' });
+                if (s.telefone) doc.text(s.telefone, W - mr, 21, { align: 'right' });
+
+                y = 33;
+
+                // ── FAIXA "CONTRATO DE PRESTAÇÃO DE SERVIÇOS" ──
+                doc.setFillColor(...blue2);
+                doc.setTextColor(...white);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.rect(ml, y, cw, 7, 'F');
+                doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE DJ / ENTRETENIMENTO MUSICAL', ml + cw / 2, y + 4.8, { align: 'center' });
+                y += 10;
+
+                // ── PARTES ──
+                const halfW = (cw - 4) / 2;
+
+                // Card CONTRATADO
+                doc.setFillColor(...lgray);
+                doc.roundedRect(ml, y, halfW, 20, 2, 2, 'F');
+                doc.setTextColor(...blue2);
+                doc.setFontSize(6.5);
+                doc.setFont('helvetica', 'bold');
+                doc.text('CONTRATADO', ml + 3, y + 5);
+                doc.setTextColor(...dark);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.text(s.razao || s.nome || '', ml + 3, y + 10);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...gray);
+                if (s.cnpj) doc.text(`CNPJ: ${s.cnpj}`, ml + 3, y + 14.5);
+                if (s.telefone) doc.text(s.telefone, ml + 3, y + 18.5);
+
+                // Card CONTRATANTE
+                const cx2 = ml + halfW + 4;
+                doc.setFillColor(...lgray);
+                doc.roundedRect(cx2, y, halfW, 20, 2, 2, 'F');
+                doc.setTextColor(...blue2);
+                doc.setFontSize(6.5);
+                doc.setFont('helvetica', 'bold');
+                doc.text('CONTRATANTE', cx2 + 3, y + 5);
+                doc.setTextColor(...dark);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                const nomeLines = doc.splitTextToSize(c.nome, halfW - 6);
+                doc.text(nomeLines[0], cx2 + 3, y + 10);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...gray);
+                doc.text(Utils.formatPhone(c.telefone) || c.telefone, cx2 + 3, y + 14.5);
+                if (c.email) doc.text(c.email, cx2 + 3, y + 18.5);
+
+                y += 24;
+
+                // ── DETALHES DO EVENTO ──
+                doc.setFillColor(...blue2);
+                doc.rect(ml, y, cw, 6, 'F');
+                doc.setTextColor(...white);
+                doc.setFontSize(7.5);
+                doc.setFont('helvetica', 'bold');
+                doc.text('DETALHES DO EVENTO', ml + 3, y + 4.2);
+                y += 6;
+
+                doc.setFillColor(255, 255, 255);
+                doc.setDrawColor(229, 231, 235);
+                doc.setLineWidth(0.3);
+                doc.rect(ml, y, cw, 14, 'FD');
+
+                const colW = cw / 4;
+                const evFields = [
+                    ['TIPO DE EVENTO', o.evento || '-'],
+                    ['DATA', Utils.formatDate(o.dataEvento)],
+                    ['HORÁRIO', o.horario || 'A definir'],
+                    ['LOCAL', o.local || 'A definir'],
+                ];
+                evFields.forEach(([lbl, val], i) => {
+                    const ex = ml + i * colW + 3;
+                    doc.setFontSize(6.5);
+                    doc.setTextColor(...gray);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(lbl, ex, y + 5);
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(...dark);
+                    doc.setFont('helvetica', 'bold');
+                    const v = doc.splitTextToSize(val, colW - 6);
+                    doc.text(v[0], ex, y + 10.5);
+                });
+                y += 18;
+
+                // ── SERVIÇOS + VALOR ──
+                doc.setFillColor(...blue2);
+                doc.rect(ml, y, cw, 6, 'F');
+                doc.setTextColor(...white);
+                doc.setFontSize(7.5);
+                doc.setFont('helvetica', 'bold');
+                doc.text('SERVIÇOS CONTRATADOS E VALOR', ml + 3, y + 4.2);
+                y += 6;
+
+                doc.setFillColor(255, 255, 255);
+                doc.rect(ml, y, cw, 16, 'FD');
+
+                // Serviços (col esquerda 60%)
+                let servicoTexto = 'Serviços de DJ';
+                if (o.pacoteSelecionado) {
+                    const p = UI.data.pacotes.find(x => x.id === o.pacoteSelecionado);
+                    if (p) servicoTexto = p.nome;
+                }
+                if (o.equipamentosSelecionados && o.equipamentosSelecionados.length > 0) {
+                    const nomes = o.equipamentosSelecionados.map(eId => {
+                        const e = UI.data.equipamentos.find(x => x.id === eId);
+                        return e ? e.nome : '';
+                    }).filter(Boolean);
+                    if (nomes.length) servicoTexto += ' + ' + nomes.join(', ');
+                }
+
+                doc.setFontSize(6.5);
+                doc.setTextColor(...gray);
+                doc.setFont('helvetica', 'normal');
+                doc.text('DESCRIÇÃO DO SERVIÇO', ml + 3, y + 5);
+                doc.setFontSize(8);
+                doc.setTextColor(...dark);
+                doc.setFont('helvetica', 'bold');
+                const svcLines = doc.splitTextToSize(servicoTexto, cw * 0.58);
+                doc.text(svcLines[0], ml + 3, y + 10.5);
+                if (svcLines[1]) { doc.setFontSize(7); doc.text(svcLines[1], ml + 3, y + 14.5); }
+
+                // Valor (col direita 40%)
+                const vx = ml + cw * 0.62;
+                doc.setFontSize(6.5);
+                doc.setTextColor(...gray);
+                doc.setFont('helvetica', 'normal');
+                doc.text('VALOR TOTAL', vx, y + 5);
+
+                if (o.descontoValor > 0) {
+                    // valor bruto riscado
+                    doc.setFontSize(7);
+                    doc.setTextColor(...gray);
+                    doc.setFont('helvetica', 'normal');
+                    const brutoStr = Utils.formatCurrency(o.valorBruto || o.valor);
+                    doc.text(brutoStr, vx, y + 10);
+                    doc.setLineWidth(0.3);
+                    doc.setDrawColor(...gray);
+                    const brutoW = doc.getTextWidth(brutoStr);
+                    doc.line(vx, y + 9.2, vx + brutoW, y + 9.2);
+
+                    doc.setFontSize(7);
+                    doc.setTextColor(...green);
+                    const pctStr = o.descontoTipo === 'percentual' ? `${o.descontoValorInput}% off` : `- ${Utils.formatCurrency(o.descontoValor)}`;
+                    doc.text(pctStr, vx + brutoW + 2, y + 10);
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(...blue2);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(Utils.formatCurrency(o.valor), vx, y + 15.5);
+                } else {
+                    doc.setFontSize(12);
+                    doc.setTextColor(...blue2);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(Utils.formatCurrency(o.valor), vx, y + 13);
+                }
+
+                // PIX
+                doc.setFontSize(6);
+                doc.setTextColor(...gray);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`PIX: ${s.pix || 'a informar'} | ${s.razao || s.nome || ''}`, vx, y + 15.5 + (o.descontoValor > 0 ? 0 : 2));
+
+                y += 20;
+
+                // ── CLÁUSULAS ──
+                doc.setFillColor(...blue2);
+                doc.rect(ml, y, cw, 6, 'F');
+                doc.setTextColor(...white);
+                doc.setFontSize(7.5);
+                doc.setFont('helvetica', 'bold');
+                doc.text('CONDIÇÕES E CLÁUSULAS CONTRATUAIS', ml + 3, y + 4.2);
+                y += 8;
+
+                doc.setFontSize(6.6);
+                doc.setTextColor(...dark);
+                doc.setFont('helvetica', 'normal');
+
+                // Renderizar cláusulas otimizadas
+                const clausulasArr = clausulas.split('\n').filter(l => l.trim());
+                const spaceLeft = H - mb - 26 - y;
+                const lineH = 3.1;
+                let usedH = 0;
+
+                for (const cl of clausulasArr) {
+                    const isTitle = /^\d+\./.test(cl.trim());
+                    const wrapped = doc.splitTextToSize(cl.trim(), cw);
+                    const needed = wrapped.length * lineH + (isTitle ? 1.5 : 0.8);
+                    if (usedH + needed > spaceLeft) break;
+
+                    if (isTitle) {
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(...blue2);
+                    } else {
+                        doc.setFont('helvetica', 'normal');
+                        doc.setTextColor(...dark);
+                    }
+
+                    wrapped.forEach(line => { doc.text(line, ml, y); y += lineH; });
+                    y += isTitle ? 1.5 : 0.8;
+                    usedH += needed;
+                }
+
+                // ── LOCAL E DATA ──
+                y += 2;
+                const cidade = s.endereco ? s.endereco.split(',').filter(p => p.trim()).pop()?.trim() || '' : '';
+                doc.setFontSize(7);
+                doc.setTextColor(...gray);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`${cidade ? cidade + ', ' : ''}${new Date().toLocaleDateString('pt-BR', {day:'numeric', month:'long', year:'numeric'})}`, ml, y);
+                y += 8;
+
+                // ── ASSINATURAS ──
+                const sigW = 70;
+                const sig1x = ml + 10;
+                const sig2x = W - mr - sigW + 10;
+
+                doc.setDrawColor(...dark);
+                doc.setLineWidth(0.3);
+                doc.line(sig1x, y, sig1x + sigW - 20, y);
+                doc.line(sig2x, y, sig2x + sigW - 20, y);
+
+                doc.setFontSize(7);
+                doc.setTextColor(...dark);
+                doc.setFont('helvetica', 'bold');
+                const djNomeShort = (s.razao || s.nome || 'Contratado');
+                doc.text(djNomeShort.length > 28 ? djNomeShort.substring(0,28)+'.' : djNomeShort, sig1x + (sigW - 20) / 2, y + 4.5, { align: 'center' });
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...gray);
+                doc.setFontSize(6.5);
+                doc.text('CONTRATADO', sig1x + (sigW - 20) / 2, y + 8, { align: 'center' });
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(7);
+                doc.setTextColor(...dark);
+                const cNomeShort = c.nome.length > 28 ? c.nome.substring(0, 28) + '.' : c.nome;
+                doc.text(cNomeShort, sig2x + (sigW - 20) / 2, y + 4.5, { align: 'center' });
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...gray);
+                doc.setFontSize(6.5);
+                doc.text('CONTRATANTE', sig2x + (sigW - 20) / 2, y + 8, { align: 'center' });
+
+                y += 12;
+
+                // ── RODAPÉ ──
+                doc.setFillColor(...blue);
+                doc.rect(0, H - 10, W, 10, 'F');
+                doc.setFontSize(6);
+                doc.setTextColor(147, 197, 253);
+                doc.setFont('helvetica', 'normal');
+                const footParts = [s.razao, s.cnpj ? `CNPJ: ${s.cnpj}` : '', s.email, s.telefone].filter(Boolean);
+                doc.text(footParts.join('  |  '), W / 2, H - 4.5, { align: 'center' });
+
+                doc.save(`Contrato_${o.numero}_${c.nome.replace(/\s+/g,'_')}.pdf`);
+                Utils.toast('Contrato gerado com sucesso! 📄', 'success');
+                this._orcamentoId = null;
+            }
+        };
+
         // Event listeners
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            if (overlay.id === 'overlay-contract-prompt') return; // gerenciado pelo ContractModal
             overlay.addEventListener('click', (e) => {
                 if(e.target === overlay) UI.closeModals();
             });
