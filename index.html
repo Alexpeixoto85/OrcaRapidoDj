@@ -1566,6 +1566,48 @@
             font-size: 1rem; font-weight: 700; color: var(--secondary);
             cursor: pointer; border-radius: 14px; background: var(--light);
         }
+
+        /* ── ASSINATURA DIGITAL ── */
+        .signature-container {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background: #f8fafc;
+            margin-bottom: 8px;
+        }
+        .signature-container.has-sig {
+            border-color: var(--primary);
+            border-style: solid;
+        }
+        #signature-canvas {
+            display: block;
+            width: 100%;
+            height: 140px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        .signature-placeholder {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #cbd5e1;
+            text-align: center;
+            pointer-events: none;
+            font-size: 0.85rem;
+        }
+        .signature-placeholder i { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+        .sig-actions {
+            display: flex; gap: 8px; margin-bottom: 10px;
+        }
+        .sig-btn {
+            flex: 1; padding: 9px 8px; border: none; border-radius: 10px;
+            font-size: 0.82rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            cursor: pointer;
+        }
+        .sig-btn-clear { background: #fee2e2; color: var(--danger); }
+        .sig-btn-upload { background: #dbeafe; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -2608,6 +2650,29 @@
             </div>
 
             <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+
+            <!-- ASSINATURA DO DJ -->
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-signature" style="color:var(--primary)"></i> Minha Assinatura Digital</label>
+                <p style="font-size:0.78rem;color:var(--secondary);margin-bottom:8px;">Sua assinatura será incluída automaticamente nos orçamentos e contratos. O cliente assina posteriormente.</p>
+                <div class="signature-container" id="sig-container">
+                    <canvas id="signature-canvas"></canvas>
+                    <div class="signature-placeholder" id="sig-placeholder">
+                        <i class="fas fa-pen-nib"></i>
+                        Desenhe sua assinatura aqui
+                    </div>
+                </div>
+                <div class="sig-actions">
+                    <button type="button" class="sig-btn sig-btn-clear" onclick="Signature.clear()">
+                        <i class="fas fa-eraser"></i> Limpar
+                    </button>
+                    <button type="button" class="sig-btn sig-btn-upload" onclick="document.getElementById('sig-upload').click()">
+                        <i class="fas fa-upload"></i> Carregar imagem
+                    </button>
+                </div>
+                <input type="file" id="sig-upload" accept="image/*" style="display:none;" onchange="Signature.loadFromFile(this)">
+                <input type="hidden" id="s-assinatura-data">
+            </div>
             <button type="button" class="btn-block" style="background: var(--danger);" onclick="App.backup.clearData()">
                 <i class="fas fa-trash"></i> Resetar Tudo
             </button>
@@ -4271,6 +4336,10 @@
                     document.getElementById('s-logo-preview').style.display = 'none';
                     document.getElementById('s-logo-placeholder').style.display = 'flex';
                 }
+
+                // Assinatura
+                document.getElementById('s-assinatura-data').value = s.assinatura || '';
+                setTimeout(() => Signature.init(s.assinatura || null), 100);
                 
                 UI.openModal('settings');
             },
@@ -4951,9 +5020,12 @@
                     s.endereco = document.getElementById('s-endereco').value;
                     s.pix = document.getElementById('s-pix').value;
                     s.logo = document.getElementById('s-logo-data').value;
+                    // Salvar assinatura digital
+                    const sigData = Signature.getDataURL();
+                    s.assinatura = sigData || document.getElementById('s-assinatura-data').value || null;
                     
                     Storage.saveSettings(s);
-                    Utils.toast('Configurações salvas');
+                    Utils.toast('Configurações salvas!');
                     UI.closeModals();
                 }
             },
@@ -5342,6 +5414,19 @@
                                 dLines.slice(0, maxLines).forEach(l => { doc.text(l, margin.left, y); y += 3.5; });
                                 y += 1;
                             }
+                            // Fotos do pacote no PDF
+                            if (pacote.fotos && pacote.fotos.length > 0) {
+                                const fotoSize = 22;
+                                const fotoGap = 4;
+                                const fotosParaMostrar = pacote.fotos.slice(0, 4);
+                                fotosParaMostrar.forEach((src, idx) => {
+                                    try {
+                                        const fx = margin.left + idx * (fotoSize + fotoGap);
+                                        doc.addImage(src, 'JPEG', fx, y, fotoSize, fotoSize);
+                                    } catch(e) {}
+                                });
+                                y += fotoSize + 3;
+                            }
                         }
                     }
 
@@ -5479,13 +5564,24 @@
                     const sigY = pageHeight - margin.bottom - 14;
                     doc.setDrawColor(0);
                     doc.setLineWidth(0.3);
-                    doc.line(margin.left + 8, sigY, margin.left + 72, sigY);
+                    // Linha do cliente (em branco para assinar)
                     doc.line(margin.left + 98, sigY, margin.left + contentWidth - 8, sigY);
                     doc.setFontSize(7.5);
                     doc.setTextColor(...darkGray);
                     doc.setFont("helvetica", "normal");
-                    doc.text(s.nome || 'Contratado', margin.left + 40, sigY + 4.5, { align: "center" });
                     doc.text("Contratante", margin.left + 145, sigY + 4.5, { align: "center" });
+
+                    // Assinatura do DJ (imagem se existir, senão linha)
+                    if (s.assinatura) {
+                        try {
+                            doc.addImage(s.assinatura, 'PNG', margin.left + 8, sigY - 12, 64, 12);
+                        } catch(e) {
+                            doc.line(margin.left + 8, sigY, margin.left + 72, sigY);
+                        }
+                    } else {
+                        doc.line(margin.left + 8, sigY, margin.left + 72, sigY);
+                    }
+                    doc.text(s.nome || 'Contratado', margin.left + 40, sigY + 4.5, { align: "center" });
 
                     // ── RODAPÉ ──
                     const footY = pageHeight - margin.bottom - 2;
@@ -6101,16 +6197,26 @@
                 const cidade = s.endereco ? (s.endereco.split(',').pop()?.trim()||'') : '';
                 doc.setFontSize(7.5); doc.setTextColor(...gray); doc.setFont('helvetica','normal');
                 doc.text(`${cidade ? cidade+', ':'' }${new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}`, ml, sigY);
-                const sigW = 68;
+                const sigWR = 68;
                 doc.setDrawColor(...dark); doc.setLineWidth(0.3);
-                doc.line(ml+4, sigY+14, ml+sigW, sigY+14);
-                doc.line(W-mr-sigW, sigY+14, W-mr-4, sigY+14);
+                // Linha do pagante (cliente assina depois)
+                doc.line(W-mr-sigWR, sigY+14, W-mr-4, sigY+14);
+                // Assinatura do recebedor (DJ)
+                if (s.assinatura) {
+                    try {
+                        doc.addImage(s.assinatura, 'PNG', ml+4, sigY+4, sigWR-4, 10);
+                    } catch(e) {
+                        doc.line(ml+4, sigY+14, ml+sigWR, sigY+14);
+                    }
+                } else {
+                    doc.line(ml+4, sigY+14, ml+sigWR, sigY+14);
+                }
                 doc.setFontSize(7); doc.setTextColor(...dark); doc.setFont('helvetica','bold');
-                doc.text((s.razao||s.nome||'').substring(0,28), ml+sigW/2+4, sigY+18.5, {align:'center'});
-                doc.text(c.nome.substring(0,28), W-mr-sigW/2, sigY+18.5, {align:'center'});
+                doc.text((s.razao||s.nome||'').substring(0,28), ml+sigWR/2+4, sigY+18.5, {align:'center'});
+                doc.text(c.nome.substring(0,28), W-mr-sigWR/2, sigY+18.5, {align:'center'});
                 doc.setFont('helvetica','normal'); doc.setTextColor(...gray); doc.setFontSize(6.5);
-                doc.text('RECEBEDOR', ml+sigW/2+4, sigY+22.5, {align:'center'});
-                doc.text('PAGANTE', W-mr-sigW/2, sigY+22.5, {align:'center'});
+                doc.text('RECEBEDOR', ml+sigWR/2+4, sigY+22.5, {align:'center'});
+                doc.text('PAGANTE', W-mr-sigWR/2, sigY+22.5, {align:'center'});
 
                 // ── RODAPÉ ──
                 doc.setFillColor(...blue);
@@ -6293,6 +6399,147 @@
             },
             close() {
                 document.getElementById('action-sheet-overlay').classList.remove('active');
+            }
+        };
+
+        // ============================================================
+        // ============================================================
+        // SIGNATURE PAD — Assinatura Digital do DJ
+        // ============================================================
+        const Signature = {
+            canvas: null,
+            ctx: null,
+            drawing: false,
+            lastX: 0,
+            lastY: 0,
+            hasContent: false,
+
+            init(existingData) {
+                const canvas = document.getElementById('signature-canvas');
+                if (!canvas) return;
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+
+                // Set canvas real size
+                const dpr = window.devicePixelRatio || 1;
+                const rect = canvas.getBoundingClientRect();
+                const w = canvas.offsetWidth || 300;
+                canvas.width = w * dpr;
+                canvas.height = 140 * dpr;
+                this.ctx.scale(dpr, dpr);
+
+                // Style
+                this.ctx.strokeStyle = '#1e293b';
+                this.ctx.lineWidth = 2;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+
+                // Clear
+                this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+                this.hasContent = false;
+
+                // Load existing
+                if (existingData) {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.ctx.drawImage(img, 0, 0, w, 140);
+                        this.hasContent = true;
+                        this._updateUI();
+                    };
+                    img.src = existingData;
+                }
+                this._updateUI();
+                this._bindEvents();
+            },
+
+            _bindEvents() {
+                const c = this.canvas;
+                if (c._sigBound) return;
+                c._sigBound = true;
+
+                const getPos = (e) => {
+                    const rect = c.getBoundingClientRect();
+                    const src = e.touches ? e.touches[0] : e;
+                    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+                };
+
+                const start = (e) => {
+                    e.preventDefault();
+                    this.drawing = true;
+                    const p = getPos(e);
+                    this.lastX = p.x; this.lastY = p.y;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p.x, p.y);
+                };
+                const move = (e) => {
+                    if (!this.drawing) return;
+                    e.preventDefault();
+                    const p = getPos(e);
+                    this.ctx.lineTo(p.x, p.y);
+                    this.ctx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p.x, p.y);
+                    this.lastX = p.x; this.lastY = p.y;
+                    this.hasContent = true;
+                    this._updateUI();
+                };
+                const end = () => { this.drawing = false; };
+
+                c.addEventListener('mousedown', start);
+                c.addEventListener('mousemove', move);
+                c.addEventListener('mouseup', end);
+                c.addEventListener('mouseleave', end);
+                c.addEventListener('touchstart', start, { passive: false });
+                c.addEventListener('touchmove', move, { passive: false });
+                c.addEventListener('touchend', end);
+            },
+
+            _updateUI() {
+                const placeholder = document.getElementById('sig-placeholder');
+                const container = document.getElementById('sig-container');
+                if (placeholder) placeholder.style.display = this.hasContent ? 'none' : 'block';
+                if (container) container.classList.toggle('has-sig', this.hasContent);
+            },
+
+            clear() {
+                if (!this.ctx) return;
+                const dpr = window.devicePixelRatio || 1;
+                this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
+                this.hasContent = false;
+                this._updateUI();
+                document.getElementById('s-assinatura-data').value = '';
+            },
+
+            getDataURL() {
+                if (!this.canvas || !this.hasContent) return null;
+                return this.canvas.toDataURL('image/png');
+            },
+
+            async loadFromFile(input) {
+                if (!input.files || !input.files[0]) return;
+                try {
+                    const base64 = await Utils.readImage(input.files[0]);
+                    const img = new Image();
+                    img.onload = () => {
+                        const dpr = window.devicePixelRatio || 1;
+                        const w = this.canvas.offsetWidth;
+                        const h = 140;
+                        this.ctx.clearRect(0, 0, w, h);
+                        // Fit image maintaining aspect ratio
+                        const scale = Math.min(w / img.width, h / img.height);
+                        const dw = img.width * scale;
+                        const dh = img.height * scale;
+                        const dx = (w - dw) / 2;
+                        const dy = (h - dh) / 2;
+                        this.ctx.drawImage(img, dx, dy, dw, dh);
+                        this.hasContent = true;
+                        this._updateUI();
+                        document.getElementById('s-assinatura-data').value = base64;
+                    };
+                    img.src = base64;
+                } catch(e) {
+                    Utils.toast('Erro ao carregar imagem', 'error');
+                }
             }
         };
 
@@ -6709,8 +6956,19 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
 
                 doc.setDrawColor(...dark);
                 doc.setLineWidth(0.3);
-                doc.line(sig1x, y, sig1x + sigW - 20, y);
+                // Linha do cliente em branco (para assinar depois)
                 doc.line(sig2x, y, sig2x + sigW - 20, y);
+
+                // Assinatura do DJ: imagem se houver, senão linha
+                if (s.assinatura) {
+                    try {
+                        doc.addImage(s.assinatura, 'PNG', sig1x, y - 10, sigW - 20, 10);
+                    } catch(e) {
+                        doc.line(sig1x, y, sig1x + sigW - 20, y);
+                    }
+                } else {
+                    doc.line(sig1x, y, sig1x + sigW - 20, y);
+                }
 
                 doc.setFontSize(7);
                 doc.setTextColor(...dark);
