@@ -1506,6 +1506,28 @@
         }
         .notif-empty i { font-size: 2rem; opacity: 0.3; margin-bottom: 10px; display: block; }
         .notif-empty p { font-size: 0.85rem; }
+
+        .notif-section-label {
+            font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.5px; margin: 4px 2px 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        /* Botões de ação inline nos itens */
+        .notif-actions {
+            display: flex; gap: 5px; margin-top: 7px;
+        }
+        .na-btn {
+            flex: 1; padding: 6px 4px; border: none; border-radius: 7px;
+            font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .na-btn:active { opacity: 0.7; transform: scale(0.95); }
+        .na-done      { background: #d1fae5; color: #047857; }
+        .na-reschedule{ background: #dbeafe; color: #1d4ed8; }
+        .na-whatsapp  { background: #dcfce7; color: #16a34a; }
+        .na-delete    { background: #fee2e2; color: var(--danger); }
     
         .action-sheet-overlay {
             position: fixed; inset:0;
@@ -1571,8 +1593,8 @@
             <button class="notif-close" onclick="Notif.close()"><i class="fas fa-times"></i></button>
         </div>
         <div class="notif-tabs">
-            <button class="notif-tab active" onclick="Notif.switchTab('eventos')" id="ntab-eventos">Eventos</button>
             <button class="notif-tab" onclick="Notif.switchTab('contatos')" id="ntab-contatos">Contatos</button>
+            <button class="notif-tab active" onclick="Notif.switchTab('eventos')" id="ntab-eventos">Eventos</button>
             <button class="notif-tab" onclick="Notif.switchTab('aniversarios')" id="ntab-aniversarios">Aniversários</button>
         </div>
         <div class="notif-body" id="notif-body">
@@ -6615,25 +6637,35 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
 
         // ── NOTIFICATION PANEL ──
         const Notif = {
-            currentTab: 'eventos',
+            currentTab: 'contatos',
+            MAX_DAYS: 5,
+
+            // Retorna data no formato YYYY-MM-DD com offset em dias
+            dateOffset: (days) => {
+                const d = new Date();
+                d.setDate(d.getDate() + days);
+                return d.toISOString().split('T')[0];
+            },
 
             getAlerts: () => {
                 const today = new Date().toISOString().split('T')[0];
+                const limit = Notif.dateOffset(Notif.MAX_DAYS);
                 const { clientes, orcamentos } = UI.data;
 
-                // Eventos vencidos (follow-up)
-                const vencidos = orcamentos.filter(o =>
-                    o.status === 'pendente' && o.validade && o.validade <= today
-                );
-
-                // Contatos atrasados
+                // Contatos atrasados (passado)
                 const contatosAtrasados = orcamentos.filter(o =>
                     o.dataContato && o.dataContato < today && o.status === 'pendente'
                 );
 
-                // Contatos para hoje
-                const contatosHoje = orcamentos.filter(o =>
-                    o.dataContato && o.dataContato === today && o.status === 'pendente'
+                // Contatos de hoje até +5 dias
+                const contatosProximos = orcamentos.filter(o =>
+                    o.dataContato && o.dataContato >= today && o.dataContato <= limit && o.status === 'pendente'
+                );
+
+                // Orçamentos com evento nos próximos 5 dias (aceitos ou pendentes)
+                const eventosProximos = orcamentos.filter(o =>
+                    o.dataEvento && o.dataEvento >= today && o.dataEvento <= limit &&
+                    o.status !== 'recusado'
                 );
 
                 // Aniversariantes hoje
@@ -6641,24 +6673,20 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                     c.nascimento && Utils.isBirthdayToday(c.nascimento)
                 );
 
-                // Próximos 7 dias
-                const aniversariantesBreve = clientes.filter(c =>
-                    c.nascimento && !Utils.isBirthdayToday(c.nascimento) && Utils.isBirthdayNextWeek(c.nascimento)
-                );
+                // Aniversariantes nos próximos 5 dias
+                const aniversariantesBreve = clientes.filter(c => {
+                    if (!c.nascimento || Utils.isBirthdayToday(c.nascimento)) return false;
+                    const nextB = Utils.getNextBirthday(c.nascimento);
+                    return nextB >= today && nextB <= limit;
+                });
 
-                // Recontato (eventos recorrentes 6 meses antes)
-                const recontatos = orcamentos.filter(o =>
-                    o.status === 'aceito' && o.dataEvento && o.evento &&
-                    Utils.needsRecontact(o.dataEvento, o.evento)
-                );
-
-                return { vencidos, contatosAtrasados, contatosHoje, aniversariantesHoje, aniversariantesBreve, recontatos };
+                return { contatosAtrasados, contatosProximos, eventosProximos, aniversariantesHoje, aniversariantesBreve };
             },
 
             getTotalCount: () => {
                 const a = Notif.getAlerts();
-                return a.vencidos.length + a.contatosAtrasados.length + a.contatosHoje.length +
-                       a.aniversariantesHoje.length + a.recontatos.length;
+                return a.contatosAtrasados.length + a.contatosProximos.length +
+                       a.eventosProximos.length + a.aniversariantesHoje.length + a.aniversariantesBreve.length;
             },
 
             updateBadge: () => {
@@ -6687,6 +6715,8 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
             close: () => {
                 document.getElementById('notif-panel').classList.remove('active');
                 document.getElementById('notif-overlay').classList.remove('active');
+                // Fechar qualquer reprogramar inline aberto
+                document.querySelectorAll('.notif-reschedule-form').forEach(el => el.remove());
             },
 
             switchTab: (tab) => {
@@ -6696,96 +6726,176 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                 Notif.render(tab);
             },
 
+            // ── AÇÕES DIRETAS ──
+            markDone: (orcId) => {
+                const idx = UI.data.orcamentos.findIndex(o => o.id === orcId);
+                if (idx < 0) return;
+                UI.data.orcamentos[idx].statusContato = 'realizado';
+                UI.data.orcamentos[idx].resultadoContato = UI.data.orcamentos[idx].resultadoContato || 'cliente_interessado';
+                Storage.set('orcamentos', UI.data.orcamentos);
+                Utils.toast('Contato marcado como feito! ✅');
+                UI.renderDashboard();
+                Notif.render(Notif.currentTab);
+            },
+
+            deleteContact: (orcId) => {
+                if (!confirm('Remover agendamento deste contato?')) return;
+                const idx = UI.data.orcamentos.findIndex(o => o.id === orcId);
+                if (idx < 0) return;
+                UI.data.orcamentos[idx].dataContato = '';
+                UI.data.orcamentos[idx].statusContato = '';
+                UI.data.orcamentos[idx].observacoesContato = '';
+                UI.data.orcamentos[idx].resultadoContato = '';
+                Storage.set('orcamentos', UI.data.orcamentos);
+                Utils.toast('Agendamento removido!');
+                UI.renderDashboard();
+                Notif.render(Notif.currentTab);
+            },
+
+            showRescheduleForm: (orcId, btnEl) => {
+                // Fechar qualquer outro form aberto
+                document.querySelectorAll('.notif-reschedule-form').forEach(el => el.remove());
+
+                const today = new Date().toISOString().split('T')[0];
+                const form = document.createElement('div');
+                form.className = 'notif-reschedule-form';
+                form.style.cssText = 'background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 12px;margin-top:6px;';
+                form.innerHTML = `
+                    <div style="font-size:0.78rem;font-weight:700;color:#0369a1;margin-bottom:6px;"><i class="fas fa-calendar-plus"></i> Nova data de contato</div>
+                    <input type="date" id="reschedule-date-${orcId}" min="${today}" style="width:100%;padding:8px;border:1px solid #bae6fd;border-radius:8px;font-size:0.9rem;outline:none;margin-bottom:8px;">
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="Notif.confirmReschedule('${orcId}')" style="flex:1;padding:8px;background:#0369a1;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Salvar</button>
+                        <button onclick="this.closest('.notif-reschedule-form').remove()" style="flex:1;padding:8px;background:#f1f5f9;color:var(--secondary);border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Cancelar</button>
+                    </div>
+                `;
+                btnEl.closest('.notif-item').after(form);
+                form.querySelector(`#reschedule-date-${orcId}`).focus();
+            },
+
+            confirmReschedule: (orcId) => {
+                const input = document.getElementById(`reschedule-date-${orcId}`);
+                if (!input || !input.value) { Utils.toast('Selecione uma data!', 'error'); return; }
+                const idx = UI.data.orcamentos.findIndex(o => o.id === orcId);
+                if (idx < 0) return;
+                UI.data.orcamentos[idx].dataContato = input.value;
+                UI.data.orcamentos[idx].statusContato = 'agendado';
+                Storage.set('orcamentos', UI.data.orcamentos);
+                Utils.toast('Contato reprogramado! 📅');
+                UI.renderDashboard();
+                Notif.render(Notif.currentTab);
+            },
+
+            // Renderiza botões de ação para contatos
+            contactActions: (o) => `
+                <div class="notif-actions">
+                    <button class="na-btn na-done" onclick="event.stopPropagation(); Notif.markDone('${o.id}')" title="Marcar feito">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="na-btn na-reschedule" onclick="event.stopPropagation(); Notif.showRescheduleForm('${o.id}', this)" title="Reprogramar">
+                        <i class="fas fa-calendar-alt"></i>
+                    </button>
+                    <button class="na-btn na-whatsapp" onclick="event.stopPropagation(); Notif.close(); App.whatsapp.confirmOpen('${o.id}', true)" title="WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                    <button class="na-btn na-delete" onclick="event.stopPropagation(); Notif.deleteContact('${o.id}')" title="Excluir agendamento">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `,
+
             render: (tab) => {
                 const body = document.getElementById('notif-body');
                 const a = Notif.getAlerts();
+                const today = new Date().toISOString().split('T')[0];
                 let html = '';
 
-                if (tab === 'eventos') {
-                    if (a.vencidos.length === 0 && a.recontatos.length === 0) {
-                        html = `<div class="notif-empty"><i class="fas fa-check-circle"></i><p>Nenhum evento precisa de atenção!</p></div>`;
-                    } else {
-                        if (a.vencidos.length > 0) {
-                            html += `<div style="font-size:0.75rem;font-weight:700;color:var(--danger);margin:4px 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Orçamentos Vencidos (${a.vencidos.length})</div>`;
-                            html += a.vencidos.map(o => {
-                                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
-                                return `<div class="notif-item danger" onclick="Notif.close(); UI.showOrcamentoDetails('${o.id}')">
-                                    <div class="notif-icon" style="background:#fee2e2;color:var(--danger)"><i class="fas fa-exclamation-triangle"></i></div>
-                                    <div class="notif-text">
-                                        <strong>#${o.numero} — ${c.nome}</strong>
-                                        <span>${o.evento} • ${Utils.formatDate(o.dataEvento)}</span>
-                                        <div class="notif-time"><i class="fas fa-clock"></i> Vencido em ${Utils.formatDate(o.validade)}</div>
-                                    </div>
-                                </div>`;
-                            }).join('');
-                        }
-                        if (a.recontatos.length > 0) {
-                            html += `<div style="font-size:0.75rem;font-weight:700;color:#16a34a;margin:10px 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Para Recontato (${a.recontatos.length})</div>`;
-                            html += a.recontatos.map(o => {
-                                const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
-                                return `<div class="notif-item green" onclick="Notif.close(); UI.showOrcamentoDetails('${o.id}')">
-                                    <div class="notif-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-calendar-plus"></i></div>
-                                    <div class="notif-text">
-                                        <strong>${c.nome}</strong>
-                                        <span>${o.evento} • ${Utils.formatDate(o.dataEvento)}</span>
-                                        <div class="notif-time"><i class="fas fa-redo"></i> Evento recorrente — hora de recontatar</div>
-                                    </div>
-                                </div>`;
-                            }).join('');
-                        }
-                    }
-                } else if (tab === 'contatos') {
-                    if (a.contatosAtrasados.length === 0 && a.contatosHoje.length === 0) {
-                        html = `<div class="notif-empty"><i class="fas fa-calendar-check"></i><p>Nenhum contato pendente!</p></div>`;
+                if (tab === 'contatos') {
+                    const total = a.contatosAtrasados.length + a.contatosProximos.length;
+                    if (total === 0) {
+                        html = `<div class="notif-empty"><i class="fas fa-calendar-check"></i><p>Nenhum contato nos próximos ${Notif.MAX_DAYS} dias!</p></div>`;
                     } else {
                         if (a.contatosAtrasados.length > 0) {
-                            html += `<div style="font-size:0.75rem;font-weight:700;color:var(--danger);margin:4px 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Contatos Atrasados (${a.contatosAtrasados.length})</div>`;
+                            html += `<div class="notif-section-label" style="color:var(--danger)"><i class="fas fa-exclamation-circle"></i> Atrasados (${a.contatosAtrasados.length})</div>`;
                             html += a.contatosAtrasados.map(o => {
                                 const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                                const daysLate = Math.round((new Date(today) - new Date(o.dataContato)) / 86400000);
                                 return `<div class="notif-item danger" onclick="Notif.close(); App.contact.open('${o.id}')">
                                     <div class="notif-icon" style="background:#fee2e2;color:var(--danger)"><i class="fas fa-phone-slash"></i></div>
                                     <div class="notif-text">
                                         <strong>${c.nome}</strong>
                                         <span>#${o.numero} — ${o.evento}</span>
-                                        <div class="notif-time"><i class="fas fa-clock"></i> Era para ${Utils.formatDate(o.dataContato)}</div>
+                                        <div class="notif-time"><i class="fas fa-clock"></i> ${daysLate} dia${daysLate!==1?'s':''} atrasado • era ${Utils.formatDate(o.dataContato)}</div>
                                     </div>
+                                    ${Notif.contactActions(o)}
                                 </div>`;
                             }).join('');
                         }
-                        if (a.contatosHoje.length > 0) {
-                            html += `<div style="font-size:0.75rem;font-weight:700;color:var(--warning);margin:${a.contatosAtrasados.length>0?'10px':'4px'} 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Contatos para Hoje (${a.contatosHoje.length})</div>`;
-                            html += a.contatosHoje.map(o => {
+                        if (a.contatosProximos.length > 0) {
+                            html += `<div class="notif-section-label" style="color:#0369a1;margin-top:${a.contatosAtrasados.length>0?'12px':'4px'}"><i class="fas fa-phone"></i> Próximos ${Notif.MAX_DAYS} dias (${a.contatosProximos.length})</div>`;
+                            html += a.contatosProximos.map(o => {
                                 const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
-                                return `<div class="notif-item warning" onclick="Notif.close(); App.contact.open('${o.id}')">
-                                    <div class="notif-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-phone"></i></div>
+                                const isToday = o.dataContato === today;
+                                const daysLeft = Math.round((new Date(o.dataContato) - new Date(today)) / 86400000);
+                                const colorClass = isToday ? 'warning' : 'info';
+                                const iconBg = isToday ? '#fef3c7' : '#eff6ff';
+                                const iconColor = isToday ? '#b45309' : '#1d4ed8';
+                                return `<div class="notif-item ${colorClass}" onclick="Notif.close(); App.contact.open('${o.id}')">
+                                    <div class="notif-icon" style="background:${iconBg};color:${iconColor}"><i class="fas fa-phone"></i></div>
                                     <div class="notif-text">
                                         <strong>${c.nome}</strong>
                                         <span>#${o.numero} — ${o.evento}</span>
-                                        <div class="notif-time"><i class="fas fa-calendar-day"></i> Hoje — ${o.observacoesContato ? o.observacoesContato.substring(0,30)+'...' : 'Sem observações'}</div>
+                                        <div class="notif-time"><i class="fas fa-calendar-day"></i> ${isToday ? 'Hoje' : `Em ${daysLeft} dia${daysLeft!==1?'s':''}`} • ${Utils.formatDate(o.dataContato)}</div>
                                     </div>
+                                    ${Notif.contactActions(o)}
                                 </div>`;
                             }).join('');
                         }
                     }
+
+                } else if (tab === 'eventos') {
+                    if (a.eventosProximos.length === 0) {
+                        html = `<div class="notif-empty"><i class="fas fa-calendar-alt"></i><p>Nenhum evento nos próximos ${Notif.MAX_DAYS} dias!</p></div>`;
+                    } else {
+                        html += `<div class="notif-section-label" style="color:var(--primary)"><i class="fas fa-calendar-star"></i> Eventos em até ${Notif.MAX_DAYS} dias (${a.eventosProximos.length})</div>`;
+                        html += a.eventosProximos.map(o => {
+                            const c = UI.data.clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                            const isToday = o.dataEvento === today;
+                            const daysLeft = Math.round((new Date(o.dataEvento) - new Date(today)) / 86400000);
+                            const isFechado = o.status === 'aceito';
+                            const colorClass = isToday ? 'danger' : (isFechado ? 'green' : 'warning');
+                            const iconBg = isToday ? '#fee2e2' : (isFechado ? '#dcfce7' : '#fef3c7');
+                            const iconColor = isToday ? 'var(--danger)' : (isFechado ? '#16a34a' : '#b45309');
+                            return `<div class="notif-item ${colorClass}" onclick="Notif.close(); UI.showOrcamentoDetails('${o.id}')">
+                                <div class="notif-icon" style="background:${iconBg};color:${iconColor}"><i class="fas fa-music"></i></div>
+                                <div class="notif-text">
+                                    <strong>${c.nome} <span style="font-weight:500;font-size:0.8rem">${isFechado ? '✅' : '⏳'}</span></strong>
+                                    <span>${o.evento} ${o.horario ? '• '+o.horario : ''}</span>
+                                    <div class="notif-time"><i class="fas fa-calendar"></i> ${isToday ? 'HOJE!' : `Em ${daysLeft} dia${daysLeft!==1?'s':''}`} • ${Utils.formatDate(o.dataEvento)} ${o.local ? '• '+o.local : ''}</div>
+                                </div>
+                            </div>`;
+                        }).join('');
+                    }
+
                 } else if (tab === 'aniversarios') {
-                    if (a.aniversariantesHoje.length === 0 && a.aniversariantesBreve.length === 0) {
-                        html = `<div class="notif-empty"><i class="fas fa-birthday-cake"></i><p>Nenhum aniversário próximo!</p></div>`;
+                    const total = a.aniversariantesHoje.length + a.aniversariantesBreve.length;
+                    if (total === 0) {
+                        html = `<div class="notif-empty"><i class="fas fa-birthday-cake"></i><p>Nenhum aniversário nos próximos ${Notif.MAX_DAYS} dias!</p></div>`;
                     } else {
                         if (a.aniversariantesHoje.length > 0) {
-                            html += `<div style="font-size:0.75rem;font-weight:700;color:#db2777;margin:4px 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">🎂 Aniversário HOJE (${a.aniversariantesHoje.length})</div>`;
+                            html += `<div class="notif-section-label" style="color:#db2777"><i class="fas fa-birthday-cake"></i> 🎂 Hoje (${a.aniversariantesHoje.length})</div>`;
                             html += a.aniversariantesHoje.map(c => {
                                 return `<div class="notif-item pink" onclick="Notif.close(); App.whatsapp.openCliente('${c.id}', true)">
                                     <div class="notif-icon" style="background:#fce7f3;color:#db2777"><i class="fas fa-birthday-cake"></i></div>
                                     <div class="notif-text">
                                         <strong>${c.nome}</strong>
                                         <span>${Utils.formatBirthdate(c.nascimento)}</span>
-                                        <div class="notif-time"><i class="fab fa-whatsapp" style="color:#25D366"></i> Clique para enviar parabéns!</div>
+                                        <div class="notif-time"><i class="fab fa-whatsapp" style="color:#25D366"></i> Toque para enviar parabéns no WhatsApp</div>
                                     </div>
                                 </div>`;
                             }).join('');
                         }
                         if (a.aniversariantesBreve.length > 0) {
-                            html += `<div style="font-size:0.75rem;font-weight:700;color:#b45309;margin:${a.aniversariantesHoje.length>0?'10px':'4px'} 2px 8px;text-transform:uppercase;letter-spacing:0.5px;">Nos próximos 7 dias (${a.aniversariantesBreve.length})</div>`;
+                            html += `<div class="notif-section-label" style="color:#b45309;margin-top:${a.aniversariantesHoje.length>0?'12px':'4px'}"><i class="fas fa-gift"></i> Próximos ${Notif.MAX_DAYS} dias (${a.aniversariantesBreve.length})</div>`;
                             html += a.aniversariantesBreve.map(c => {
                                 const nextB = Utils.getNextBirthday(c.nascimento);
                                 const days = Utils.getDaysUntil(nextB);
@@ -6794,7 +6904,7 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                                     <div class="notif-text">
                                         <strong>${c.nome}</strong>
                                         <span>${Utils.formatBirthdate(c.nascimento)}</span>
-                                        <div class="notif-time"><i class="fas fa-calendar"></i> Em ${days} dia${days!==1?'s':''}</div>
+                                        <div class="notif-time"><i class="fas fa-calendar"></i> Em ${days} dia${days!==1?'s':''} — ${Utils.formatDate(nextB)}</div>
                                     </div>
                                 </div>`;
                             }).join('');
