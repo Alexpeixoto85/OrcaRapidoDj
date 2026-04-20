@@ -1897,6 +1897,12 @@
             <div id="scheduled-contacts-list">
                 <!-- Lista de contatos agendados será preenchida aqui -->
             </div>
+
+            <div class="section-title" id="eventos-hoje-section" style="display:none;">
+                🎵 Eventos Hoje — Checklist
+                <span class="tag tag-alert" id="checklist-hoje-badge" style="display:none">!</span>
+            </div>
+            <div id="eventos-hoje-checklist-list"></div>
             
             <div class="section-title" id="birthday-alerts">
                 Aniversariantes de Hoje
@@ -2054,11 +2060,21 @@
                 <div class="checklist-header">
                     <div style="font-weight:700;color:var(--dark);" id="checklist-counter">0 / 0 itens</div>
                     <div style="display:flex;gap:8px;">
-                        <button onclick="ChecklistApp.addCustomItem()" style="background:#dbeafe;color:var(--primary);border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-plus"></i> Adicionar</button>
+                        <button onclick="ChecklistApp.toggleEquipPanel()" id="btn-equip-panel" style="background:#f3e8ff;color:#7c3aed;border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-boxes"></i> Equipamentos</button>
+                        <button onclick="ChecklistApp.addCustomItem()" style="background:#dbeafe;color:var(--primary);border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-pencil-alt"></i> Manual</button>
                         <button onclick="ChecklistApp.resetAll()" style="background:#fee2e2;color:var(--danger);border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-undo"></i></button>
                     </div>
                 </div>
                 <div class="checklist-progress"><div class="checklist-progress-fill" id="checklist-progress-fill" style="width:0%"></div></div>
+                <!-- Painel de seleção de equipamentos cadastrados -->
+                <div id="checklist-equip-panel" style="display:none;background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:14px;padding:14px;margin-bottom:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <div style="font-size:0.82rem;font-weight:800;color:#7c3aed;display:flex;align-items:center;gap:6px;"><i class="fas fa-boxes"></i> SELECIONAR EQUIPAMENTOS</div>
+                        <button onclick="ChecklistApp.addSelectedEquips()" id="btn-add-selected" style="background:#7c3aed;color:white;border:none;border-radius:8px;padding:7px 14px;font-weight:700;font-size:0.8rem;cursor:pointer;display:none;"><i class="fas fa-plus-circle"></i> Adicionar selecionados</button>
+                    </div>
+                    <div id="checklist-equip-catalog"></div>
+                </div>
+                <div id="checklist-orcamento-equips" style="display:none;"></div>
                 <div id="checklist-items"></div>
             </div>
         </div>
@@ -3548,6 +3564,59 @@
                 } else {
                     scheduledList.innerHTML = allScheduled.map(o => UI.createScheduledContactCard(o)).join('');
                 }
+
+                // Eventos de hoje — alerta de checklist
+                const today2 = new Date().toISOString().split('T')[0];
+                const eventosHoje = orcamentos.filter(o =>
+                    o.dataEvento === today2 && o.status !== 'recusado'
+                );
+                const eventosSectionEl = document.getElementById('eventos-hoje-section');
+                const eventosChecklistList = document.getElementById('eventos-hoje-checklist-list');
+                if (eventosHoje.length > 0) {
+                    eventosSectionEl.style.display = 'flex';
+                    const incompletos = eventosHoje.filter(o => {
+                        const cl = o.checklist || [];
+                        return cl.length === 0 || cl.some(i => !i.checked);
+                    });
+                    document.getElementById('checklist-hoje-badge').style.display = incompletos.length > 0 ? 'inline-block' : 'none';
+                    eventosChecklistList.innerHTML = eventosHoje.map(o => {
+                        const c2 = clientes.find(cl => cl.id === o.clienteId) || { nome: 'Desconhecido' };
+                        const cl = o.checklist || [];
+                        const done = cl.filter(i => i.checked).length;
+                        const total = cl.length;
+                        const pct = total > 0 ? Math.round((done / total) * 100) : -1;
+                        const isComplete = pct === 100;
+                        const isEmpty = total === 0;
+                        const borderColor = isComplete ? 'var(--success)' : isEmpty ? 'var(--warning)' : 'var(--danger)';
+                        const statusText = isEmpty
+                            ? `<span style="background:#fef3c7;color:#b45309;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;"><i class="fas fa-exclamation-triangle"></i> Checklist não criado</span>`
+                            : isComplete
+                            ? `<span style="background:#dcfce7;color:#166534;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;"><i class="fas fa-check-circle"></i> Checklist completo</span>`
+                            : `<span style="background:#fee2e2;color:#b91c1c;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;"><i class="fas fa-clipboard-list"></i> ${done}/${total} — Incompleto!</span>`;
+                        return `<div class="list-card" style="border-left:4px solid ${borderColor};margin-bottom:10px;">
+                            <div class="card-header">
+                                <div class="card-title">${o.evento} — ${c2.nome}</div>
+                                ${statusText}
+                            </div>
+                            <div class="card-subtitle"><i class="fas fa-clock"></i> ${o.horario || 'Horário a definir'} ${o.local ? '• ' + o.local : ''}</div>
+                            ${!isComplete ? `<div class="action-row">
+                                <button class="btn-sm ${isEmpty ? 'btn-pending' : 'btn-rejected'}" onclick="ChecklistApp.openFromOrcamento('${o.id}')">
+                                    <i class="fas fa-clipboard-list"></i> ${isEmpty ? 'Criar Checklist' : 'Completar Checklist'}
+                                </button>
+                                <button class="btn-sm btn-light" onclick="UI.showOrcamentoDetails('${o.id}')">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                            </div>` : `<div class="action-row">
+                                <button class="btn-sm btn-accepted" onclick="ChecklistApp.openFromOrcamento('${o.id}')">
+                                    <i class="fas fa-clipboard-check"></i> Ver Checklist
+                                </button>
+                            </div>`}
+                        </div>`;
+                    }).join('');
+                } else {
+                    eventosSectionEl.style.display = 'none';
+                    eventosChecklistList.innerHTML = '';
+                }
                 
                 // Render aniversariantes
                 const birthdayList = document.getElementById('birthday-list');
@@ -4270,6 +4339,9 @@
                             </button>
                             <button class="btn-details" style="background:#d1fae5;color:#065f46;border:none;padding:10px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="UI.closeModals(); setTimeout(()=>App.recebimento.open('${o.id}'), 200)">
                                 <i class="fas fa-hand-holding-usd"></i> Recebimento
+                            </button>
+                            <button class="btn-details" style="background:${o.checklist && o.checklist.length > 0 ? '#f3e8ff' : '#fef3c7'};color:${o.checklist && o.checklist.length > 0 ? '#7c3aed' : '#b45309'};border:none;padding:10px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="UI.closeModals(); setTimeout(()=>ChecklistApp.openFromOrcamento('${o.id}'), 200)">
+                                <i class="fas fa-clipboard-list"></i> ${o.checklist && o.checklist.length > 0 ? 'Ver Checklist (' + o.checklist.filter(i=>i.checked).length + '/' + o.checklist.length + ')' : 'Criar Checklist'}
                             </button>
                             ` : ''}
                         </div>
@@ -7713,8 +7785,13 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
 
             getTotalCount: () => {
                 const a = Notif.getAlerts();
+                const today = new Date().toISOString().split('T')[0];
+                const checklistIncompletos = UI.data.orcamentos.filter(o =>
+                    o.dataEvento === today && o.status !== 'recusado' &&
+                    (!(o.checklist) || o.checklist.length === 0 || o.checklist.some(i => !i.checked))
+                ).length;
                 return a.contatosAtrasados.length + a.contatosProximos.length +
-                       a.eventosProximos.length + a.aniversariantesHoje.length + a.aniversariantesBreve.length;
+                       a.eventosProximos.length + a.aniversariantesHoje.length + a.aniversariantesBreve.length + checklistIncompletos;
             },
 
             updateBadge: () => {
@@ -7893,12 +7970,23 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
                             const colorClass = isToday ? 'danger' : (isFechado ? 'green' : 'warning');
                             const iconBg = isToday ? '#fee2e2' : (isFechado ? '#dcfce7' : '#fef3c7');
                             const iconColor = isToday ? 'var(--danger)' : (isFechado ? '#16a34a' : '#b45309');
+                            // Checklist status
+                            const checklist = o.checklist || [];
+                            const checklistTotal = checklist.length;
+                            const checklistDone = checklist.filter(i => i.checked).length;
+                            const checklistPct = checklistTotal > 0 ? Math.round((checklistDone / checklistTotal) * 100) : -1;
+                            const checklistBadge = checklistTotal === 0
+                                ? `<div style="margin-top:6px;background:#fef3c7;border-radius:7px;padding:5px 9px;font-size:0.75rem;font-weight:700;color:#b45309;display:flex;align-items:center;gap:5px;cursor:pointer;" onclick="Notif.close(); ChecklistApp.openFromOrcamento('${o.id}')"><i class="fas fa-clipboard-list"></i> Checklist não criado — toque para criar</div>`
+                                : checklistPct < 100
+                                ? `<div style="margin-top:6px;background:#ffe4e6;border-radius:7px;padding:5px 9px;font-size:0.75rem;font-weight:700;color:#be123c;display:flex;align-items:center;gap:5px;cursor:pointer;" onclick="Notif.close(); ChecklistApp.openFromOrcamento('${o.id}')"><i class="fas fa-clipboard-list"></i> Checklist: ${checklistDone}/${checklistTotal} (${checklistPct}%) — Incompleto!</div>`
+                                : `<div style="margin-top:6px;background:#dcfce7;border-radius:7px;padding:5px 9px;font-size:0.75rem;font-weight:700;color:#166534;display:flex;align-items:center;gap:5px;"><i class="fas fa-clipboard-check"></i> Checklist completo ✓</div>`;
                             return `<div class="notif-item ${colorClass}" onclick="Notif.close(); UI.showOrcamentoDetails('${o.id}')">
                                 <div class="notif-icon" style="background:${iconBg};color:${iconColor}"><i class="fas fa-music"></i></div>
-                                <div class="notif-text">
+                                <div class="notif-text" style="flex:1;">
                                     <strong>${c.nome} <span style="font-weight:500;font-size:0.8rem">${isFechado ? '✅' : '⏳'}</span></strong>
                                     <span>${o.evento} ${o.horario ? '• '+o.horario : ''}</span>
                                     <div class="notif-time"><i class="fas fa-calendar"></i> ${isToday ? 'HOJE!' : `Em ${daysLeft} dia${daysLeft!==1?'s':''}`} • ${Utils.formatDate(o.dataEvento)} ${o.local ? '• '+o.local : ''}</div>
+                                    ${checklistBadge}
                                 </div>
                             </div>`;
                         }).join('');
@@ -8106,25 +8194,263 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
 
                 // Build checklist se não existir
                 if (!o.checklist) {
-                    o.checklist = ChecklistApp._buildDefault(o.evento);
+                    o.checklist = ChecklistApp._buildDefault(o.evento, o);
                     ChecklistApp._save(o);
                 }
+
+                // Renderizar equipamentos pendentes do orçamento
+                ChecklistApp._equipPanelOpen = false;
+                const panel = document.getElementById('checklist-equip-panel');
+                if (panel) panel.style.display = 'none';
+                const btnPanel = document.getElementById('btn-equip-panel');
+                if (btnPanel) { btnPanel.style.background = '#f3e8ff'; btnPanel.style.color = '#7c3aed'; }
+
+                ChecklistApp._renderOrcamentoEquips(o);
 
                 content.style.display = 'block';
                 ChecklistApp.renderItems();
             },
 
-            _buildDefault(tipoEvento) {
+            openFromOrcamento(orcId) {
+                // Navega para a aba checklist e abre o evento específico
+                UI.navigate('checklist');
+                setTimeout(() => {
+                    const sel = document.getElementById('checklist-event-select');
+                    if (sel) {
+                        sel.value = orcId;
+                        ChecklistApp.loadEvent(orcId);
+                        // Scroll suave ao conteúdo
+                        setTimeout(() => {
+                            const content = document.getElementById('checklist-content');
+                            if (content) content.scrollIntoView({ behavior: 'smooth' });
+                        }, 200);
+                    }
+                }, 300);
+            },
+
+            _buildDefault(tipoEvento, orcamento) {
+                // Equipamentos do cadastro que se encaixam no tipo do evento
                 const equips = (UI.data.equipsCadastro || []).filter(e =>
                     e.status !== 'inativo' && (e.checklistTipos || []).includes(tipoEvento)
                 );
-                return equips.map(e => ({
+                const items = equips.map(e => ({
                     id: Utils.id(),
                     nome: e.nome,
                     categoria: e.categoria,
                     checked: false,
-                    equipId: e.id
+                    equipId: e.id,
+                    origem: 'cadastro'
                 }));
+
+                // Equipamentos selecionados no orçamento (extras do orçamento)
+                if (orcamento && orcamento.equipamentosSelecionados && orcamento.equipamentosSelecionados.length > 0) {
+                    const existingNames = new Set(items.map(i => i.nome.toLowerCase()));
+                    orcamento.equipamentosSelecionados.forEach(eqId => {
+                        const equip = (UI.data.equipamentos || []).find(e => e.id === eqId);
+                        if (equip && !existingNames.has(equip.nome.toLowerCase())) {
+                            items.push({
+                                id: Utils.id(),
+                                nome: equip.nome,
+                                categoria: equip.tipo || 'Outros',
+                                checked: false,
+                                equipId: equip.id,
+                                origem: 'orcamento'
+                            });
+                            existingNames.add(equip.nome.toLowerCase());
+                        }
+                    });
+                }
+
+                return items;
+            },
+
+            _equipPanelOpen: false,
+
+            toggleEquipPanel() {
+                this._equipPanelOpen = !this._equipPanelOpen;
+                const panel = document.getElementById('checklist-equip-panel');
+                const btn   = document.getElementById('btn-equip-panel');
+                if (this._equipPanelOpen) {
+                    panel.style.display = 'block';
+                    btn.style.background = '#7c3aed';
+                    btn.style.color = 'white';
+                    this._renderEquipCatalog();
+                } else {
+                    panel.style.display = 'none';
+                    btn.style.background = '#f3e8ff';
+                    btn.style.color = '#7c3aed';
+                }
+            },
+
+            _renderEquipCatalog() {
+                const catalog = document.getElementById('checklist-equip-catalog');
+                if (!catalog) return;
+                const o = UI.data.orcamentos.find(x => x.id === this.currentOrcId);
+                const checklist = (o && o.checklist) || [];
+
+                // Todos os equipamentos cadastrados que estão ok ou em manutenção (não inativos)
+                const todos = (UI.data.equipsCadastro || []).filter(e => e.status !== 'inativo');
+
+                // Equipamentos do orçamento (pacote add-ons)
+                const equipOrc = (o && o.equipamentosSelecionados || [])
+                    .map(id => (UI.data.equipamentos || []).find(e => e.id === id))
+                    .filter(Boolean);
+
+                if (todos.length === 0 && equipOrc.length === 0) {
+                    catalog.innerHTML = `<div style="text-align:center;padding:16px;color:var(--secondary);font-size:0.85rem;"><i class="fas fa-box-open"></i> Nenhum equipamento cadastrado.</div>`;
+                    return;
+                }
+
+                // Agrupar equipamentos cadastrados por categoria
+                const cats = {};
+                todos.forEach(e => {
+                    const cat = e.categoria || 'Outros';
+                    if (!cats[cat]) cats[cat] = [];
+                    cats[cat].push({ ...e, _source: 'cadastro' });
+                });
+                // Adicionar extras do orçamento numa categoria especial
+                if (equipOrc.length > 0) {
+                    cats['📦 Do Orçamento'] = equipOrc.map(e => ({ ...e, categoria: 'Do Orçamento', _source: 'orcamento', _origId: e.id }));
+                }
+
+                const jaNoChecklist = new Set(
+                    checklist.map(i => (i.equipId || '') + '|' + i.nome.toLowerCase())
+                );
+
+                let html = '';
+                Object.entries(cats).forEach(([cat, items]) => {
+                    const icon = EquipApp._icon(cat.replace('📦 ', ''));
+                    html += `<div style="margin-bottom:10px;">
+                        <div style="font-size:0.72rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:6px;margin-bottom:6px;padding:4px 0;border-bottom:1px solid #ede9fe;">
+                            <i class="fas fa-${icon}"></i>${cat}
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">`;
+                    items.forEach(e => {
+                        const key = (e._source === 'orcamento' ? (e._origId || e.id) : e.id) + '|' + e.nome.toLowerCase();
+                        const jaAdicionado = jaNoChecklist.has(key) ||
+                            checklist.some(i => i.nome.toLowerCase() === e.nome.toLowerCase());
+                        const statusDot = e.status === 'manutencao'
+                            ? `<span style="font-size:0.65rem;background:#fef3c7;color:#b45309;padding:2px 6px;border-radius:99px;font-weight:700;margin-left:4px;"><i class="fas fa-tools"></i> Manutenção</span>`
+                            : '';
+                        html += `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:${jaAdicionado ? 'default' : 'pointer'};background:${jaAdicionado ? '#f0fdf4' : '#fff'};border:1px solid ${jaAdicionado ? '#86efac' : '#ede9fe'};transition:background 0.15s;">
+                            <input type="checkbox" 
+                                id="eq-sel-${e.id}" 
+                                value="${e.id}"
+                                data-source="${e._source}"
+                                data-orig-id="${e._origId || e.id}"
+                                data-nome="${e.nome}"
+                                data-cat="${e.categoria || 'Outros'}"
+                                ${jaAdicionado ? 'disabled checked' : ''}
+                                onchange="ChecklistApp._onEquipCheckChange()"
+                                style="width:18px;height:18px;accent-color:#7c3aed;flex-shrink:0;">
+                            <div style="flex:1;">
+                                <div style="font-size:0.88rem;font-weight:600;color:${jaAdicionado ? '#166534' : 'var(--dark)'};">
+                                    ${e.nome}
+                                    ${jaAdicionado ? '<i class="fas fa-check-circle" style="color:#16a34a;margin-left:4px;"></i>' : ''}
+                                    ${statusDot}
+                                </div>
+                                ${e.obs ? `<div style="font-size:0.72rem;color:var(--secondary);margin-top:1px;">${e.obs}</div>` : ''}
+                            </div>
+                        </label>`;
+                    });
+                    html += `</div></div>`;
+                });
+
+                catalog.innerHTML = html;
+                this._onEquipCheckChange();
+            },
+
+            _onEquipCheckChange() {
+                const checked = document.querySelectorAll('#checklist-equip-catalog input[type=checkbox]:not(:disabled):checked');
+                const btn = document.getElementById('btn-add-selected');
+                if (!btn) return;
+                if (checked.length > 0) {
+                    btn.style.display = 'inline-flex';
+                    btn.innerHTML = `<i class="fas fa-plus-circle"></i> Adicionar ${checked.length} selecionado${checked.length > 1 ? 's' : ''}`;
+                } else {
+                    btn.style.display = 'none';
+                }
+            },
+
+            addSelectedEquips() {
+                const o = UI.data.orcamentos.find(x => x.id === this.currentOrcId);
+                if (!o) return;
+                if (!o.checklist) o.checklist = [];
+
+                const checked = document.querySelectorAll('#checklist-equip-catalog input[type=checkbox]:not(:disabled):checked');
+                let adicionados = 0;
+                checked.forEach(cb => {
+                    const nome  = cb.dataset.nome;
+                    const cat   = cb.dataset.cat;
+                    const id    = cb.dataset.origId || cb.value;
+                    // Evitar duplicata
+                    if (o.checklist.some(i => i.nome.toLowerCase() === nome.toLowerCase())) return;
+                    o.checklist.push({
+                        id: Utils.id(),
+                        nome,
+                        categoria: cat,
+                        checked: false,
+                        equipId: id,
+                        origem: cb.dataset.source || 'cadastro'
+                    });
+                    adicionados++;
+                });
+
+                if (adicionados === 0) { Utils.toast('Nenhum item novo para adicionar.', 'error'); return; }
+                ChecklistApp._save(o);
+                ChecklistApp.renderItems();
+                // Re-renderizar catálogo para marcar os adicionados
+                ChecklistApp._renderEquipCatalog();
+                // Atualizar equipamentos do orçamento
+                ChecklistApp._renderOrcamentoEquips(o);
+                Utils.toast(`${adicionados} item${adicionados > 1 ? 's adicionados' : ' adicionado'}! ✅`);
+            },
+
+            _renderOrcamentoEquipSelector(o) {
+                // Mantido por compatibilidade — chama o novo
+                this._renderOrcamentoEquips(o);
+            },
+
+            _renderOrcamentoEquips(o) {
+                const container = document.getElementById('checklist-orcamento-equips');
+                if (!container) return;
+                // Exibir equipamentos do orçamento que ainda não foram adicionados ao checklist
+                const equipamentos = (o.equipamentosSelecionados || [])
+                    .map(eqId => (UI.data.equipamentos || []).find(e => e.id === eqId))
+                    .filter(Boolean);
+                const checklist = o.checklist || [];
+                const pendentes = equipamentos.filter(eq =>
+                    !checklist.some(i => i.nome.toLowerCase() === eq.nome.toLowerCase())
+                );
+                if (pendentes.length === 0) { container.style.display = 'none'; return; }
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:11px 13px;margin-bottom:12px;">
+                        <div style="font-size:0.78rem;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:6px;margin-bottom:8px;"><i class="fas fa-file-invoice"></i> DO ORÇAMENTO — não adicionados</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                            ${pendentes.map(eq => `
+                                <button onclick="ChecklistApp._addSingleEquip('${eq.id}','${eq.nome.replace(/'/g,"\\'")}','${eq.tipo||'Outros'}','orcamento')"
+                                    style="background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;border-radius:8px;padding:6px 10px;font-size:0.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;">
+                                    <i class="fas fa-plus-circle"></i> ${eq.nome}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>`;
+            },
+
+            _addSingleEquip(equipId, nome, categoria, origem) {
+                const o = UI.data.orcamentos.find(x => x.id === this.currentOrcId);
+                if (!o) return;
+                if (!o.checklist) o.checklist = [];
+                if (o.checklist.some(i => i.nome.toLowerCase() === nome.toLowerCase())) {
+                    Utils.toast('Já está no checklist!', 'error'); return;
+                }
+                o.checklist.push({ id: Utils.id(), nome, categoria, checked: false, equipId, origem });
+                ChecklistApp._save(o);
+                ChecklistApp.renderItems();
+                ChecklistApp._renderOrcamentoEquips(o);
+                if (this._equipPanelOpen) ChecklistApp._renderEquipCatalog();
+                Utils.toast(`${nome} adicionado!`);
             },
 
             renderItems() {
