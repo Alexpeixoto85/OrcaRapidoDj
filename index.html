@@ -1644,6 +1644,143 @@
         .sig-btn:active { opacity: 0.8; transform: scale(0.97); }
         .sig-btn-clear { background: #fee2e2; color: var(--danger); }
         .sig-btn-upload { background: #dbeafe; color: var(--primary); }
+        /* ── CHECKLIST ── */
+        .checklist-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .checklist-progress {
+            background: #e2e8f0; border-radius: 99px; height: 8px; margin-bottom: 16px; overflow: hidden;
+        }
+        .checklist-progress-fill {
+            height: 100%; border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            transition: width 0.4s;
+        }
+        .checklist-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; background: var(--surface);
+            border-radius: 12px; margin-bottom: 8px;
+            border: 1.5px solid var(--border); cursor: pointer;
+            transition: all 0.2s; position: relative;
+        }
+        .checklist-item.checked {
+            background: #f0fdf4; border-color: #86efac;
+        }
+        .checklist-item.checked .checklist-item-name {
+            text-decoration: line-through; color: var(--secondary);
+        }
+        .checklist-check {
+            width: 26px; height: 26px; border-radius: 50%;
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.2s; font-size: 0.8rem;
+        }
+        .checklist-item.checked .checklist-check {
+            background: var(--success); border-color: var(--success); color: white;
+        }
+        .checklist-item-name { font-size: 0.95rem; font-weight: 600; color: var(--dark); }
+        .checklist-item-cat { font-size: 0.75rem; color: var(--secondary); }
+        .checklist-item-delete {
+            margin-left: auto; background: none; border: none; color: var(--secondary);
+            font-size: 1rem; padding: 4px; cursor: pointer; opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .checklist-item-delete:active { opacity: 1; color: var(--danger); }
+        .checklist-category-badge {
+            font-size: 0.7rem; padding: 3px 8px; border-radius: 99px;
+            font-weight: 700; background: #dbeafe; color: var(--primary); white-space: nowrap;
+        }
+
+        /* ── EQUIPAMENTOS CADASTRO ── */
+        .equip-card {
+            background: var(--surface); border-radius: 14px;
+            border: 1.5px solid var(--border); padding: 14px;
+            margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start;
+        }
+        .equip-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0; background: #dbeafe; color: var(--primary);
+        }
+        .equip-info { flex: 1; }
+        .equip-name { font-size: 0.95rem; font-weight: 700; color: var(--dark); }
+        .equip-cat { font-size: 0.78rem; color: var(--secondary); margin-top: 1px; }
+        .equip-status-ok { color: var(--success); font-size: 0.75rem; font-weight: 700; }
+        .equip-status-manut { color: var(--danger); font-size: 0.75rem; font-weight: 700; }
+
+        /* ── MANUTENÇÃO ── */
+        .manut-card {
+            background: var(--surface); border-radius: 14px;
+            border: 1.5px solid var(--border); padding: 14px;
+            margin-bottom: 10px;
+        }
+        .manut-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .manut-title { font-weight: 700; font-size: 0.95rem; color: var(--dark); }
+        .manut-status-open { background: #fee2e2; color: var(--danger); font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
+        .manut-status-done { background: #d1fae5; color: var(--success); font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
+        .manut-equip { font-size: 0.82rem; color: var(--secondary); margin-bottom: 5px; }
+        .manut-desc { font-size: 0.85rem; color: var(--dark); line-height: 1.4; margin-bottom: 8px; }
+        .manut-fotos { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .manut-foto { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
+        .manut-date { font-size: 0.75rem; color: var(--secondary); }
+        .manut-actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+
+        /* ── DESPESAS / RECEITAS ── */
+        .transacao-card {
+            background: var(--surface); border-radius: 14px;
+            border-left: 4px solid transparent; padding: 14px;
+            margin-bottom: 10px;
+        }
+        .transacao-card.receita { border-left-color: var(--success); }
+        .transacao-card.despesa { border-left-color: var(--danger); }
+        .transacao-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .transacao-valor-pos { font-size: 1.1rem; font-weight: 800; color: var(--success); }
+        .transacao-valor-neg { font-size: 1.1rem; font-weight: 800; color: var(--danger); }
+        .transacao-desc { font-size: 0.9rem; font-weight: 600; color: var(--dark); margin-top: 3px; }
+        .transacao-meta { font-size: 0.78rem; color: var(--secondary); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* ── FINANCIAL IMPROVED ── */
+        .fin-balance-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px;
+            color: white; position: relative; overflow: hidden;
+        }
+        .fin-balance-card::before {
+            content: ''; position: absolute; right: -30px; top: -30px;
+            width: 120px; height: 120px; border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+        .fin-balance-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+        .fin-balance-value { font-size: 2.2rem; font-weight: 800; color: white; }
+        .fin-balance-sub { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
+        .fin-balance-row { display: flex; gap: 12px; margin-top: 16px; }
+        .fin-balance-item { flex: 1; background: rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; }
+        .fin-balance-item-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 2px; }
+        .fin-balance-item-value { font-size: 0.95rem; font-weight: 800; }
+
+        .fin-tab-container { display: flex; gap: 0; background: #f1f5f9; border-radius: 12px; padding: 4px; margin-bottom: 16px; }
+        .fin-tab-btn { flex: 1; padding: 9px 8px; border: none; border-radius: 9px; background: none; font-size: 0.82rem; font-weight: 600; color: var(--secondary); cursor: pointer; transition: all 0.2s; }
+        .fin-tab-btn.active { background: white; color: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+        /* Projeção */
+        .proj-card { background: var(--surface); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+        .proj-month { font-size: 0.82rem; font-weight: 700; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .proj-value { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+        .proj-bar-track { background: #e2e8f0; border-radius: 99px; height: 6px; margin-top: 8px; overflow: hidden; }
+        .proj-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+
+        /* Foto lightbox */
+        .lightbox-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 500;
+            display: none; align-items: center; justify-content: center;
+        }
+        .lightbox-overlay.active { display: flex; }
+        .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 12px; }
+        .lightbox-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
+
+        .fin-section-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+        .fin-section-tab { padding: 10px 16px; border: none; background: none; font-size: 0.85rem; font-weight: 600; color: var(--secondary); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+        .fin-section-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -1727,6 +1864,21 @@
                     <div class="stat-icon bg-success" style="background: #d1fae5; color: #10b981;"><i class="fas fa-calendar-plus"></i></div>
                     <div class="stat-value" id="dash-recontato">0</div>
                     <div class="stat-label">Para Recontato</div>
+                </div>
+                <div class="stat-card" onclick="UI.navigate('checklist')">
+                    <div class="stat-icon" style="background:#e0f2fe;color:#0369a1;"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="stat-value" style="font-size:1rem;margin-top:4px;">Checklist</div>
+                    <div class="stat-label">de Equipamentos</div>
+                </div>
+                <div class="stat-card" onclick="UI.navigate('equipamentos')">
+                    <div class="stat-icon" style="background:#fef3c7;color:#b45309;"><i class="fas fa-tools"></i></div>
+                    <div class="stat-value" style="font-size:1rem;margin-top:4px;">Equipamentos</div>
+                    <div class="stat-label">Cadastro</div>
+                </div>
+                <div class="stat-card" onclick="UI.navigate('manutencao')">
+                    <div class="stat-icon bg-red"><i class="fas fa-wrench"></i></div>
+                    <div class="stat-value" style="font-size:1rem;margin-top:4px;">Manutenção</div>
+                    <div class="stat-label">Notas de Defeito</div>
                 </div>
             </div>
 
@@ -1873,6 +2025,147 @@
             <div class="section-title" style="margin-top:8px;">Eventos do Mês</div>
             <div class="agenda-events-list" id="agenda-events-list"></div>
         </div>
+
+        <!-- ======= EQUIPAMENTOS (CADASTRO PARA CHECKLIST) ======= -->
+        <div id="equipamentos-view" class="view">
+            <div class="section-title">
+                Equipamentos
+                <button onclick="EquipApp.openNew()" style="background:var(--primary);color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-plus"></i> Novo</button>
+            </div>
+            <div class="filter-buttons" id="equip-filter-btns">
+                <button class="filter-btn active" onclick="EquipApp.render('todos',this)">Todos</button>
+                <button class="filter-btn" onclick="EquipApp.render('ok',this)">OK</button>
+                <button class="filter-btn" onclick="EquipApp.render('manutencao',this)">Manutenção</button>
+            </div>
+            <div id="equip-list"></div>
+        </div>
+
+        <!-- ======= CHECKLIST DE EVENTO ======= -->
+        <div id="checklist-view" class="view">
+            <div class="section-title">Checklist por Evento</div>
+            <div id="checklist-event-selector" style="margin-bottom:16px;">
+                <label class="form-label">Selecione o Evento</label>
+                <select id="checklist-event-select" class="form-control" onchange="ChecklistApp.loadEvent(this.value)">
+                    <option value="">— Selecione um evento fechado —</option>
+                </select>
+            </div>
+            <div id="checklist-content" style="display:none;">
+                <div class="list-card" style="border-left:4px solid var(--primary);margin-bottom:16px;" id="checklist-event-info"></div>
+                <div class="checklist-header">
+                    <div style="font-weight:700;color:var(--dark);" id="checklist-counter">0 / 0 itens</div>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="ChecklistApp.addCustomItem()" style="background:#dbeafe;color:var(--primary);border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-plus"></i> Adicionar</button>
+                        <button onclick="ChecklistApp.resetAll()" style="background:#fee2e2;color:var(--danger);border:none;border-radius:8px;padding:7px 12px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>
+                <div class="checklist-progress"><div class="checklist-progress-fill" id="checklist-progress-fill" style="width:0%"></div></div>
+                <div id="checklist-items"></div>
+            </div>
+        </div>
+
+        <!-- ======= MANUTENÇÃO ======= -->
+        <div id="manutencao-view" class="view">
+            <div class="section-title">
+                Notas de Manutenção
+                <button onclick="ManutApp.openNew()" style="background:var(--danger);color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-plus"></i> Nova Nota</button>
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="ManutApp.render('todos',this)">Todas</button>
+                <button class="filter-btn" onclick="ManutApp.render('aberto',this)">Abertas</button>
+                <button class="filter-btn" onclick="ManutApp.render('concluido',this)">Concluídas</button>
+            </div>
+            <div id="manut-list"></div>
+        </div>
+
+        <!-- ======= FINANCEIRO MELHORADO ======= -->
+        <div id="financeiro-view" class="view">
+            <!-- Balanço geral -->
+            <div class="fin-balance-card" id="fin-balance-card">
+                <div class="fin-balance-label"><i class="fas fa-wallet"></i> Balanço Geral</div>
+                <div class="fin-balance-value" id="fin-bal-value">R$ 0,00</div>
+                <div class="fin-balance-sub" id="fin-bal-sub">Receitas - Despesas</div>
+                <div class="fin-balance-row">
+                    <div class="fin-balance-item">
+                        <div class="fin-balance-item-label">Receitas</div>
+                        <div class="fin-balance-item-value" style="color:#4ade80;" id="fin-bal-rec">R$ 0</div>
+                    </div>
+                    <div class="fin-balance-item">
+                        <div class="fin-balance-item-label">Despesas</div>
+                        <div class="fin-balance-item-value" style="color:#f87171;" id="fin-bal-desp">R$ 0</div>
+                    </div>
+                    <div class="fin-balance-item">
+                        <div class="fin-balance-item-label">A Receber</div>
+                        <div class="fin-balance-item-value" style="color:#60a5fa;" id="fin-bal-arec">R$ 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs financeiro -->
+            <div class="fin-section-tabs">
+                <button class="fin-section-tab active" onclick="FinApp.switchTab('resumo',this)">Resumo</button>
+                <button class="fin-section-tab" onclick="FinApp.switchTab('projecao',this)">Projeção</button>
+                <button class="fin-section-tab" onclick="FinApp.switchTab('transacoes',this)">Lançamentos</button>
+                <button class="fin-section-tab" onclick="FinApp.switchTab('recibos',this)">Recibos</button>
+            </div>
+
+            <div id="fin-tab-resumo">
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="UI.navigateToOrcamentos('aceito')">
+                        <div class="stat-icon bg-green"><i class="fas fa-check"></i></div>
+                        <div class="stat-value" id="fin-aceito" style="font-size: 1.1rem">R$ 0</div>
+                        <div class="stat-label">Já Fechado</div>
+                    </div>
+                    <div class="stat-card" onclick="UI.navigateToOrcamentos('pendente')">
+                        <div class="stat-icon bg-orange"><i class="fas fa-hourglass-half"></i></div>
+                        <div class="stat-value" id="fin-pendente" style="font-size: 1.1rem">R$ 0</div>
+                        <div class="stat-label">A Fechar</div>
+                    </div>
+                    <div class="stat-card" onclick="UI.showRejected()">
+                        <div class="stat-icon bg-red"><i class="fas fa-times-circle"></i></div>
+                        <div class="stat-value" id="fin-recusado" style="font-size: 1.1rem">R$ 0</div>
+                        <div class="stat-label">Recusados</div>
+                    </div>
+                    <div class="stat-card" onclick="UI.navigateToOrcamentos('all')">
+                        <div class="stat-icon bg-purple"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-value" id="fin-media-mensal" style="font-size: 1.1rem">R$ 0</div>
+                        <div class="stat-label">Média Mensal</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="UI.navigateToOrcamentos('all')" style="margin-top:4px;">
+                    <div class="card-subtitle">Potencial Total (Estimado)</div>
+                    <div class="card-price" id="fin-total">R$ 0,00</div>
+                </div>
+            </div>
+
+            <div id="fin-tab-projecao" style="display:none;">
+                <div id="fin-projecao-list"></div>
+            </div>
+
+            <div id="fin-tab-transacoes" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div style="font-weight:700;color:var(--dark);">Lançamentos</div>
+                    <button onclick="FinApp.openNewTransacao()" style="background:var(--primary);color:white;border:none;border-radius:8px;padding:7px 14px;font-weight:700;font-size:0.82rem;cursor:pointer;"><i class="fas fa-plus"></i> Novo</button>
+                </div>
+                <div class="filter-buttons" id="transacao-filter-btns">
+                    <button class="filter-btn active" onclick="FinApp.renderTransacoes('todos',this)">Todos</button>
+                    <button class="filter-btn" onclick="FinApp.renderTransacoes('receita',this)">Receitas</button>
+                    <button class="filter-btn" onclick="FinApp.renderTransacoes('despesa',this)">Despesas</button>
+                </div>
+                <div id="transacoes-list"></div>
+            </div>
+
+            <div id="fin-tab-recibos" style="display:none;">
+                <div class="list-card" id="fin-recibo-card" style="border-left:4px solid var(--success);">
+                    <div style="text-align:center;padding:20px;color:var(--secondary);">
+                        <i class="fas fa-receipt" style="font-size:2rem;margin-bottom:8px;display:block;"></i>
+                        Nenhum recibo emitido ainda
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <button class="fab" onclick="UI.openNewOrcamento()" id="main-fab">
@@ -1883,20 +2176,20 @@
         <a href="#" class="nav-item active" data-target="dashboard-view" onclick="UI.switchTab(this)">
             <i class="fas fa-home"></i> <span>Início</span>
         </a>
-        <a href="#" class="nav-item" data-target="clientes-view" onclick="UI.switchTab(this)">
-            <i class="fas fa-user-friends"></i> <span>Clientes</span>
-        </a>
         <a href="#" class="nav-item" data-target="orcamentos-view" onclick="UI.switchTab(this)">
             <i class="fas fa-file-invoice"></i> <span>Orç.</span>
         </a>
-        <a href="#" class="nav-item" data-target="pacotes-view" onclick="UI.switchTab(this)">
-            <i class="fas fa-box-open"></i> <span>Pacotes</span>
-        </a>
-        <a href="#" class="nav-item" data-target="agenda-view" onclick="UI.switchTab(this)">
-            <i class="fas fa-calendar-alt"></i> <span>Agenda</span>
+        <a href="#" class="nav-item" data-target="checklist-view" onclick="UI.switchTab(this)">
+            <i class="fas fa-clipboard-check"></i> <span>Checklist</span>
         </a>
         <a href="#" class="nav-item" data-target="financeiro-view" onclick="UI.switchTab(this)">
             <i class="fas fa-chart-pie"></i> <span>Finanças</span>
+        </a>
+        <a href="#" class="nav-item" data-target="equipamentos-view" onclick="UI.switchTab(this)">
+            <i class="fas fa-tools"></i> <span>Equip.</span>
+        </a>
+        <a href="#" class="nav-item" data-target="manutencao-view" onclick="UI.switchTab(this)">
+            <i class="fas fa-wrench"></i> <span>Manutenção</span>
         </a>
     </nav>
 
@@ -2777,51 +3070,46 @@
                 setTimeout(() => t.classList.remove('show'), 3000);
             },
             readImage: (file) => {
-                // Salva a imagem como base64 puro, SEM aplicar nenhuma transformação EXIF.
-                // O browser já exibe corretamente via CSS image-orientation: from-image.
-                // A correção EXIF para o PDF é feita separadamente em normalizeStoredImage.
+                // Lê a imagem e normaliza orientação EXIF via canvas
+                // Isso corrige fotos tiradas de celular que ficam viradas no PDF
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            },
-
-            // Normaliza orientação EXIF de uma imagem base64 para uso no PDF.
-            // O jsPDF ignora o EXIF, então precisamos girar o canvas manualmente antes de inserir.
-            normalizeStoredImage: (src) => {
-                return new Promise((resolve) => {
-                    if (!src) return resolve(src);
-                    Utils._getExifOrientation(src).then(orientation => {
-                        // Orientação 1 = normal, sem transformação necessária
-                        if (!orientation || orientation === 1) return resolve(src);
+                    reader.onload = (e) => {
+                        const raw = e.target.result;
                         const img = new Image();
                         img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            const w = img.naturalWidth;
-                            const h = img.naturalHeight;
-                            const swap = orientation >= 5 && orientation <= 8;
-                            canvas.width  = swap ? h : w;
-                            canvas.height = swap ? w : h;
-                            // Aplicar transformação EXIF ANTES de desenhar
-                            switch(orientation) {
-                                case 2: ctx.transform(-1,0,0,1,w,0); break;
-                                case 3: ctx.translate(w,h); ctx.rotate(Math.PI); break;
-                                case 4: ctx.transform(1,0,0,-1,0,h); break;
-                                case 5: ctx.rotate(Math.PI/2); ctx.transform(1,0,0,-1,0,0); break;
-                                case 6: ctx.translate(h,0); ctx.rotate(Math.PI/2); break;
-                                case 7: ctx.rotate(-Math.PI/2); ctx.transform(1,0,0,-1,0,0); break;
-                                case 8: ctx.translate(0,w); ctx.rotate(-Math.PI/2); break;
-                                default: break;
-                            }
-                            ctx.drawImage(img, 0, 0);
-                            resolve(canvas.toDataURL('image/jpeg', 0.95));
+                            // Ler EXIF orientation
+                            Utils._getExifOrientation(raw).then(orientation => {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                const w = img.naturalWidth;
+                                const h = img.naturalHeight;
+                                // Para orientações que trocam eixos (5,6,7,8) inverter largura/altura
+                                const swap = orientation >= 5 && orientation <= 8;
+                                canvas.width  = swap ? h : w;
+                                canvas.height = swap ? w : h;
+                                ctx.save();
+                                // Aplicar transformação EXIF
+                                switch(orientation) {
+                                    case 2: ctx.transform(-1,0,0,1,w,0); break;
+                                    case 3: ctx.transform(-1,0,0,-1,w,h); break;
+                                    case 4: ctx.transform(1,0,0,-1,0,h); break;
+                                    case 5: ctx.transform(0,1,1,0,0,0); break;
+                                    case 6: ctx.transform(0,1,-1,0,h,0); break;
+                                    case 7: ctx.transform(0,-1,-1,0,h,w); break;
+                                    case 8: ctx.transform(0,-1,1,0,0,w); break;
+                                    default: break; // orientação 1 = normal
+                                }
+                                ctx.drawImage(img, 0, 0);
+                                ctx.restore();
+                                resolve(canvas.toDataURL('image/jpeg', 0.92));
+                            });
                         };
-                        img.onerror = () => resolve(src);
-                        img.src = src;
-                    });
+                        img.onerror = reject;
+                        img.src = raw;
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
                 });
             },
 
@@ -3088,7 +3376,7 @@
 
         // --- UI MANAGER ---
         const UI = {
-            data: { clientes: [], orcamentos: [], pacotes: [], equipamentos: [], recebimentos: [] },
+            data: { clientes: [], orcamentos: [], pacotes: [], equipamentos: [], recebimentos: [], equipsCadastro: [], manutencoes: [], transacoes: [] },
             chartInstance: null,
             showingRejected: false,
             currentFilter: 'all',
@@ -3100,6 +3388,9 @@
                 UI.data.pacotes = Storage.get('pacotes');
                 UI.data.equipamentos = Storage.get('equipamentos');
                 UI.data.recebimentos = Storage.get('recebimentos');
+                UI.data.equipsCadastro = Storage.get('equipsCadastro');
+                UI.data.manutencoes = Storage.get('manutencoes');
+                UI.data.transacoes = Storage.get('transacoes');
                 
                 // Inicializar com arrays vazios para pacotes e equipamentos
                 if (UI.data.pacotes.length === 0) {
@@ -3140,8 +3431,14 @@
                 } else if (target === 'pacotes-view') {
                     fab.style.display = 'flex';
                     fab.onclick = UI.openNewPacote;
-                } else if (target === 'agenda-view') {
+                } else if (target === 'checklist-view') {
                     fab.style.display = 'none';
+                } else if (target === 'equipamentos-view') {
+                    fab.style.display = 'flex';
+                    fab.onclick = EquipApp.openNew;
+                } else if (target === 'manutencao-view') {
+                    fab.style.display = 'flex';
+                    fab.onclick = ManutApp.openNew;
                 } else {
                     fab.style.display = 'none';
                 }
@@ -3151,6 +3448,9 @@
                 if(target === 'financeiro-view') UI.renderFinanceiro();
                 if(target === 'pacotes-view') UI.renderPacotes();
                 if(target === 'agenda-view') AgendaView.render();
+                if(target === 'equipamentos-view') EquipApp.render('todos');
+                if(target === 'manutencao-view') ManutApp.render('todos');
+                if(target === 'checklist-view') ChecklistApp.init();
             },
 
             navigate: (tabName) => {
@@ -3641,7 +3941,7 @@
                                 <div class="list-card" onclick="App.pacote.edit('${p.id}')">
                                     ${p.fotos && p.fotos.length > 0 ? `
                                     <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px;">
-                                        ${p.fotos.map(src => `<img src="${src}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border);image-orientation:from-image;">`).join('')}
+                                        ${p.fotos.map(src => `<img src="${src}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border);">`).join('')}
                                     </div>` : ''}
                                     <div class="card-header">
                                         <div class="card-title">${p.nome}</div>
@@ -3669,7 +3969,7 @@
                                 <div class="list-card" onclick="App.pacote.edit('${e.id}')">
                                     ${e.fotos && e.fotos.length > 0 ? `
                                     <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px;">
-                                        ${e.fotos.map(src => `<img src="${src}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border);image-orientation:from-image;">`).join('')}
+                                        ${e.fotos.map(src => `<img src="${src}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border);">`).join('')}
                                     </div>` : ''}
                                     <div class="card-header">
                                         <div class="card-title">${e.nome}</div>
@@ -3987,6 +4287,25 @@
                 const recusado = UI.data.orcamentos.filter(o => o.status === 'recusado').reduce((acc, o) => acc + o.valor, 0);
                 const potencialTotal = aceito + pendente;
                 const mediaMensal = Utils.calcularMediaMensal(UI.data.orcamentos);
+                const recibos = UI.data.recebimentos || [];
+                const totalRecibos = recibos.reduce((acc, r) => acc + r.valor, 0);
+                const transacoes = UI.data.transacoes || [];
+                const totalReceitas = transacoes.filter(t => t.tipo === 'receita').reduce((a, t) => a + t.valor, 0) + totalRecibos;
+                const totalDespesas = transacoes.filter(t => t.tipo === 'despesa').reduce((a, t) => a + t.valor, 0);
+                const balanco = totalReceitas - totalDespesas;
+                const aReceber = Math.max(0, aceito - totalRecibos);
+
+                // Balance card
+                document.getElementById('fin-bal-value').innerText = Utils.formatCurrency(balanco);
+                document.getElementById('fin-bal-rec').innerText = Utils.formatCurrency(totalReceitas);
+                document.getElementById('fin-bal-desp').innerText = Utils.formatCurrency(totalDespesas);
+                document.getElementById('fin-bal-arec').innerText = Utils.formatCurrency(aReceber);
+                const balCard = document.getElementById('fin-balance-card');
+                if (balanco >= 0) {
+                    balCard.style.background = 'linear-gradient(135deg, #1e293b, #334155)';
+                } else {
+                    balCard.style.background = 'linear-gradient(135deg, #7f1d1d, #991b1b)';
+                }
 
                 document.getElementById('fin-total').innerText = Utils.formatCurrency(potencialTotal);
                 document.getElementById('fin-aceito').innerText = Utils.formatCurrency(aceito);
@@ -3994,23 +4313,19 @@
                 document.getElementById('fin-recusado').innerText = Utils.formatCurrency(recusado);
                 document.getElementById('fin-media-mensal').innerText = Utils.formatCurrency(mediaMensal);
 
-                // Card de somatorio de recibos
-                const recibos = UI.data.recebimentos || [];
-                const totalRecibos = recibos.reduce((acc, r) => acc + r.valor, 0);
+                // Recibos card
                 const orcamentosComRecibo = new Set(recibos.map(r => r.orcamentoId)).size;
                 const recibosQuitados = UI.data.orcamentos.filter(o => o.status === 'aceito').filter(o => {
                     const totalPago = recibos.filter(r => r.orcamentoId === o.id).reduce((a, r) => a + r.valor, 0);
                     return totalPago >= o.valor && o.valor > 0;
                 }).length;
-                const aReceber = Math.max(0, aceito - totalRecibos);
                 const formaMap = { pix:'PIX', dinheiro:'Dinheiro', cartao_credito:'Credito', cartao_debito:'Debito', transferencia:'Transf.' };
-
                 const reciboCard = document.getElementById('fin-recibo-card');
                 if (reciboCard) {
                     const ultimos = recibos.slice(-3).reverse();
                     reciboCard.innerHTML =
                         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
-                            '<div style="font-size:0.85rem;font-weight:700;color:var(--secondary);text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-receipt" style="color:var(--success);margin-right:6px;"></i>Somatorio de Recibos</div>' +
+                            '<div style="font-size:0.85rem;font-weight:700;color:var(--secondary);text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-receipt" style="color:var(--success);margin-right:6px;"></i>Somatório de Recibos</div>' +
                             '<span style="font-size:0.7rem;background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:99px;font-weight:700;">' + recibos.length + ' recibo' + (recibos.length !== 1 ? 's' : '') + '</span>' +
                         '</div>' +
                         '<div style="font-size:2rem;font-weight:800;color:var(--success);margin-bottom:2px;">' + Utils.formatCurrency(totalRecibos) + '</div>' +
@@ -4031,7 +4346,7 @@
                         '</div>' +
                         (ultimos.length > 0
                             ? '<div style="border-top:1px solid #f1f5f9;padding-top:10px;">' +
-                                '<div style="font-size:0.72rem;font-weight:700;color:var(--secondary);margin-bottom:6px;text-transform:uppercase;">Ultimos Recibos</div>' +
+                                '<div style="font-size:0.72rem;font-weight:700;color:var(--secondary);margin-bottom:6px;text-transform:uppercase;">Últimos Recibos</div>' +
                                 ultimos.map(function(r) {
                                     var o2 = UI.data.orcamentos.find(function(x){ return x.id === r.orcamentoId; });
                                     var c2 = o2 ? UI.data.clientes.find(function(x){ return x.id === o2.clienteId; }) : null;
@@ -4045,6 +4360,10 @@
                             : '');
                 }
 
+                // Projeção
+                FinApp.renderProjecao();
+                // Transações
+                FinApp.renderTransacoes('todos');
                 UI.renderChart();
             },
 
@@ -4923,7 +5242,7 @@
                     if (!container) return;
                     container.innerHTML = App.pacote._fotosBuffer.map((src, i) =>
                         '<div style="position:relative;width:72px;height:72px;">' +
-                            '<img src="' + src + '" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:2px solid var(--border);image-orientation:from-image;">' +
+                            '<img src="' + src + '" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:2px solid var(--border);">' +
                             '<button type="button" onclick="App.pacote._removePhoto(' + i + ')" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--danger);color:white;font-size:0.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="fas fa-times"></i></button>' +
                         '</div>'
                     ).join('');
@@ -5396,7 +5715,7 @@
                     setTimeout(() => App.pdf._executarGeracao(id, clausulas), 200);
                 },
 
-                _executarGeracao: async (id, clausulas) => {
+                _executarGeracao: (id, clausulas) => {
                     const o = UI.data.orcamentos.find(x => x.id === id);
                     const c = UI.data.clientes.find(x => x.id === o.clienteId);
                     const s = Storage.getSettings();
@@ -5547,24 +5866,22 @@
                                 const fotoCols = 4;
                                 const fotoGap = 3;
                                 const fotoSize = (contentWidth - fotoGap * (fotoCols - 1)) / fotoCols;
-                                // Normaliza e insere cada foto corrigindo orientação EXIF
-                                for (let idx = 0; idx < fotosAll.length; idx++) {
-                                    const src = fotosAll[idx];
+                                let fotoX = 0, fotoY = y;
+                                fotosAll.forEach((src, idx) => {
                                     const col = idx % fotoCols;
                                     const row = Math.floor(idx / fotoCols);
                                     const fx = margin.left + col * (fotoSize + fotoGap);
                                     const fy = y + row * (fotoSize + fotoGap);
                                     try {
-                                        // Normalizar orientação EXIF antes de inserir no PDF
-                                        const normalizedSrc = await Utils.normalizeStoredImage(src);
-                                        const fmt = normalizedSrc.startsWith('data:image/png') ? 'PNG' : 'JPEG';
-                                        doc.addImage(normalizedSrc, fmt, fx, fy, fotoSize, fotoSize);
+                                        // Detectar formato real da imagem
+                                        const fmt = src.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+                                        doc.addImage(src, fmt, fx, fy, fotoSize, fotoSize);
                                         // Borda sutil ao redor da foto
                                         doc.setDrawColor(229, 231, 235);
                                         doc.setLineWidth(0.2);
                                         doc.rect(fx, fy, fotoSize, fotoSize);
                                     } catch(e) {}
-                                }
+                                });
                                 const totalRows = Math.ceil(fotosAll.length / fotoCols);
                                 y += totalRows * (fotoSize + fotoGap) + 2;
                             }
@@ -7646,6 +7963,676 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
             App.contact.toggleResultField();
         });
 
+        // ============================================================
+        // EQUIP APP — Cadastro de Equipamentos para Checklist
+        // ============================================================
+        const EquipApp = {
+            _fotosBuffer: [],
+
+            render(filter = 'todos', btnEl) {
+                if (btnEl) {
+                    document.querySelectorAll('#equip-filter-btns .filter-btn').forEach(b => b.classList.remove('active'));
+                    btnEl.classList.add('active');
+                }
+                let items = UI.data.equipsCadastro || [];
+                if (filter === 'ok') items = items.filter(e => e.status === 'ok');
+                if (filter === 'manutencao') items = items.filter(e => e.status === 'manutencao');
+                const container = document.getElementById('equip-list');
+                if (!container) return;
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-tools"></i><p>Nenhum equipamento cadastrado.</p><p style="font-size:0.82rem;margin-top:4px;">Cadastre seus equipamentos para montar checklists automáticos.</p></div>`;
+                    return;
+                }
+                container.innerHTML = items.map(e => {
+                    const statusHtml = e.status === 'ok'
+                        ? `<span class="equip-status-ok"><i class="fas fa-check-circle"></i> OK</span>`
+                        : e.status === 'manutencao'
+                        ? `<span class="equip-status-manut"><i class="fas fa-exclamation-triangle"></i> Manutenção</span>`
+                        : `<span style="color:var(--secondary);font-size:0.75rem;font-weight:700;">Inativo</span>`;
+                    const tiposHtml = (e.checklistTipos || []).map(t =>
+                        `<span class="checklist-category-badge">${t}</span>`
+                    ).join(' ');
+                    return `<div class="equip-card">
+                        <div class="equip-icon"><i class="fas fa-${EquipApp._icon(e.categoria)}"></i></div>
+                        <div class="equip-info">
+                            <div class="equip-name">${e.nome}</div>
+                            <div class="equip-cat">${e.categoria}</div>
+                            ${statusHtml}
+                            ${tiposHtml ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${tiposHtml}</div>` : ''}
+                            ${e.obs ? `<div style="font-size:0.78rem;color:var(--secondary);margin-top:4px;">${e.obs}</div>` : ''}
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <button onclick="EquipApp.edit('${e.id}')" style="background:#dbeafe;color:var(--primary);border:none;border-radius:8px;padding:7px 10px;font-weight:700;font-size:0.78rem;cursor:pointer;"><i class="fas fa-edit"></i></button>
+                            <button onclick="EquipApp.delete('${e.id}')" style="background:#fee2e2;color:var(--danger);border:none;border-radius:8px;padding:7px 10px;font-weight:700;font-size:0.78rem;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
+                }).join('');
+            },
+
+            _icon(cat) {
+                const map = { 'Som': 'volume-up', 'Iluminação': 'lightbulb', 'DJ': 'compact-disc', 'Microfone': 'microphone', 'Cabos': 'plug', 'Estrutura': 'cubes', 'Outros': 'box' };
+                return map[cat] || 'tools';
+            },
+
+            openNew() {
+                document.getElementById('eq-id').value = '';
+                document.getElementById('eq-nome').value = '';
+                document.getElementById('eq-obs').value = '';
+                document.getElementById('eq-status').value = 'ok';
+                document.getElementById('title-equip').innerText = 'Novo Equipamento';
+                Array.from(document.getElementById('eq-checklist-tipos').options).forEach(o => o.selected = false);
+                UI.openModal('equip');
+            },
+
+            edit(id) {
+                const e = (UI.data.equipsCadastro || []).find(x => x.id === id);
+                if (!e) return;
+                document.getElementById('eq-id').value = e.id;
+                document.getElementById('eq-nome').value = e.nome;
+                document.getElementById('eq-categoria').value = e.categoria;
+                document.getElementById('eq-obs').value = e.obs || '';
+                document.getElementById('eq-status').value = e.status;
+                document.getElementById('title-equip').innerText = 'Editar Equipamento';
+                const sel = document.getElementById('eq-checklist-tipos');
+                Array.from(sel.options).forEach(o => { o.selected = (e.checklistTipos || []).includes(o.value); });
+                UI.openModal('equip');
+            },
+
+            save(e) {
+                e.preventDefault();
+                const id = document.getElementById('eq-id').value || Utils.id();
+                const sel = document.getElementById('eq-checklist-tipos');
+                const tipos = Array.from(sel.selectedOptions).map(o => o.value);
+                const equip = {
+                    id,
+                    nome: document.getElementById('eq-nome').value,
+                    categoria: document.getElementById('eq-categoria').value,
+                    obs: document.getElementById('eq-obs').value,
+                    status: document.getElementById('eq-status').value,
+                    checklistTipos: tipos
+                };
+                if (!UI.data.equipsCadastro) UI.data.equipsCadastro = [];
+                const idx = UI.data.equipsCadastro.findIndex(x => x.id === id);
+                if (idx >= 0) UI.data.equipsCadastro[idx] = equip;
+                else UI.data.equipsCadastro.push(equip);
+                Storage.set('equipsCadastro', UI.data.equipsCadastro);
+                UI.closeModals();
+                EquipApp.render('todos');
+                Utils.toast('Equipamento salvo!');
+            },
+
+            delete(id) {
+                if (!confirm('Excluir este equipamento?')) return;
+                UI.data.equipsCadastro = (UI.data.equipsCadastro || []).filter(x => x.id !== id);
+                Storage.set('equipsCadastro', UI.data.equipsCadastro);
+                EquipApp.render('todos');
+                Utils.toast('Excluído!');
+            }
+        };
+
+        // ============================================================
+        // CHECKLIST APP — Checklist de Equipamentos por Evento
+        // ============================================================
+        const ChecklistApp = {
+            currentOrcId: null,
+
+            init() {
+                const sel = document.getElementById('checklist-event-select');
+                if (!sel) return;
+                const eventos = UI.data.orcamentos.filter(o => o.status === 'aceito');
+                sel.innerHTML = '<option value="">— Selecione um evento fechado —</option>' +
+                    eventos.map(o => {
+                        const c = UI.data.clientes.find(x => x.id === o.clienteId) || { nome: '-' };
+                        return `<option value="${o.id}">#${o.numero} — ${c.nome} — ${o.evento} (${Utils.formatDate(o.dataEvento)})</option>`;
+                    }).join('');
+                document.getElementById('checklist-content').style.display = 'none';
+            },
+
+            loadEvent(orcId) {
+                this.currentOrcId = orcId;
+                const content = document.getElementById('checklist-content');
+                if (!orcId) { content.style.display = 'none'; return; }
+
+                const o = UI.data.orcamentos.find(x => x.id === orcId);
+                const c = UI.data.clientes.find(x => x.id === o.clienteId) || { nome: '-' };
+                document.getElementById('checklist-event-info').innerHTML = `
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <div style="width:44px;height:44px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;flex-shrink:0;"><i class="fas fa-music"></i></div>
+                        <div>
+                            <div style="font-weight:700;color:var(--dark);">${o.evento} — ${c.nome}</div>
+                            <div style="font-size:0.82rem;color:var(--secondary);">${Utils.formatDate(o.dataEvento)} ${o.horario ? '• ' + o.horario : ''} ${o.local ? '• ' + o.local : ''}</div>
+                        </div>
+                    </div>`;
+
+                // Build checklist se não existir
+                if (!o.checklist) {
+                    o.checklist = ChecklistApp._buildDefault(o.evento);
+                    ChecklistApp._save(o);
+                }
+
+                content.style.display = 'block';
+                ChecklistApp.renderItems();
+            },
+
+            _buildDefault(tipoEvento) {
+                const equips = (UI.data.equipsCadastro || []).filter(e =>
+                    e.status !== 'inativo' && (e.checklistTipos || []).includes(tipoEvento)
+                );
+                return equips.map(e => ({
+                    id: Utils.id(),
+                    nome: e.nome,
+                    categoria: e.categoria,
+                    checked: false,
+                    equipId: e.id
+                }));
+            },
+
+            renderItems() {
+                const o = UI.data.orcamentos.find(x => x.id === this.currentOrcId);
+                if (!o) return;
+                const items = o.checklist || [];
+                const checked = items.filter(i => i.checked).length;
+                const total = items.length;
+                document.getElementById('checklist-counter').innerText = `${checked} / ${total} itens`;
+                const pct = total > 0 ? (checked / total) * 100 : 0;
+                document.getElementById('checklist-progress-fill').style.width = pct + '%';
+
+                // Group by category
+                const cats = {};
+                items.forEach(i => {
+                    if (!cats[i.categoria]) cats[i.categoria] = [];
+                    cats[i.categoria].push(i);
+                });
+
+                let html = '';
+                Object.entries(cats).forEach(([cat, catItems]) => {
+                    html += `<div style="font-size:0.75rem;font-weight:800;color:var(--secondary);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 6px;display:flex;align-items:center;gap:8px;"><i class="fas fa-${EquipApp._icon(cat)}"></i>${cat}</div>`;
+                    html += catItems.map(item => `
+                        <div class="checklist-item ${item.checked ? 'checked' : ''}" onclick="ChecklistApp.toggle('${item.id}')">
+                            <div class="checklist-check">${item.checked ? '<i class="fas fa-check"></i>' : ''}</div>
+                            <div class="equip-info">
+                                <div class="checklist-item-name">${item.nome}</div>
+                            </div>
+                            <button class="checklist-item-delete" onclick="event.stopPropagation();ChecklistApp.removeItem('${item.id}')"><i class="fas fa-times"></i></button>
+                        </div>`).join('');
+                });
+
+                if (items.length === 0) {
+                    html = `<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>Checklist vazio.</p><p style="font-size:0.82rem;">Cadastre equipamentos com tipos de evento para gerar automaticamente,<br>ou adicione itens manualmente.</p></div>`;
+                }
+
+                document.getElementById('checklist-items').innerHTML = html;
+            },
+
+            toggle(itemId) {
+                const o = UI.data.orcamentos.find(x => x.id === this.currentOrcId);
+                if (!o) return;
+                const item = o.checklist.find(i => i.id === itemId);
+                if (item) { item.checked = !item.checked; ChecklistApp._save(o); ChecklistApp.renderItems(); }
+            },
+
+            removeItem(itemId) {
+                const o = UI.data.orcamentos.find(x => x.id === this.currentOrcId);
+                if (!o) return;
+                o.checklist = o.checklist.filter(i => i.id !== itemId);
+                ChecklistApp._save(o); ChecklistApp.renderItems();
+            },
+
+            resetAll() {
+                if (!confirm('Desmarcar todos os itens?')) return;
+                const o = UI.data.orcamentos.find(x => x.id === this.currentOrcId);
+                if (!o) return;
+                o.checklist.forEach(i => i.checked = false);
+                ChecklistApp._save(o); ChecklistApp.renderItems();
+            },
+
+            addCustomItem() { UI.openModal('checklist-item'); },
+
+            saveCustomItem(e) {
+                e.preventDefault();
+                const o = UI.data.orcamentos.find(x => x.id === this.currentOrcId);
+                if (!o) return;
+                if (!o.checklist) o.checklist = [];
+                o.checklist.push({
+                    id: Utils.id(),
+                    nome: document.getElementById('cli-nome').value,
+                    categoria: document.getElementById('cli-cat').value,
+                    checked: false
+                });
+                ChecklistApp._save(o);
+                UI.closeModals();
+                ChecklistApp.renderItems();
+                Utils.toast('Item adicionado!');
+            },
+
+            _save(o) {
+                const idx = UI.data.orcamentos.findIndex(x => x.id === o.id);
+                if (idx >= 0) UI.data.orcamentos[idx] = o;
+                Storage.set('orcamentos', UI.data.orcamentos);
+            }
+        };
+
+        // ============================================================
+        // MANUT APP — Notas de Manutenção
+        // ============================================================
+        const ManutApp = {
+            _fotosBuffer: [],
+
+            render(filter = 'todos', btnEl) {
+                if (btnEl) {
+                    document.querySelectorAll('#manutencao-view .filter-btn').forEach(b => b.classList.remove('active'));
+                    btnEl.classList.add('active');
+                }
+                let items = UI.data.manutencoes || [];
+                if (filter === 'aberto') items = items.filter(m => m.status === 'aberto' || m.status === 'em_andamento');
+                if (filter === 'concluido') items = items.filter(m => m.status === 'concluido');
+                items = [...items].reverse();
+                const container = document.getElementById('manut-list');
+                if (!container) return;
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-wrench"></i><p>Nenhuma nota de manutenção.</p></div>`;
+                    return;
+                }
+                container.innerHTML = items.map(m => {
+                    const equip = (UI.data.equipsCadastro || []).find(e => e.id === m.equipId);
+                    const statusHtml = m.status === 'concluido'
+                        ? `<span class="manut-status-done">Concluído</span>`
+                        : m.status === 'em_andamento'
+                        ? `<span style="background:#fef3c7;color:#b45309;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:99px;">Em Andamento</span>`
+                        : `<span class="manut-status-open">Aberto</span>`;
+                    const fotosHtml = (m.fotos || []).map(src =>
+                        `<img class="manut-foto" src="${src}" onclick="ManutApp.openPhoto('${src}')">`
+                    ).join('');
+                    const custoHtml = m.custo > 0 ? `<span style="color:var(--danger);font-weight:700;">R$ ${Utils.formatCurrency(m.custo)}</span> • ` : '';
+                    return `<div class="manut-card">
+                        <div class="manut-header">
+                            <div class="manut-title"><i class="fas fa-${EquipApp._icon(equip ? equip.categoria : 'Outros')}"></i> ${equip ? equip.nome : 'Equipamento'}</div>
+                            ${statusHtml}
+                        </div>
+                        <div class="manut-equip">${equip ? equip.categoria : ''}</div>
+                        <div class="manut-desc">${m.descricao}</div>
+                        ${fotosHtml ? `<div class="manut-fotos">${fotosHtml}</div>` : ''}
+                        ${m.solucao ? `<div style="font-size:0.82rem;color:var(--success);background:#f0fdf4;border-radius:8px;padding:8px;margin-bottom:6px;"><i class="fas fa-check-circle"></i> ${m.solucao}</div>` : ''}
+                        <div class="manut-date">${custoHtml}<i class="fas fa-calendar"></i> ${Utils.formatDate(m.data)}</div>
+                        <div class="manut-actions">
+                            <button onclick="ManutApp.edit('${m.id}')" class="btn-sm btn-primary-soft"><i class="fas fa-edit"></i> Editar</button>
+                            ${m.status !== 'concluido' ? `<button onclick="ManutApp.concluir('${m.id}')" class="btn-sm btn-accepted"><i class="fas fa-check"></i> Concluir</button>` : ''}
+                            <button onclick="ManutApp.delete('${m.id}')" class="btn-sm btn-rejected"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
+                }).join('');
+            },
+
+            openPhoto(src) {
+                document.getElementById('lightbox-img').src = src;
+                document.getElementById('lightbox-overlay').classList.add('active');
+            },
+
+            openNew() {
+                this._fotosBuffer = [];
+                document.getElementById('mn-id').value = '';
+                document.getElementById('mn-desc').value = '';
+                document.getElementById('mn-solucao').value = '';
+                document.getElementById('mn-custo').value = '';
+                document.getElementById('mn-status').value = 'aberto';
+                document.getElementById('mn-data').value = Utils.getToday();
+                document.getElementById('mn-fotos-preview').innerHTML = '';
+                document.getElementById('title-manut').innerText = 'Nova Nota de Manutenção';
+                const sel = document.getElementById('mn-equip');
+                sel.innerHTML = (UI.data.equipsCadastro || []).map(e =>
+                    `<option value="${e.id}">${e.nome} (${e.categoria})</option>`
+                ).join('');
+                if (sel.innerHTML === '') sel.innerHTML = '<option value="">Nenhum equipamento cadastrado</option>';
+                UI.openModal('manut');
+            },
+
+            edit(id) {
+                const m = (UI.data.manutencoes || []).find(x => x.id === id);
+                if (!m) return;
+                this._fotosBuffer = [...(m.fotos || [])];
+                document.getElementById('mn-id').value = m.id;
+                document.getElementById('mn-desc').value = m.descricao;
+                document.getElementById('mn-solucao').value = m.solucao || '';
+                document.getElementById('mn-status').value = m.status;
+                document.getElementById('mn-data').value = m.data;
+                const custoInput = document.getElementById('mn-custo');
+                custoInput.value = m.custo > 0 ? String(Math.round(m.custo * 100)) : '';
+                if (m.custo > 0) Utils.maskMoney(custoInput);
+                document.getElementById('title-manut').innerText = 'Editar Nota';
+                const sel = document.getElementById('mn-equip');
+                sel.innerHTML = (UI.data.equipsCadastro || []).map(e =>
+                    `<option value="${e.id}" ${e.id === m.equipId ? 'selected' : ''}>${e.nome} (${e.categoria})</option>`
+                ).join('');
+                ManutApp._renderFotos();
+                UI.openModal('manut');
+            },
+
+            previewFotos(input) {
+                const files = Array.from(input.files);
+                const promises = files.map(f => Utils.readImage(f));
+                Promise.all(promises).then(results => {
+                    ManutApp._fotosBuffer = [...ManutApp._fotosBuffer, ...results];
+                    ManutApp._renderFotos();
+                    input.value = '';
+                });
+            },
+
+            _renderFotos() {
+                const container = document.getElementById('mn-fotos-preview');
+                if (!container) return;
+                container.innerHTML = ManutApp._fotosBuffer.map((src, i) =>
+                    `<div style="position:relative;width:72px;height:72px;">
+                        <img src="${src}" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:2px solid var(--border);" onclick="ManutApp.openPhoto('${src}')">
+                        <button type="button" onclick="ManutApp._removePhoto(${i})" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--danger);color:white;font-size:0.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="fas fa-times"></i></button>
+                    </div>`
+                ).join('');
+            },
+
+            _removePhoto(i) {
+                ManutApp._fotosBuffer.splice(i, 1);
+                ManutApp._renderFotos();
+            },
+
+            save(e) {
+                e.preventDefault();
+                const id = document.getElementById('mn-id').value || Utils.id();
+                const custo = Utils.parseCurrency(document.getElementById('mn-custo').value || '0');
+                const nota = {
+                    id,
+                    equipId: document.getElementById('mn-equip').value,
+                    descricao: document.getElementById('mn-desc').value,
+                    solucao: document.getElementById('mn-solucao').value,
+                    status: document.getElementById('mn-status').value,
+                    data: document.getElementById('mn-data').value,
+                    custo,
+                    fotos: [...ManutApp._fotosBuffer]
+                };
+                if (!UI.data.manutencoes) UI.data.manutencoes = [];
+                const idx = UI.data.manutencoes.findIndex(x => x.id === id);
+                if (idx >= 0) UI.data.manutencoes[idx] = nota;
+                else UI.data.manutencoes.push(nota);
+
+                // Atualizar status do equipamento
+                if (nota.status === 'aberto' || nota.status === 'em_andamento') {
+                    const eq = (UI.data.equipsCadastro || []).find(x => x.id === nota.equipId);
+                    if (eq) { eq.status = 'manutencao'; Storage.set('equipsCadastro', UI.data.equipsCadastro); }
+                } else if (nota.status === 'concluido') {
+                    // Se não houver outras notas abertas, liberar equipamento
+                    const abertas = UI.data.manutencoes.filter(x => x.equipId === nota.equipId && x.id !== nota.id && x.status !== 'concluido');
+                    if (abertas.length === 0) {
+                        const eq = (UI.data.equipsCadastro || []).find(x => x.id === nota.equipId);
+                        if (eq) { eq.status = 'ok'; Storage.set('equipsCadastro', UI.data.equipsCadastro); }
+                    }
+                }
+                Storage.set('manutencoes', UI.data.manutencoes);
+                UI.closeModals();
+                ManutApp.render('todos');
+                Utils.toast('Nota salva!');
+            },
+
+            concluir(id) {
+                const m = (UI.data.manutencoes || []).find(x => x.id === id);
+                if (!m) return;
+                m.status = 'concluido';
+                const abertas = UI.data.manutencoes.filter(x => x.equipId === m.equipId && x.id !== id && x.status !== 'concluido');
+                if (abertas.length === 0) {
+                    const eq = (UI.data.equipsCadastro || []).find(x => x.id === m.equipId);
+                    if (eq) { eq.status = 'ok'; Storage.set('equipsCadastro', UI.data.equipsCadastro); }
+                }
+                Storage.set('manutencoes', UI.data.manutencoes);
+                ManutApp.render('todos');
+                Utils.toast('Manutenção concluída!');
+            },
+
+            delete(id) {
+                if (!confirm('Excluir esta nota?')) return;
+                UI.data.manutencoes = (UI.data.manutencoes || []).filter(x => x.id !== id);
+                Storage.set('manutencoes', UI.data.manutencoes);
+                ManutApp.render('todos');
+                Utils.toast('Excluída!');
+            }
+        };
+
+        // ============================================================
+        // FIN APP — Financeiro Melhorado (Lançamentos + Projeção)
+        // ============================================================
+        const FinApp = {
+            switchTab(tab, btnEl) {
+                ['resumo','projecao','transacoes','recibos'].forEach(t => {
+                    document.getElementById('fin-tab-' + t).style.display = t === tab ? 'block' : 'none';
+                });
+                document.querySelectorAll('.fin-section-tab').forEach(b => b.classList.remove('active'));
+                if (btnEl) btnEl.classList.add('active');
+                if (tab === 'projecao') FinApp.renderProjecao();
+                if (tab === 'transacoes') FinApp.renderTransacoes('todos');
+            },
+
+            renderProjecao() {
+                const container = document.getElementById('fin-projecao-list');
+                if (!container) return;
+                const hoje = new Date();
+                const meses = [];
+                for (let i = 0; i < 6; i++) {
+                    const d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
+                    meses.push({ ano: d.getFullYear(), mes: d.getMonth() });
+                }
+                const nomeMeses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+                const maxVal = Math.max(...meses.map(({ ano, mes }) => {
+                    const key = `${ano}-${String(mes+1).padStart(2,'0')}`;
+                    return UI.data.orcamentos.filter(o => o.dataEvento && o.dataEvento.startsWith(key) && o.status !== 'recusado').reduce((a, o) => a + o.valor, 0);
+                }), 1);
+
+                container.innerHTML = meses.map(({ ano, mes }) => {
+                    const key = `${ano}-${String(mes+1).padStart(2,'0')}`;
+                    const eventosMes = UI.data.orcamentos.filter(o => o.dataEvento && o.dataEvento.startsWith(key) && o.status !== 'recusado');
+                    const fechados = eventosMes.filter(o => o.status === 'aceito').reduce((a, o) => a + o.valor, 0);
+                    const pendentes = eventosMes.filter(o => o.status === 'pendente').reduce((a, o) => a + o.valor, 0);
+                    const total = fechados + pendentes;
+                    const pct = Math.round((total / maxVal) * 100);
+                    const isAtual = ano === hoje.getFullYear() && mes === hoje.getMonth();
+                    return `<div class="proj-card" ${isAtual ? 'style="border-left:4px solid var(--primary);"' : ''}>
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div class="proj-month">${isAtual ? '📅 ' : ''}${nomeMeses[mes]} ${ano}</div>
+                            <div style="font-size:0.75rem;color:var(--secondary);">${eventosMes.length} evento${eventosMes.length !== 1 ? 's' : ''}</div>
+                        </div>
+                        <div class="proj-value">${Utils.formatCurrency(total)}</div>
+                        <div style="font-size:0.75rem;color:var(--secondary);margin-top:4px;">
+                            <span style="color:var(--success);">✓ ${Utils.formatCurrency(fechados)}</span>
+                            ${pendentes > 0 ? ` &bull; <span style="color:var(--warning);">⏳ ${Utils.formatCurrency(pendentes)}</span>` : ''}
+                        </div>
+                        <div class="proj-bar-track"><div class="proj-bar-fill" style="width:${pct}%"></div></div>
+                    </div>`;
+                }).join('');
+            },
+
+            renderTransacoes(filter = 'todos', btnEl) {
+                if (btnEl) {
+                    document.querySelectorAll('#transacao-filter-btns .filter-btn').forEach(b => b.classList.remove('active'));
+                    btnEl.classList.add('active');
+                }
+                let items = [...(UI.data.transacoes || [])].reverse();
+                if (filter === 'receita') items = items.filter(t => t.tipo === 'receita');
+                if (filter === 'despesa') items = items.filter(t => t.tipo === 'despesa');
+                const container = document.getElementById('transacoes-list');
+                if (!container) return;
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>Nenhum lançamento.</p></div>`;
+                    return;
+                }
+                container.innerHTML = items.map(t => `
+                    <div class="transacao-card ${t.tipo}">
+                        <div class="transacao-header">
+                            <div>
+                                <div class="transacao-desc">${t.descricao}</div>
+                                <div class="transacao-meta">
+                                    <span><i class="fas fa-tag"></i> ${t.categoria}</span>
+                                    <span><i class="fas fa-calendar"></i> ${Utils.formatDate(t.data)}</span>
+                                    ${t.obs ? `<span>${t.obs}</span>` : ''}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="${t.tipo === 'receita' ? 'transacao-valor-pos' : 'transacao-valor-neg'}">${t.tipo === 'receita' ? '+' : '-'}${Utils.formatCurrency(t.valor)}</div>
+                                <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end;">
+                                    <button onclick="FinApp.editTransacao('${t.id}')" style="background:#dbeafe;color:var(--primary);border:none;border-radius:7px;padding:5px 8px;font-size:0.75rem;font-weight:700;cursor:pointer;"><i class="fas fa-edit"></i></button>
+                                    <button onclick="FinApp.deleteTransacao('${t.id}')" style="background:#fee2e2;color:var(--danger);border:none;border-radius:7px;padding:5px 8px;font-size:0.75rem;font-weight:700;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`).join('');
+            },
+
+            openNewTransacao() {
+                document.getElementById('tx-id').value = '';
+                document.getElementById('tx-desc').value = '';
+                document.getElementById('tx-valor').value = '';
+                document.getElementById('tx-obs').value = '';
+                document.getElementById('tx-data').value = Utils.getToday();
+                document.getElementById('tx-tipo-receita').checked = true;
+                document.getElementById('tx-tipo-receita-label').style.borderColor = 'var(--success)';
+                document.getElementById('tx-tipo-despesa-label').style.borderColor = 'var(--border)';
+                document.getElementById('tx-tipo-despesa-label').style.color = 'var(--secondary)';
+                document.getElementById('tx-tipo-despesa-label').style.background = 'var(--light)';
+                document.getElementById('title-transacao').innerText = 'Novo Lançamento';
+                UI.openModal('transacao');
+            },
+
+            editTransacao(id) {
+                const t = (UI.data.transacoes || []).find(x => x.id === id);
+                if (!t) return;
+                document.getElementById('tx-id').value = t.id;
+                document.getElementById('tx-desc').value = t.descricao;
+                const valInput = document.getElementById('tx-valor');
+                valInput.value = String(Math.round(t.valor * 100));
+                Utils.maskMoney(valInput);
+                document.getElementById('tx-obs').value = t.obs || '';
+                document.getElementById('tx-data').value = t.data;
+                document.getElementById('tx-categoria').value = t.categoria;
+                if (t.tipo === 'receita') {
+                    document.getElementById('tx-tipo-receita').checked = true;
+                    document.getElementById('tx-tipo-receita-label').style.borderColor = 'var(--success)';
+                    document.getElementById('tx-tipo-despesa-label').style.borderColor = 'var(--border)';
+                } else {
+                    document.getElementById('tx-tipo-despesa').checked = true;
+                    document.getElementById('tx-tipo-despesa-label').style.borderColor = 'var(--danger)';
+                    document.getElementById('tx-tipo-receita-label').style.borderColor = 'var(--border)';
+                }
+                document.getElementById('title-transacao').innerText = 'Editar Lançamento';
+                UI.openModal('transacao');
+            },
+
+            saveTransacao(e) {
+                e.preventDefault();
+                const id = document.getElementById('tx-id').value || Utils.id();
+                const tipo = document.querySelector('input[name="tx-tipo"]:checked').value;
+                const transacao = {
+                    id,
+                    tipo,
+                    descricao: document.getElementById('tx-desc').value,
+                    valor: Utils.parseCurrency(document.getElementById('tx-valor').value),
+                    data: document.getElementById('tx-data').value,
+                    categoria: document.getElementById('tx-categoria').value,
+                    obs: document.getElementById('tx-obs').value
+                };
+                if (!UI.data.transacoes) UI.data.transacoes = [];
+                const idx = UI.data.transacoes.findIndex(x => x.id === id);
+                if (idx >= 0) UI.data.transacoes[idx] = transacao;
+                else UI.data.transacoes.push(transacao);
+                Storage.set('transacoes', UI.data.transacoes);
+                UI.closeModals();
+                UI.renderFinanceiro();
+                FinApp.switchTab('transacoes');
+                document.querySelector('.fin-section-tab:nth-child(3)').classList.add('active');
+                document.querySelectorAll('.fin-section-tab').forEach((b, i) => b.classList.toggle('active', i === 2));
+                Utils.toast('Lançamento salvo!');
+            },
+
+            deleteTransacao(id) {
+                if (!confirm('Excluir este lançamento?')) return;
+                UI.data.transacoes = (UI.data.transacoes || []).filter(x => x.id !== id);
+                Storage.set('transacoes', UI.data.transacoes);
+                UI.renderFinanceiro();
+                FinApp.renderTransacoes('todos');
+                Utils.toast('Excluído!');
+            }
+        };
+
+        // Extend backup to include new data
+        const _origExport = App.backup.exportData;
+        App.backup.exportData = () => {
+            const data = {
+                clientes: UI.data.clientes,
+                orcamentos: UI.data.orcamentos,
+                pacotes: UI.data.pacotes,
+                equipamentos: UI.data.equipamentos,
+                recebimentos: UI.data.recebimentos,
+                equipsCadastro: UI.data.equipsCadastro,
+                manutencoes: UI.data.manutencoes,
+                transacoes: UI.data.transacoes,
+                settings: Storage.getSettings()
+            };
+            const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_dj_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        };
+        const _origImport = App.backup.importData;
+        App.backup.importData = (input) => {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.clientes) Storage.set('clientes', data.clientes);
+                    if (data.orcamentos) Storage.set('orcamentos', data.orcamentos);
+                    if (data.pacotes) Storage.set('pacotes', data.pacotes);
+                    if (data.equipamentos) Storage.set('equipamentos', data.equipamentos);
+                    if (data.recebimentos) Storage.set('recebimentos', data.recebimentos);
+                    if (data.equipsCadastro) Storage.set('equipsCadastro', data.equipsCadastro);
+                    if (data.manutencoes) Storage.set('manutencoes', data.manutencoes);
+                    if (data.transacoes) Storage.set('transacoes', data.transacoes);
+                    if (data.settings) Storage.saveSettings(data.settings);
+                    location.reload();
+                } catch(err) { Utils.toast('Erro no arquivo', 'error'); }
+            };
+            reader.readAsText(file);
+        };
+
+        // Add checklist button to orcamento details
+        const _origShowDetails = UI.showOrcamentoDetails;
+        UI.showOrcamentoDetails = (id) => {
+            _origShowDetails(id);
+            // Add checklist button after details load
+            setTimeout(() => {
+                const actions = document.querySelector('#orcamento-details-content .details-actions');
+                if (actions) {
+                    const o = UI.data.orcamentos.find(x => x.id === id);
+                    if (o && o.status === 'aceito') {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-details';
+                        btn.style.cssText = 'background:#dbeafe;color:#1e40af;border:none;padding:10px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;display:flex;align-items:center;gap:6px;cursor:pointer;';
+                        btn.innerHTML = '<i class="fas fa-clipboard-check"></i> Checklist';
+                        btn.onclick = () => {
+                            UI.closeModals();
+                            setTimeout(() => {
+                                const navEl = document.querySelector('.nav-item[data-target="checklist-view"]');
+                                if (navEl) {
+                                    navEl.click();
+                                    setTimeout(() => {
+                                        const sel = document.getElementById('checklist-event-select');
+                                        if (sel) { sel.value = id; ChecklistApp.loadEvent(id); }
+                                    }, 200);
+                                }
+                            }, 200);
+                        };
+                        actions.appendChild(btn);
+                    }
+                }
+            }, 100);
+        };
+
         document.addEventListener('DOMContentLoaded', UI.init);
     </script>
 
@@ -7657,6 +8644,206 @@ As partes elegem o foro da comarca de ${s.endereco ? s.endereco.split(',').pop()
             <div id="action-sheet-items"></div>
             <div class="action-sheet-cancel" onclick="ActionSheet.close()">Cancelar</div>
         </div>
+    </div>
+
+    <!-- Lightbox de Fotos -->
+    <div class="lightbox-overlay" id="lightbox-overlay" onclick="document.getElementById('lightbox-overlay').classList.remove('active')">
+        <button class="lightbox-close" onclick="document.getElementById('lightbox-overlay').classList.remove('active')"><i class="fas fa-times"></i></button>
+        <img class="lightbox-img" id="lightbox-img" src="">
+    </div>
+
+    <!-- Modal: Cadastro de Equipamento -->
+    <div class="modal-overlay" id="overlay-equip"></div>
+    <div class="modal-sheet" id="sheet-equip">
+        <div class="sheet-handle"></div>
+        <h3 class="section-title" id="title-equip">Novo Equipamento</h3>
+        <form id="form-equip" onsubmit="EquipApp.save(event)">
+            <input type="hidden" id="eq-id">
+            <div class="form-group">
+                <label class="form-label">Nome do Equipamento</label>
+                <input type="text" id="eq-nome" class="form-control" required placeholder="Ex: Caixa de Som JBL">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Categoria</label>
+                <select id="eq-categoria" class="form-control">
+                    <option value="Som">Som</option>
+                    <option value="Iluminação">Iluminação</option>
+                    <option value="DJ">DJ</option>
+                    <option value="Microfone">Microfone</option>
+                    <option value="Cabos">Cabos</option>
+                    <option value="Estrutura">Estrutura</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Observações</label>
+                <textarea id="eq-obs" class="form-control" placeholder="Modelo, número de série, etc..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="eq-status" class="form-control">
+                    <option value="ok">OK / Disponível</option>
+                    <option value="manutencao">Em Manutenção</option>
+                    <option value="inativo">Inativo</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Incluir no checklist padrão de eventos?</label>
+                <select id="eq-checklist-tipos" class="form-control" multiple style="min-height:140px;">
+                    <option value="Aniversário">Aniversário</option>
+                    <option value="15 Anos">15 Anos</option>
+                    <option value="Casamento">Casamento</option>
+                    <option value="Formatura">Formatura</option>
+                    <option value="Confraternização">Confraternização</option>
+                    <option value="Corporativo">Corporativo</option>
+                    <option value="Infantil">Infantil</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <div style="font-size:0.78rem;color:var(--secondary);margin-top:5px;">Segure Ctrl/Cmd para selecionar vários tipos. Este equipamento será adicionado automaticamente ao checklist desses eventos.</div>
+            </div>
+            <button type="submit" class="btn-block">Salvar Equipamento</button>
+            <button type="button" class="btn-block" style="background:var(--light);color:var(--secondary);margin-top:8px;" onclick="UI.closeModals()">Cancelar</button>
+        </form>
+    </div>
+
+    <!-- Modal: Item personalizado no checklist -->
+    <div class="modal-overlay" id="overlay-checklist-item"></div>
+    <div class="modal-sheet" id="sheet-checklist-item">
+        <div class="sheet-handle"></div>
+        <h3 class="section-title">Adicionar Item ao Checklist</h3>
+        <form id="form-checklist-item" onsubmit="ChecklistApp.saveCustomItem(event)">
+            <div class="form-group">
+                <label class="form-label">Nome do Item</label>
+                <input type="text" id="cli-nome" class="form-control" required placeholder="Ex: Extensão elétrica">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Categoria</label>
+                <select id="cli-cat" class="form-control">
+                    <option value="Som">Som</option>
+                    <option value="Iluminação">Iluminação</option>
+                    <option value="DJ">DJ</option>
+                    <option value="Microfone">Microfone</option>
+                    <option value="Cabos">Cabos</option>
+                    <option value="Estrutura">Estrutura</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-block">Adicionar</button>
+            <button type="button" class="btn-block" style="background:var(--light);color:var(--secondary);margin-top:8px;" onclick="UI.closeModals()">Cancelar</button>
+        </form>
+    </div>
+
+    <!-- Modal: Nova Nota de Manutenção -->
+    <div class="modal-overlay" id="overlay-manut"></div>
+    <div class="modal-sheet" id="sheet-manut">
+        <div class="sheet-handle"></div>
+        <h3 class="section-title" id="title-manut">Nova Nota de Manutenção</h3>
+        <form id="form-manut" onsubmit="ManutApp.save(event)">
+            <input type="hidden" id="mn-id">
+            <div class="form-group">
+                <label class="form-label">Equipamento</label>
+                <select id="mn-equip" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Descrição do Problema</label>
+                <textarea id="mn-desc" class="form-control" required placeholder="Descreva o defeito ou problema..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Data da Ocorrência</label>
+                <input type="date" id="mn-data" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="mn-status" class="form-control">
+                    <option value="aberto">Aberto</option>
+                    <option value="em_andamento">Em Andamento</option>
+                    <option value="concluido">Concluído</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Custo da Manutenção (R$)</label>
+                <input type="text" inputmode="numeric" id="mn-custo" class="form-control" placeholder="0,00" oninput="Utils.maskMoney(this)">
+            </div>
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-camera" style="color:var(--primary);"></i> Fotos do Defeito</label>
+                <div id="mn-fotos-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+                <label for="mn-fotos-input" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:2px dashed var(--border);border-radius:12px;cursor:pointer;color:var(--primary);font-weight:600;background:#f8fafc;">
+                    <i class="fas fa-plus-circle"></i> Adicionar Foto
+                </label>
+                <input type="file" id="mn-fotos-input" accept="image/*" multiple style="display:none;" onchange="ManutApp.previewFotos(this)">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Observações / Solução</label>
+                <textarea id="mn-solucao" class="form-control" placeholder="Solução aplicada, peças trocadas..."></textarea>
+            </div>
+            <button type="submit" class="btn-block">Salvar Nota</button>
+            <button type="button" class="btn-block" style="background:var(--light);color:var(--secondary);margin-top:8px;" onclick="UI.closeModals()">Cancelar</button>
+        </form>
+    </div>
+
+    <!-- Modal: Novo Lançamento Financeiro -->
+    <div class="modal-overlay" id="overlay-transacao"></div>
+    <div class="modal-sheet" id="sheet-transacao">
+        <div class="sheet-handle"></div>
+        <h3 class="section-title" id="title-transacao">Novo Lançamento</h3>
+        <form id="form-transacao" onsubmit="FinApp.saveTransacao(event)">
+            <input type="hidden" id="tx-id">
+            <div class="form-group">
+                <label class="form-label">Tipo</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <label style="cursor:pointer;">
+                        <input type="radio" name="tx-tipo" value="receita" id="tx-tipo-receita" style="display:none;" checked onchange="document.getElementById('tx-tipo-receita-label').style.borderColor='var(--success)';document.getElementById('tx-tipo-despesa-label').style.borderColor='var(--border)'">
+                        <div id="tx-tipo-receita-label" style="padding:14px;border:2px solid var(--success);border-radius:12px;text-align:center;font-weight:700;color:var(--success);background:#f0fdf4;">
+                            <i class="fas fa-arrow-up"></i> Receita
+                        </div>
+                    </label>
+                    <label style="cursor:pointer;">
+                        <input type="radio" name="tx-tipo" value="despesa" id="tx-tipo-despesa" style="display:none;" onchange="document.getElementById('tx-tipo-despesa-label').style.borderColor='var(--danger)';document.getElementById('tx-tipo-receita-label').style.borderColor='var(--border)'">
+                        <div id="tx-tipo-despesa-label" style="padding:14px;border:2px solid var(--border);border-radius:12px;text-align:center;font-weight:700;color:var(--secondary);background:var(--light);">
+                            <i class="fas fa-arrow-down"></i> Despesa
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <input type="text" id="tx-desc" class="form-control" required placeholder="Ex: Compra de cabo P10">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Valor (R$)</label>
+                <input type="text" inputmode="numeric" id="tx-valor" class="form-control" required placeholder="0,00" oninput="Utils.maskMoney(this)">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Data</label>
+                <input type="date" id="tx-data" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Categoria</label>
+                <select id="tx-categoria" class="form-control">
+                    <optgroup label="Receitas">
+                        <option value="Cachê de Evento">Cachê de Evento</option>
+                        <option value="Recebimento de Orçamento">Recebimento de Orçamento</option>
+                        <option value="Outros Serviços">Outros Serviços</option>
+                    </optgroup>
+                    <optgroup label="Despesas">
+                        <option value="Equipamento">Equipamento</option>
+                        <option value="Manutenção">Manutenção</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Software / Assinaturas">Software / Assinaturas</option>
+                        <option value="Impostos / Taxas">Impostos / Taxas</option>
+                        <option value="Alimentação">Alimentação</option>
+                        <option value="Outras Despesas">Outras Despesas</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Observações</label>
+                <textarea id="tx-obs" class="form-control" placeholder="Opcional..."></textarea>
+            </div>
+            <button type="submit" class="btn-block">Salvar Lançamento</button>
+            <button type="button" class="btn-block" style="background:var(--light);color:var(--secondary);margin-top:8px;" onclick="UI.closeModals()">Cancelar</button>
+        </form>
     </div>
 </body>
 </html>
