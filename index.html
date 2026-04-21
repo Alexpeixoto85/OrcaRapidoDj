@@ -47,7 +47,7 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+            background-color: #eef2f7;
             color: var(--dark);
             height: 100vh;
             overflow: hidden;
@@ -116,23 +116,75 @@
             background: var(--surface);
             padding: 16px;
             border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
         }
-        .stat-card:active { transform: scale(0.98); box-shadow: var(--shadow-sm); }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            transform: translate(20px, 20px);
+        }
+        .stat-card:active { transform: scale(0.97); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+        /* Colored card variants */
+        .stat-card.card-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+        .stat-card.card-green { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .stat-card.card-orange { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .stat-card.card-red { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .stat-card.card-cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; }
+        .stat-card.card-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+        .stat-card.card-pink { background: linear-gradient(135deg, #ec4899, #db2777); color: white; }
+        .stat-card.card-teal { background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; }
+        .stat-card.card-indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
+        .stat-card.card-amber { background: linear-gradient(135deg, #f59e0b, #b45309); color: white; }
+        .stat-card.card-rose { background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; }
+
+        .stat-card.card-blue .stat-value,
+        .stat-card.card-green .stat-value,
+        .stat-card.card-orange .stat-value,
+        .stat-card.card-red .stat-value,
+        .stat-card.card-cyan .stat-value,
+        .stat-card.card-purple .stat-value,
+        .stat-card.card-pink .stat-value,
+        .stat-card.card-teal .stat-value,
+        .stat-card.card-indigo .stat-value,
+        .stat-card.card-amber .stat-value,
+        .stat-card.card-rose .stat-value { color: white; }
+
+        .stat-card.card-blue .stat-label,
+        .stat-card.card-green .stat-label,
+        .stat-card.card-orange .stat-label,
+        .stat-card.card-red .stat-label,
+        .stat-card.card-cyan .stat-label,
+        .stat-card.card-purple .stat-label,
+        .stat-card.card-pink .stat-label,
+        .stat-card.card-teal .stat-label,
+        .stat-card.card-indigo .stat-label,
+        .stat-card.card-amber .stat-label,
+        .stat-card.card-rose .stat-label { color: rgba(255,255,255,0.85); }
 
         .stat-icon {
-            width: 32px; height: 32px;
-            border-radius: 8px;
+            width: 34px; height: 34px;
+            border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.25);
+            color: white;
         }
+        /* For non-colored cards keep original icon colors */
+        .stat-card:not([class*="card-"]) .stat-icon { background: transparent; }
         .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--dark); line-height: 1; }
-        .stat-label { font-size: 0.8rem; color: var(--secondary); font-weight: 500; }
+        .stat-label { font-size: 0.78rem; color: var(--secondary); font-weight: 500; }
 
         /* Chart Container */
         .chart-container {
@@ -1823,61 +1875,67 @@
 
     <main>
         <div id="dashboard-view" class="view active">
-            <div class="section-title">Visão Geral</div>
+            <div style="background:linear-gradient(135deg,#1e293b,#334155);border-radius:16px;padding:18px 20px;margin-bottom:16px;color:white;position:relative;overflow:hidden;">
+                <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
+                <div style="position:absolute;right:20px;bottom:-30px;width:80px;height:80px;border-radius:50%;background:rgba(59,130,246,0.15);"></div>
+                <div style="font-size:0.78rem;color:rgba(255,255,255,0.6);margin-bottom:4px;"><i class="fas fa-compact-disc" style="color:#3b82f6;"></i> DJ Manager Pro</div>
+                <div style="font-size:1.2rem;font-weight:800;">Visão Geral</div>
+                <div style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:2px;">Seu painel de controle</div>
+            </div>
             <div class="stats-grid">
-                <div class="stat-card" onclick="UI.navigateToOrcamentos('all')">
-                    <div class="stat-icon bg-blue"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="stat-card card-blue" onclick="UI.navigateToOrcamentos('all')">
+                    <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
                     <div class="stat-value" id="dash-total-orcamentos">0</div>
                     <div class="stat-label">Orçamentos</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('clientes')">
-                    <div class="stat-icon bg-green"><i class="fas fa-users"></i></div>
+                <div class="stat-card card-green" onclick="UI.openClientesView()">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
                     <div class="stat-value" id="dash-total-clientes">0</div>
                     <div class="stat-label">Clientes</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigateToOrcamentos('pendente')">
-                    <div class="stat-icon bg-orange"><i class="fas fa-clock"></i></div>
+                <div class="stat-card card-orange" onclick="UI.navigateToOrcamentos('pendente')">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
                     <div class="stat-value" id="dash-pendentes">0</div>
                     <div class="stat-label">Pendentes</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigateToOrcamentos('vencido')">
-                    <div class="stat-icon bg-red"><i class="fas fa-bell"></i></div>
+                <div class="stat-card card-red" onclick="UI.navigateToOrcamentos('vencido')">
+                    <div class="stat-icon"><i class="fas fa-bell"></i></div>
                     <div class="stat-value" id="dash-followup">0</div>
                     <div class="stat-label">Follow-up</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigateToOrcamentos('agendado')">
-                    <div class="stat-icon bg-cyan"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-card card-cyan" onclick="UI.navigateToOrcamentos('agendado')">
+                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
                     <div class="stat-value" id="dash-agendamentos">0</div>
                     <div class="stat-label">Contatos Agend.</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('financeiro')">
-                    <div class="stat-icon bg-purple"><i class="fas fa-chart-line"></i></div>
+                <div class="stat-card card-purple" onclick="UI.navigate('financeiro')">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
                     <div class="stat-value" id="dash-media-mensal">R$ 0</div>
                     <div class="stat-label">Média Mensal</div>
                 </div>
-                <div class="stat-card" onclick="UI.scrollTo('birthday-alerts')">
-                    <div class="stat-icon bg-pink"><i class="fas fa-birthday-cake"></i></div>
+                <div class="stat-card card-pink" onclick="UI.scrollTo('birthday-alerts')">
+                    <div class="stat-icon"><i class="fas fa-birthday-cake"></i></div>
                     <div class="stat-value" id="dash-aniversariantes">0</div>
                     <div class="stat-label">Aniversariantes</div>
                 </div>
-                <div class="stat-card" onclick="UI.scrollTo('recontact-alerts')">
-                    <div class="stat-icon bg-success" style="background: #d1fae5; color: #10b981;"><i class="fas fa-calendar-plus"></i></div>
+                <div class="stat-card card-teal" onclick="UI.scrollTo('recontact-alerts')">
+                    <div class="stat-icon"><i class="fas fa-calendar-plus"></i></div>
                     <div class="stat-value" id="dash-recontato">0</div>
                     <div class="stat-label">Para Recontato</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('checklist')">
-                    <div class="stat-icon" style="background:#e0f2fe;color:#0369a1;"><i class="fas fa-clipboard-check"></i></div>
-                    <div class="stat-value" style="font-size:1rem;margin-top:4px;">Checklist</div>
+                <div class="stat-card card-indigo" onclick="UI.navigate('checklist')">
+                    <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="stat-value" style="font-size:1rem;margin-top:4px;color:white;">Checklist</div>
                     <div class="stat-label">de Equipamentos</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('equipamentos')">
-                    <div class="stat-icon" style="background:#fef3c7;color:#b45309;"><i class="fas fa-tools"></i></div>
-                    <div class="stat-value" style="font-size:1rem;margin-top:4px;">Equipamentos</div>
+                <div class="stat-card card-amber" onclick="UI.navigate('equipamentos')">
+                    <div class="stat-icon"><i class="fas fa-tools"></i></div>
+                    <div class="stat-value" style="font-size:1rem;margin-top:4px;color:white;">Equipamentos</div>
                     <div class="stat-label">Cadastro</div>
                 </div>
-                <div class="stat-card" onclick="UI.navigate('manutencao')">
-                    <div class="stat-icon bg-red"><i class="fas fa-wrench"></i></div>
-                    <div class="stat-value" style="font-size:1rem;margin-top:4px;">Manutenção</div>
+                <div class="stat-card card-rose" onclick="UI.navigate('manutencao')">
+                    <div class="stat-icon"><i class="fas fa-wrench"></i></div>
+                    <div class="stat-value" style="font-size:1rem;margin-top:4px;color:white;">Manutenção</div>
                     <div class="stat-label">Notas de Defeito</div>
                 </div>
             </div>
@@ -1930,6 +1988,11 @@
         </div>
 
         <div id="clientes-view" class="view">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                <button onclick="UI.navigate('dashboard')" style="background:#f1f5f9;border:none;border-radius:10px;padding:8px 12px;color:var(--secondary);font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-arrow-left"></i> Início</button>
+                <div style="flex:1;font-size:1.1rem;font-weight:800;color:var(--dark);">Clientes <span id="clientes-count-badge" style="font-size:0.75rem;background:#dbeafe;color:var(--primary);padding:3px 8px;border-radius:99px;font-weight:700;vertical-align:middle;">0</span></div>
+                <button onclick="UI.openNewCliente()" style="background:var(--primary);color:white;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-user-plus"></i> Novo</button>
+            </div>
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" class="search-input" placeholder="Buscar clientes..." oninput="UI.renderClientes(this.value)">
@@ -3472,6 +3535,16 @@
                 if(target === 'checklist-view') ChecklistApp.init();
             },
 
+            openClientesView: () => {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.getElementById('clientes-view').classList.add('active');
+                const fab = document.getElementById('main-fab');
+                fab.style.display = 'flex';
+                fab.onclick = () => UI.openNewCliente(false);
+                UI.renderClientes();
+            },
+
             navigate: (tabName) => {
                 const el = document.querySelector(`.nav-item[data-target="${tabName}-view"]`);
                 if(el) UI.switchTab(el);
@@ -3799,6 +3872,8 @@
                     c.nome.toLowerCase().includes(filter.toLowerCase()) ||
                     c.telefone.includes(filter)
                 );
+                const badge = document.getElementById('clientes-count-badge');
+                if (badge) badge.textContent = UI.data.clientes.length;
                 
                 if(filtered.length === 0) {
                     list.innerHTML = `<div class="empty-state"><i class="fas fa-user-plus"></i><p>Nenhum cliente encontrado.</p></div>`;
